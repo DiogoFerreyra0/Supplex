@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Básico -->
+    <title>Supplex | Suplementación Deportiva y Nutrición</title>
+    <meta name="description" content="Encontrá los mejores suplementos deportivos: Proteínas, Creatina, Pre-entrenos y más. Calculá tus calorías y potenciá tu rendimiento con Supplex.">
+    <meta name="keywords" content="suplementos, proteína, creatina, pre-entreno, nutrición deportiva, Supplex, fitness">
+    <meta name="author" content="Supplex">
+    <link rel="canonical" href="https://www.tusitio.com/">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Redes Sociales -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Supplex | Suplementación Deportiva">
+    <meta property="og:description" content="Potenciá tu rendimiento con los mejores suplementos del mercado. Envíos a todo el país.">
+    <meta property="og:image" content="https://www.tusitio.com/img/og-image.jpg">
+    <meta property="og:url" content="https://www.tusitio.com/">
+
+    <!-- Schema.org JSON-LD para Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SportsActivityLocation",
+      "name": "Supplex",
+      "image": "https://www.tusitio.com/img/logo.png",
+      "description": "Tienda especializada en suplementación deportiva de alta calidad.",
+      "url": "https://www.tusitio.com",
+      "priceRange": "$$"
+    }
+    </script>
+
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    
+  <!-- --- ENCABEZADO --- -->
+  <!-- --- SECCIÓN PORTADA (HERO) --- -->
+<section class="portada" id="inicio">
+  <div class="portada__carrusel">
+    
+    <!-- Agregamos IDs a los botones -->
+    <button class="portada__navegacion portada__navegacion--previo boton-redondo_efecto" id="btnAntHero" aria-label="Anterior">&lt;</button>
+    <button class="portada__navegacion portada__navegacion--siguiente boton-redondo_efecto" id="btnSigHero" aria-label="Siguiente">&gt;</button>
+
+    <!-- PISTA DE DESLIZAMIENTO -->
+    <div class="portada__lista" id="trackHero">
+      
+      <!-- Diapositiva 1 -->
+      <div class="portada__diapositiva">
+        <div class="portada__fondo"></div>
+        <div class="portada__contenedor">
+          <div class="portada__contenido">
+            <span class="portada__etiqueta">COLECCIÓN RUNNING</span>
+            <h1 class="portada__titulo">CORRÉ MÁS LEJOS</h1>
+            <p class="portada__subtitulo">Energía sostenida y recuperación óptima para cada kilómetro.</p>
+            <a href="#categorias" class="portada__boton boton_efecto">VER RUNNING</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diapositiva 2 -->
+      <div class="portada__diapositiva">
+        <!-- Fondo temporal distinto para que notes el cambio -->
+        <div class="portada__fondo" style="background: linear-gradient(90deg, rgba(17,17,17,0.9) 0%, rgba(17,17,17,0.3) 100%), #333;"></div>
+        <div class="portada__contenedor">
+          <div class="portada__contenido">
+            <span class="portada__etiqueta">NUEVOS INGRESOS</span>
+            <h1 class="portada__titulo">ALCANZÁ TU META</h1>
+            <p class="portada__subtitulo">Potenciá tu entrenamiento con la mejor suplementación.</p>
+            <a href="#promociones" class="portada__boton boton_efecto">VER COMBOS</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="portada__paginacion">
+      <span class="portada__punto portada__punto--activo"></span>
+      <span class="portada__punto"></span>
+    </div>
+  </div>
+
+  <div class="portada__estadisticas">
+    <div class="portada__estadisticas-contenedor">
+      <div class="portada__dato"><span class="portada__numero">+15.000</span><span class="portada__texto">Clientes satisfechos</span></div>
+      <div class="portada__dato"><span class="portada__numero">200+</span><span class="portada__texto">Productos en stock</span></div>
+      <div class="portada__dato"><span class="portada__numero">48 hs</span><span class="portada__texto">Envío express</span></div>
+      <div class="portada__dato"><span class="portada__numero">5★</span><span class="portada__texto">Valoración promedio</span></div>
+    </div>
+  </div>
+</section>
+
+  <main>
+    <!-- --- SECCIÓN PORTADA (HERO) --- -->
+    <section class="portada" id="inicio">
+      <div class="portada__carrusel">
+        <button class="portada__navegacion portada__navegacion--previo boton-redondo_efecto" aria-label="Anterior">&lt;</button>
+        <button class="portada__navegacion portada__navegacion--siguiente boton-redondo_efecto" aria-label="Siguiente">&gt;</button>
+
+        <div class="portada__diapositiva">
+          <div class="portada__fondo"></div>
+          <div class="portada__contenedor">
+            <div class="portada__contenido">
+              <span class="portada__etiqueta">COLECCIÓN RUNNING</span>
+              <h1 class="portada__titulo">CORRÉ MÁS LEJOS</h1>
+              <p class="portada__subtitulo">Energía sostenida y recuperación óptima para cada kilómetro.</p>
+              <a href="#categorias" class="portada__boton boton_efecto">VER RUNNING</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="portada__paginacion">
+          <span class="portada__punto"></span>
+          <span class="portada__punto portada__punto--activo"></span>
+        </div>
+      </div>
+
+      <div class="portada__estadisticas">
+        <div class="portada__estadisticas-contenedor">
+          <div class="portada__dato">
+            <span class="portada__numero">+15.000</span>
+            <span class="portada__texto">Clientes satisfechos</span>
+          </div>
+          <div class="portada__dato">
+            <span class="portada__numero">200+</span>
+            <span class="portada__texto">Productos en stock</span>
+          </div>
+          <div class="portada__dato">
+            <span class="portada__numero">48 hs</span>
+            <span class="portada__texto">Envío express</span>
+          </div>
+          <div class="portada__dato">
+            <span class="portada__numero">5★</span>
+            <span class="portada__texto">Valoración promedio</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- --- SECCIÓN DESCUBRIR TU POTENCIAL --- -->
+    <section class="descubrir" id="categorias">
+      <div class="descubrir__contenedor">
+        <div class="descubrir__encabezado">
+          <div>
+            <h2 class="descubrir__titulo">DESCUBRÍ TU POTENCIAL</h2>
+            <p class="descubrir__subtitulo">Encontrá los suplementos perfectos según tu objetivo y deporte.</p>
+          </div>
+          <div class="descubrir__controles">
+            <button class="descubrir__boton-nav boton-redondo-claro_efecto" id="btnAntExplorar" aria-label="Anterior">&lt;</button>
+            <button class="descubrir__boton-nav boton-redondo-claro_efecto" id="btnSigExplorar" aria-label="Siguiente">&gt;</button>
+          </div>
+        </div>
+
+        <div class="carrusel-horizontal" id="carruselExplorar">
+          <a href="#" class="descubrir__tarjeta tarjeta_efecto">
+            <div class="descubrir__fondo"></div>
+            <div class="descubrir__contenido">
+              <h3 class="descubrir__nombre">DESARROLLO MUSCULAR</h3>
+              <span class="descubrir__enlace">EXPLORAR &gt;</span>
+            </div>
+          </a>
+          <a href="#" class="descubrir__tarjeta tarjeta_efecto">
+            <div class="descubrir__fondo"></div>
+            <div class="descubrir__contenido">
+              <h3 class="descubrir__nombre">FUERZA Y RENDIMIENTO</h3>
+              <span class="descubrir__enlace">EXPLORAR &gt;</span>
+            </div>
+          </a>
+          <a href="#" class="descubrir__tarjeta tarjeta_efecto">
+            <div class="descubrir__fondo"></div>
+            <div class="descubrir__contenido">
+              <h3 class="descubrir__nombre">DEPORTES DE CONTACTO</h3>
+              <span class="descubrir__enlace">EXPLORAR &gt;</span>
+            </div>
+          </a>
+          <a href="#" class="descubrir__tarjeta tarjeta_efecto">
+            <div class="descubrir__fondo"></div>
+            <div class="descubrir__contenido">
+              <h3 class="descubrir__nombre">RUNNING</h3>
+              <span class="descubrir__enlace">EXPLORAR &gt;</span>
+            </div>
+          </a>
+          <a href="#" class="descubrir__tarjeta tarjeta_efecto">
+            <div class="descubrir__fondo"></div>
+            <div class="descubrir__contenido">
+              <h3 class="descubrir__nombre">RECUPERACIÓN</h3>
+              <span class="descubrir__enlace">EXPLORAR &gt;</span>
+            </div>
+          </a>
+          <a href="#" class="descubrir__tarjeta tarjeta_efecto">
+            <div class="descubrir__fondo"></div>
+            <div class="descubrir__contenido">
+              <h3 class="descubrir__nombre">ENERGÍA</h3>
+              <span class="descubrir__enlace">EXPLORAR &gt;</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- --- SECCIÓN LO MÁS VENDIDO --- -->
+    <section class="mas-vendidos">
+      <div class="mas-vendidos__contenedor">
+        <div class="mas-vendidos__encabezado">
+          <div>
+            <h2 class="mas-vendidos__titulo">LO MÁS VENDIDO</h2>
+            <p class="mas-vendidos__subtitulo">Los favoritos de nuestra comunidad, elegidos por resultados reales.</p>
+          </div>
+          <div class="mas-vendidos__controles">
+            <button class="mas-vendidos__boton-nav boton-redondo-claro_efecto" id="btnAntMasVendidos" aria-label="Anterior">&lt;</button>
+            <button class="mas-vendidos__boton-nav boton-redondo-claro_efecto" id="btnSigMasVendidos" aria-label="Siguiente">&gt;</button>
+          </div>
+        </div>
+
+        <div class="carrusel-horizontal" id="carruselMasVendidos">
+          <article class="producto-tarjeta tarjeta-sombra_efecto">
+            <div class="producto-tarjeta__imagen-caja">
+              <div class="producto-tarjeta__etiquetas">
+                <span class="etiqueta etiqueta--negra">MÁS VENDIDO</span>
+                <span class="etiqueta etiqueta--roja">-24%</span>
+              </div>
+              <button class="producto-tarjeta__favorito icono_efecto" aria-label="Favoritos">♡</button>
+              <div class="producto-tarjeta__placeholder">IMG 1</div>
+            </div>
+            <div class="producto-tarjeta__info">
+              <span class="producto-tarjeta__marca">OPTIMUM NUTRITION</span>
+              <h3 class="producto-tarjeta__nombre">100% Whey Gold Standard</h3>
+              <p class="producto-tarjeta__variante">Proteína • 2.27 kg</p>
+              <div class="producto-tarjeta__precios">
+                <span class="producto-tarjeta__precio-actual">$ 42.500</span>
+                <span class="producto-tarjeta__precio-viejo">$ 56.000</span>
+              </div>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto">AGREGAR AL CARRITO</button>
+            </div>
+          </article>
+
+          <article class="producto-tarjeta tarjeta-sombra_efecto">
+            <div class="producto-tarjeta__imagen-caja">
+              <div class="producto-tarjeta__etiquetas">
+                <span class="etiqueta etiqueta--verde">OFERTA</span>
+                <span class="etiqueta etiqueta--roja">-14%</span>
+              </div>
+              <button class="producto-tarjeta__favorito icono_efecto" aria-label="Favoritos">♡</button>
+              <div class="producto-tarjeta__placeholder">IMG 2</div>
+            </div>
+            <div class="producto-tarjeta__info">
+              <span class="producto-tarjeta__marca">DYMATIZE</span>
+              <h3 class="producto-tarjeta__nombre">Creatine Monohydrate</h3>
+              <p class="producto-tarjeta__variante">Creatina • 500 g</p>
+              <div class="producto-tarjeta__precios">
+                <span class="producto-tarjeta__precio-actual">$ 18.900</span>
+                <span class="producto-tarjeta__precio-viejo">$ 22.000</span>
+              </div>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto">AGREGAR AL CARRITO</button>
+            </div>
+          </article>
+
+          <article class="producto-tarjeta tarjeta-sombra_efecto">
+            <div class="producto-tarjeta__imagen-caja">
+              <div class="producto-tarjeta__etiquetas">
+                <span class="etiqueta etiqueta--negra">NUEVO</span>
+              </div>
+              <button class="producto-tarjeta__favorito icono_efecto" aria-label="Favoritos">♡</button>
+              <div class="producto-tarjeta__placeholder">IMG 3</div>
+            </div>
+            <div class="producto-tarjeta__info">
+              <span class="producto-tarjeta__marca">CELLUCOR</span>
+              <h3 class="producto-tarjeta__nombre">Pre-Workout C4 Original</h3>
+              <p class="producto-tarjeta__variante">Pre-entreno • 390 g</p>
+              <div class="producto-tarjeta__precios">
+                <span class="producto-tarjeta__precio-actual">$ 31.200</span>
+              </div>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto">AGREGAR AL CARRITO</button>
+            </div>
+          </article>
+
+          <article class="producto-tarjeta tarjeta-sombra_efecto">
+            <div class="producto-tarjeta__imagen-caja">
+              <div class="producto-tarjeta__etiquetas">
+                <span class="etiqueta etiqueta--roja">-17%</span>
+              </div>
+              <button class="producto-tarjeta__favorito icono_efecto" aria-label="Favoritos">♡</button>
+              <div class="producto-tarjeta__placeholder">IMG 4</div>
+            </div>
+            <div class="producto-tarjeta__info">
+              <span class="producto-tarjeta__marca">MUSCLETECH</span>
+              <h3 class="producto-tarjeta__nombre">BCAA 2:1:1 Instantized</h3>
+              <p class="producto-tarjeta__variante">Aminoácidos • 400 g</p>
+              <div class="producto-tarjeta__precios">
+                <span class="producto-tarjeta__precio-actual">$ 22.400</span>
+                <span class="producto-tarjeta__precio-viejo">$ 27.000</span>
+              </div>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto">AGREGAR AL CARRITO</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- --- SECCIÓN NUESTROS COMBOS --- -->
+    <section class="seccion-combos" id="promociones">
+      <div class="seccion-combos__contenedor">
+        <div class="seccion-combos__encabezado">
+          <div>
+            <h2 class="seccion-combos__titulo">NUESTROS COMBOS</h2>
+            <p class="seccion-combos__subtitulo">Packs diseñados por expertos. Ahorrá más comprando en combo.</p>
+          </div>
+          <div class="seccion-combos__controles">
+            <button class="seccion-combos__boton-nav boton-redondo-oscuro_efecto" id="btnAntCombos">&lt;</button>
+            <button class="seccion-combos__boton-nav boton-redondo-oscuro_efecto" id="btnSigCombos">&gt;</button>
+          </div>
+        </div>
+
+        <div class="carrusel-horizontal" id="carruselCombos">
+          <article class="combo-tarjeta tarjeta_efecto">
+            <div class="combo-tarjeta__imagen-caja">
+              <span class="combo-tarjeta__etiqueta">COMBO</span>
+              <div class="combo-tarjeta__placeholder">IMG COMBO 1</div>
+            </div>
+            <div class="combo-tarjeta__info">
+              <h3 class="combo-tarjeta__nombre">COMBO VOLUMEN EXTREMO</h3>
+              <p class="combo-tarjeta__desc">Proteína Whey + Creatina + Shaker. Ideal para maximizar tu ganancia muscular.</p>
+              <div class="combo-tarjeta__precios">
+                <span class="combo-tarjeta__precio-actual">$ 68.900</span>
+                <span class="combo-tarjeta__precio-viejo">$ 80.500</span>
+              </div>
+              <a href="#" class="combo-tarjeta__enlace enlace-borde_efecto">VER COMBO &gt;</a>
+            </div>
+          </article>
+
+          <article class="combo-tarjeta tarjeta_efecto">
+            <div class="combo-tarjeta__imagen-caja">
+              <span class="combo-tarjeta__etiqueta">COMBO</span>
+              <div class="combo-tarjeta__placeholder">IMG COMBO 2</div>
+            </div>
+            <div class="combo-tarjeta__info">
+              <h3 class="combo-tarjeta__nombre">COMBO DEFINICIÓN TOTAL</h3>
+              <p class="combo-tarjeta__desc">Quemador de grasa + BCAA + Omega 3. Mantén la masa mientras defines.</p>
+              <div class="combo-tarjeta__precios">
+                <span class="combo-tarjeta__precio-actual">$ 52.000</span>
+                <span class="combo-tarjeta__precio-viejo">$ 61.000</span>
+              </div>
+              <a href="#" class="combo-tarjeta__enlace enlace-borde_efecto">VER COMBO &gt;</a>
+            </div>
+          </article>
+
+          <article class="combo-tarjeta tarjeta_efecto">
+            <div class="combo-tarjeta__imagen-caja">
+              <span class="combo-tarjeta__etiqueta">COMBO</span>
+              <div class="combo-tarjeta__placeholder">IMG COMBO 3</div>
+            </div>
+            <div class="combo-tarjeta__info">
+              <h3 class="combo-tarjeta__nombre">COMBO RENDIMIENTO RUNNER</h3>
+              <p class="combo-tarjeta__desc">Geles energéticos + Electrolitos + Magnesio. Energía para cada kilómetro.</p>
+              <div class="combo-tarjeta__precios">
+                <span class="combo-tarjeta__precio-actual">$ 45.500</span>
+              </div>
+              <a href="#" class="combo-tarjeta__enlace enlace-borde_efecto">VER COMBO &gt;</a>
+            </div>
+          </article>
+
+          <article class="combo-tarjeta tarjeta_efecto">
+            <div class="combo-tarjeta__imagen-caja">
+              <span class="combo-tarjeta__etiqueta">COMBO</span>
+              <div class="combo-tarjeta__placeholder">IMG COMBO 4</div>
+            </div>
+            <div class="combo-tarjeta__info">
+              <h3 class="combo-tarjeta__nombre">COMBO FUERZA Y POTENCIA</h3>
+              <p class="combo-tarjeta__desc">Pre-entreno + Creatina + Aminoácidos. Supera tus límites en cada serie.</p>
+              <div class="combo-tarjeta__precios">
+                <span class="combo-tarjeta__precio-actual">$ 71.000</span>
+                <span class="combo-tarjeta__precio-viejo">$ 85.000</span>
+              </div>
+              <a href="#" class="combo-tarjeta__enlace enlace-borde_efecto">VER COMBO &gt;</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- --- SECCIÓN TESTIMONIOS --- -->
+    <section class="testimonios">
+      <div class="testimonios__contenedor">
+        <h2 class="testimonios__titulo">TESTIMONIOS</h2>
+        <div class="testimonios__grilla">
+          
+          <article class="testimonio-tarjeta">
+            <div class="testimonio-tarjeta__encabezado">
+              <div class="testimonio-tarjeta__avatar"></div>
+              <div class="testimonio-tarjeta__usuario">
+                <h3 class="testimonio-tarjeta__nombre">Lucas M.</h3>
+                <div class="testimonio-tarjeta__estrellas">★★★★★</div>
+              </div>
+            </div>
+            <p class="testimonio-tarjeta__compra">COMPRÓ EN WEB</p>
+            <p class="testimonio-tarjeta__texto">"Excelente atención y los productos son de primera. Empecé a tomar la proteína hace un mes y ya noto los resultados en mi recuperación. ¡Recomendado 100%!"</p>
+          </article>
+
+          <article class="testimonio-tarjeta">
+            <div class="testimonio-tarjeta__encabezado">
+              <div class="testimonio-tarjeta__avatar"></div>
+              <div class="testimonio-tarjeta__usuario">
+                <h3 class="testimonio-tarjeta__nombre">Sofía R.</h3>
+                <div class="testimonio-tarjeta__estrellas">★★★★★</div>
+              </div>
+            </div>
+            <p class="testimonio-tarjeta__compra">COMPRÓ EN SUCURSAL</p>
+            <p class="testimonio-tarjeta__texto">"Me asesoraron súper bien sobre qué pre-entreno llevar según mi tolerancia a la cafeína. El envío además fue rapidísimo, llegó al día siguiente."</p>
+          </article>
+
+          <article class="testimonio-tarjeta">
+            <div class="testimonio-tarjeta__encabezado">
+              <div class="testimonio-tarjeta__avatar"></div>
+              <div class="testimonio-tarjeta__usuario">
+                <h3 class="testimonio-tarjeta__nombre">Martín G.</h3>
+                <div class="testimonio-tarjeta__estrellas">★★★★☆</div>
+              </div>
+            </div>
+            <p class="testimonio-tarjeta__compra">COMPRÓ EN WEB</p>
+            <p class="testimonio-tarjeta__texto">"Muy buenos precios comprando en combo. La creatina se disuelve perfecto y no tiene sabor a nada, tal cual buscaba. Volveré a comprar seguro."</p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- --- SECCIÓN MARCAS DESTACADAS --- -->
+    <section class="marcas">
+      <div class="marcas__contenedor">
+        
+        <div class="marcas__info">
+          <div class="marcas__icono">🏆</div>
+          <h2 class="marcas__titulo">Marcas destacadas</h2>
+          <h3 class="marcas__subtitulo">Reconocimiento Nacional e Internacional</h3>
+          <p class="marcas__texto">
+            Nos encargamos de distribuir productos de la más alta calidad y de gran reconocimiento. Creemos que buscar la excelencia en los productos es lo que nos asegura el éxito, por eso te brindamos un servicio dándote lo mejor de lo mejor.
+          </p>
+          <a href="#" class="marcas__boton">VER TODAS LAS MARCAS</a>
+        </div>
+
+        <div class="marcas__grilla">
+          <div class="marcas__logo-tarjeta tarjeta_efecto"><div class="marcas__logo-texto">LOGO 1</div><span class="marcas__badge">1</span></div>
+          <div class="marcas__logo-tarjeta tarjeta_efecto"><div class="marcas__logo-texto">LOGO 2</div><span class="marcas__badge">2</span></div>
+          <div class="marcas__logo-tarjeta tarjeta_efecto"><div class="marcas__logo-texto">LOGO 3</div><span class="marcas__badge">3</span></div>
+          <div class="marcas__logo-tarjeta tarjeta_efecto"><div class="marcas__logo-texto">LOGO 4</div><span class="marcas__badge">4</span></div>
+          <div class="marcas__logo-tarjeta tarjeta_efecto"><div class="marcas__logo-texto">LOGO 5</div><span class="marcas__badge">5</span></div>
+          <div class="marcas__logo-tarjeta tarjeta_efecto"><div class="marcas__logo-texto">LOGO 6</div><span class="marcas__badge">6</span></div>
+          <div class="marcas__logo-tarjeta tarjeta_efecto"><div class="marcas__logo-texto">LOGO 7</div><span class="marcas__badge">7</span></div>
+          <div class="marcas__logo-tarjeta tarjeta_efecto"><div class="marcas__logo-texto">LOGO 8</div><span class="marcas__badge">8</span></div>
+          <div class="marcas__logo-tarjeta tarjeta_efecto"><div class="marcas__logo-texto">LOGO 9</div><span class="marcas__badge">9</span></div>
+        </div>
+        
+      </div>
+    </section>
+
+    <!-- --- SECCIÓN CALCULADORA --- -->
+    <section class="calculadora" id="calculadora">
+      <div class="calculadora__contenedor">
+        
+        <div class="calculadora__encabezado">
+          <div class="calculadora__caja-titulo">
+            <h2 class="calculadora__titulo">Calculadora de Calorías (Harris-Benedict)</h2>
+          </div>
+          <p class="calculadora__texto">Esta calculadora automática te indica cuáles son las <strong>calorías diarias</strong> que gastas según la fórmula de Harris-Benedict.</p>
+          <p class="calculadora__texto">Seguido de este resultado, calculamos cuántas calorías deberías comer aprox. para tu objetivo.</p>
+        </div>
+
+        <form class="calculadora__formulario" id="formCalculadora">
+          <div class="calculadora__grilla-2">
+            <div class="calculadora__campo">
+              <label for="calcSexo">Sexo:</label>
+              <select id="calcSexo" required>
+                <option value="hombre">Hombre</option>
+                <option value="mujer">Mujer</option>
+              </select>
+            </div>
+            <div class="calculadora__campo">
+              <label for="calcEdad">Tu edad:</label>
+              <input type="number" id="calcEdad" placeholder="Ej: 30" required min="15" max="100">
+            </div>
+            <div class="calculadora__campo">
+              <label for="calcPeso">Tu peso (kg):</label>
+              <input type="number" id="calcPeso" placeholder="Ej: 80" required min="30" max="250" step="0.1">
+            </div>
+            <div class="calculadora__campo">
+              <label for="calcAltura">Tu altura (cm):</label>
+              <input type="number" id="calcAltura" placeholder="Ej: 180" required min="100" max="250">
+            </div>
+          </div>
+
+          <div class="calculadora__campo">
+            <label for="calcActividad">Nivel de actividad física diaria:</label>
+            <select id="calcActividad" required>
+              <option value="1.2">Sedentario (Poco o ningún ejercicio)</option>
+              <option value="1.375">Ligero (Ejercicio 1-3 días a la semana)</option>
+              <option value="1.55" selected>Moderado (Ejercicio 3-5 días a la semana)</option>
+              <option value="1.725">Fuerte (Ejercicio 6-7 días a la semana)</option>
+              <option value="1.9">Muy fuerte (Trabajo físico duro)</option>
+            </select>
+          </div>
+
+          <div class="calculadora__campo">
+            <label for="calcObjetivo">¿Cuál es tu objetivo?</label>
+            <select id="calcObjetivo" required>
+              <option value="deficit">Bajar de peso (Déficit calórico)</option>
+              <option value="mantenimiento" selected>Mantener mi peso actual</option>
+              <option value="superavit">Subir de peso (Superávit / Volumen)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="calculadora__boton boton-oscuro_efecto">Calcular</button>
+        </form>
+
+        <div class="calculadora__resultados" id="resultadosCalc">
+          <h3 class="calculadora__resultados-titulo" id="tituloResultados">Tus resultados:</h3>
+          <table class="calculadora__tabla">
+            <thead>
+              <tr>
+                <th>Nivel</th>
+                <th>kcal/día</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpoTablaCalc"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- --- PIE DE PÁGINA --- -->
+  <footer class="pie-pagina">
+    <div class="pie-pagina__contenedor">
+      
+      <div class="pie-pagina__arriba">
+        <div class="pie-pagina__marca">
+          <a href="/" class="pie-pagina__logo">★</a>
+          <p class="pie-pagina__texto">Suplementación deportiva de calidad para atletas que buscan resultados reales. Tu rendimiento, nuestro compromiso.</p>
+          <div class="pie-pagina__redes">
+            <a href="#" class="pie-pagina__red-link icono_efecto" aria-label="Instagram">📷</a>
+            <a href="#" class="pie-pagina__red-link icono_efecto" aria-label="Facebook">📘</a>
+            <a href="#" class="pie-pagina__red-link icono_efecto" aria-label="TikTok">🎵</a>
+          </div>
+        </div>
+
+        <div class="pie-pagina__enlaces">
+          <h4 class="pie-pagina__titulo-columna">Tienda</h4>
+          <a href="#" class="pie-pagina__link enlace_efecto">Categorías</a>
+          <a href="#" class="pie-pagina__link enlace_efecto">Promociones</a>
+          <a href="#" class="pie-pagina__link enlace_efecto">Novedades</a>
+        </div>
+
+        <div class="pie-pagina__enlaces">
+          <h4 class="pie-pagina__titulo-columna">Ayuda</h4>
+          <a href="#" class="pie-pagina__link enlace_efecto">Preguntas frecuentes</a>
+          <a href="#" class="pie-pagina__link enlace_efecto">Envíos</a>
+        </div>
+
+        <div class="pie-pagina__enlaces">
+          <h4 class="pie-pagina__titulo-columna">Empresa</h4>
+          <a href="#" class="pie-pagina__link enlace_efecto">Contáctanos</a>
+          <a href="#" class="pie-pagina__link enlace_efecto">Quienes somos</a>
+        </div>
+
+        <div class="pie-pagina__enlaces">
+          <h4 class="pie-pagina__titulo-columna">Legal</h4>
+          <a href="#" class="pie-pagina__link enlace_efecto">Términos y condiciones</a>
+          <a href="#" class="pie-pagina__link enlace_efecto">Política de privacidad</a>
+          <a href="#" class="pie-pagina__link enlace_efecto">Cookies</a>
+        </div>
+      </div>
+
+      <div class="pie-pagina__pagos">
+        <h5 class="pie-pagina__pagos-titulo">MEDIOS DE PAGO ACEPTADOS</h5>
+        <div class="pie-pagina__pagos-metodos">
+          <span class="pie-pagina__badge-pago">Visa</span>
+          <span class="pie-pagina__badge-pago">Mastercard</span>
+          <span class="pie-pagina__badge-pago">Amex</span>
+          <span class="pie-pagina__badge-pago">Mercado Pago</span>
+          <span class="pie-pagina__badge-pago">Transferencia</span>
+          <span class="pie-pagina__badge-pago">Débito</span>
+        </div>
+      </div>
+
+      <div class="pie-pagina__abajo">
+        <p>© 2026 SUPPLEX. Todos los derechos reservados.</p>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Botón WhatsApp -->
+  <a href="#" class="whatsapp-flotante icono_efecto" aria-label="Escribinos por WhatsApp">💬</a> 
+    
+  <script src="main.js"></script>
+</body>
+</html>
