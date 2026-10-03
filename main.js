@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  // HEADER FIJO
+  // =========================================
+  // 1. ENCABEZADO FIJO (Sticky Header)
+  // =========================================
   const encabezadoPrincipal = document.getElementById('encabezadoPrincipal');
   const barraSuperior = document.querySelector('.encabezado__barra-superior');
   
@@ -17,7 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // LÓGICA DEL CARRUSEL DEL HERO (FADE CLÁSICO)
+  // =========================================
+  // 2. LÓGICA DEL CARRUSEL DEL HERO
+  // =========================================
   const slidesHero = document.querySelectorAll('.portada__diapositiva');
   const puntosHero = document.querySelectorAll('.portada__punto');
   const btnAntHero = document.getElementById('btnAntHero');
@@ -26,11 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (slidesHero.length > 0 && btnAntHero && btnSigHero) {
     const mostrarSlide = (index) => {
-      // Ocultar todos
       slidesHero.forEach(slide => slide.classList.remove('portada__diapositiva--activa'));
       puntosHero.forEach(punto => punto.classList.remove('portada__punto--activo'));
 
-      // Mostrar el actual
       slidesHero[index].classList.add('portada__diapositiva--activa');
       if(puntosHero[index]) puntosHero[index].classList.add('portada__punto--activo');
     };
@@ -46,7 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- SOLUCIÓN: VOLVEMOS A DEFINIR LA FUNCIÓN ACTIVARCARRUSEL ---
+  // =========================================
+  // 3. CARRUSELES HORIZONTALES (Productos/Combos)
+  // =========================================
   const activarCarrusel = (idCarrusel, idBotonAnt, idBotonSig) => {
     const carrusel = document.getElementById(idCarrusel);
     const btnAnt = document.getElementById(idBotonAnt);
@@ -59,13 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Ahora sí llamamos a la función porque ya existe
   activarCarrusel('carruselExplorar', 'btnAntExplorar', 'btnSigExplorar');
   activarCarrusel('carruselMasVendidos', 'btnAntMasVendidos', 'btnSigMasVendidos');
   activarCarrusel('carruselCombos', 'btnAntCombos', 'btnSigCombos');
 
-
-  // CALCULADORA HARRIS-BENEDICT
+  // =========================================
+  // 4. CALCULADORA HARRIS-BENEDICT
+  // =========================================
   const formCalculadora = document.getElementById('formCalculadora');
   const resultadosCalc = document.getElementById('resultadosCalc');
   const tituloResultados = document.getElementById('tituloResultados');
@@ -126,20 +130,16 @@ document.addEventListener('DOMContentLoaded', () => {
       resultadosCalc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   }
-});
 
-// =========================================
-  // CARRITO CON MODAL LATERAL
   // =========================================
-  const numeroWhatsApp = "5491100000000"; // TU NÚMERO
+  // 5. MODAL DEL CARRITO Y WHATSAPP
+  // =========================================
+  const numeroWhatsApp = "5491100000000"; // TU NÚMERO DE WHATSAPP ACÁ
   let carrito = [];
 
-  // Selectores
-  const botonesAgregar = document.querySelectorAll('.js-agregar-carrito');
   const contadorCarrito = document.querySelector('.encabezado__contador-carrito');
   const iconoCarritoNav = document.querySelector('[aria-label="Carrito"]');
   const botonFlotanteWsp = document.querySelector('.whatsapp-flotante');
-  
   const carritoModal = document.getElementById('carritoModal');
   const carritoFondo = document.getElementById('carritoFondo');
   const btnCerrarCarrito = document.getElementById('btnCerrarCarrito');
@@ -147,7 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalCarrito = document.getElementById('totalCarrito');
   const btnEnviarWhatsApp = document.getElementById('btnEnviarWhatsApp');
 
-  // Funciones de Modal
   const abrirCarrito = (e) => {
     if(e) e.preventDefault();
     carritoModal.classList.add('carrito-modal--activo');
@@ -156,12 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const cerrarCarrito = () => carritoModal.classList.remove('carrito-modal--activo');
 
-  // Eventos para abrir y cerrar
   if(iconoCarritoNav) iconoCarritoNav.addEventListener('click', abrirCarrito);
   if(btnCerrarCarrito) btnCerrarCarrito.addEventListener('click', cerrarCarrito);
   if(carritoFondo) carritoFondo.addEventListener('click', cerrarCarrito);
 
-  // Renderizar visualmente los productos adentro del modal
   const renderizarCarrito = () => {
     if (contadorCarrito) contadorCarrito.textContent = carrito.length;
     
@@ -191,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
     totalCarrito.textContent = `$ ${total.toLocaleString('es-AR')}`;
   };
 
-  // Función global para que funcione el botón de "x" (eliminar)
   window.eliminarDelCarrito = (index) => {
     carrito.splice(index, 1);
     renderizarCarrito();
@@ -201,10 +197,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Agregar al carrito desde las tarjetas de producto
-  botonesAgregar.forEach(boton => {
-    boton.addEventListener('click', (e) => {
+  // Delegación de eventos para AGREGAR AL CARRITO (sirve para los botones estáticos y los del buscador)
+  document.addEventListener('click', (e) => {
+    const boton = e.target.closest('.js-agregar-carrito');
+    if (boton) {
       e.preventDefault();
+      
       const nombre = boton.getAttribute('data-nombre');
       const precio = parseInt(boton.getAttribute('data-precio'));
 
@@ -216,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => contadorCarrito.style.transform = 'scale(1)', 200);
       }
 
-      // Animación del botón al clickear
       const textoOriginal = boton.textContent;
       boton.textContent = "¡AGREGADO ✔!";
       boton.style.backgroundColor = "var(--color-primario)";
@@ -227,10 +224,10 @@ document.addEventListener('DOMContentLoaded', () => {
         boton.style.backgroundColor = "";
         boton.style.color = "";
       }, 1500);
-    });
+    }
   });
 
-  // Enviar a WhatsApp al finalizar la compra
+  // Enviar a WhatsApp
   if (btnEnviarWhatsApp) {
     btnEnviarWhatsApp.addEventListener('click', (e) => {
       e.preventDefault();
@@ -252,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // El botón flotante abajo a la izquierda ahora sirve para consultas generales
   if (botonFlotanteWsp) {
     botonFlotanteWsp.addEventListener('click', (e) => {
       e.preventDefault();
@@ -260,17 +256,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. LÓGICA DE FILTRADO OPTIMIZADA (Debounce + Límite)
-  let temporizadorBuscador; // Variable para controlar el retraso
+  // =========================================
+  // 6. BUSCADOR EN TIEMPO REAL (MODAL)
+  // =========================================
+  const buscadorModal = document.getElementById('buscadorModal');
+  const inputBuscador = document.getElementById('inputBuscador');
+  const btnCerrarBuscador = document.getElementById('btnCerrarBuscador');
+  const resultadosBuscador = document.getElementById('resultadosBuscador');
+  const iconoLupaNav = document.querySelector('[aria-label="Buscar"]');
 
+  if (iconoLupaNav) {
+    iconoLupaNav.addEventListener('click', (e) => {
+      e.preventDefault();
+      buscadorModal.classList.add('buscador-modal--activo');
+      // Pequeño delay para enfocar el input una vez terminada la animación del modal
+      setTimeout(() => inputBuscador.focus(), 100); 
+    });
+  }
+
+  if (btnCerrarBuscador) {
+    btnCerrarBuscador.addEventListener('click', () => {
+      buscadorModal.classList.remove('buscador-modal--activo');
+      inputBuscador.value = '';
+      resultadosBuscador.innerHTML = '<p class="buscador-modal__vacio">Escribí arriba para buscar productos.</p>';
+    });
+  }
+
+  let temporizadorBuscador;
   if (inputBuscador) {
     inputBuscador.addEventListener('keyup', (e) => {
-      
-      // DEBOUNCE: Limpiamos el temporizador anterior. 
-      // Esto evita que busque "c", "cr", "cre", "crea" en milisegundos.
-      // Solo buscará cuando el usuario deje de teclear por 300ms.
       clearTimeout(temporizadorBuscador);
-
+      
       temporizadorBuscador = setTimeout(() => {
         const textoBusqueda = e.target.value.toLowerCase().trim();
 
@@ -279,50 +295,51 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // Filtramos en la lista (que ahora viene del archivo productos.js)
-        let resultados = inventarioProductos.filter(producto => 
-          producto.nombre.toLowerCase().includes(textoBusqueda) || 
-          producto.cat.toLowerCase().includes(textoBusqueda)
-        );
+        // Verificamos que inventarioProductos exista (viene del archivo productos.js)
+        if(typeof inventarioProductos !== 'undefined') {
+            let resultados = inventarioProductos.filter(producto => 
+              producto.nombre.toLowerCase().includes(textoBusqueda) || 
+              producto.cat.toLowerCase().includes(textoBusqueda)
+            );
 
-        // LÍMITE DE RENDERIZADO: Cortamos los resultados a un máximo de 12.
-        // Dibujar HTML es pesado. Si el cliente busca "Proteína" y tenés 80,
-        // dibujar 80 tarjetas congela el celular. Mostramos solo las primeras 12.
-        const resultadosLimitados = resultados.slice(0, 12);
+            const resultadosLimitados = resultados.slice(0, 12);
+            resultadosBuscador.innerHTML = '';
 
-        resultadosBuscador.innerHTML = '';
+            if (resultadosLimitados.length === 0) {
+              resultadosBuscador.innerHTML = `<p class="buscador-modal__vacio">No encontramos nada para "<strong>${textoBusqueda}</strong>".</p>`;
+            } else {
+              resultadosLimitados.forEach(prod => {
+                const tarjetaHTML = `
+                  <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
+                    <div class="producto-tarjeta__imagen-caja">
+                      <div class="producto-tarjeta__placeholder">${prod.img}</div>
+                    </div>
+                    <div class="producto-tarjeta__info">
+                      <span class="producto-tarjeta__marca">${prod.cat}</span>
+                      <h3 class="producto-tarjeta__nombre" style="font-size: 0.9rem;">${prod.nombre}</h3>
+                      <div class="producto-tarjeta__precios">
+                        <span class="producto-tarjeta__precio-actual">$ ${prod.precio.toLocaleString('es-AR')}</span>
+                      </div>
+                      <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
+                    </div>
+                  </article>
+                `;
+                resultadosBuscador.insertAdjacentHTML('beforeend', tarjetaHTML);
+              });
 
-        if (resultadosLimitados.length === 0) {
-          resultadosBuscador.innerHTML = `<p class="buscador-modal__vacio">No encontramos nada para "<strong>${textoBusqueda}</strong>".</p>`;
+              if (resultados.length > 12) {
+                 resultadosBuscador.insertAdjacentHTML('beforeend', `
+                   <p class="buscador-modal__vacio" style="width: 100%; grid-column: 1 / -1;">
+                     Mostrando los 12 mejores resultados. Sé más específico en tu búsqueda.
+                   </p>
+                 `);
+              }
+            }
         } else {
-          resultadosLimitados.forEach(prod => {
-            const tarjetaHTML = `
-              <article class="producto-tarjeta tarjeta-sombra_efecto">
-                <div class="producto-tarjeta__imagen-caja">
-                  <div class="producto-tarjeta__placeholder">${prod.img}</div>
-                </div>
-                <div class="producto-tarjeta__info">
-                  <span class="producto-tarjeta__marca">${prod.cat}</span>
-                  <h3 class="producto-tarjeta__nombre" style="font-size: 0.9rem;">${prod.nombre}</h3>
-                  <div class="producto-tarjeta__precios">
-                    <span class="producto-tarjeta__precio-actual">$ ${prod.precio.toLocaleString('es-AR')}</span>
-                  </div>
-                  <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
-                </div>
-              </article>
-            `;
-            resultadosBuscador.insertAdjacentHTML('beforeend', tarjetaHTML);
-          });
-          
-          // Si hay más resultados de los que mostramos, damos un aviso
-          if (resultados.length > 12) {
-             resultadosBuscador.insertAdjacentHTML('beforeend', `
-               <p class="buscador-modal__vacio" style="width: 100%; grid-column: 1 / -1;">
-                 Mostrando los 12 mejores resultados. Sé más específico en tu búsqueda.
-               </p>
-             `);
-          }
+             resultadosBuscador.innerHTML = '<p class="buscador-modal__vacio" style="color:red;">Error: No se pudo cargar el archivo de productos.</p>';
         }
-      }, 300); // 300 milisegundos de espera antes de ejecutar la búsqueda
+      }, 300);
     });
   }
+
+});
