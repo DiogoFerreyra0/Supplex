@@ -697,7 +697,23 @@
 
     </div>
   </div>
-  
+  <!-- --- BUSCADOR A PANTALLA COMPLETA --- -->
+  <div class="buscador-modal" id="buscadorModal">
+    <div class="buscador-modal__contenido">
+      
+      <div class="buscador-modal__cabecera">
+        <input type="text" class="buscador-modal__input" id="inputBuscador" placeholder="Buscar proteínas, creatina, combos..." autocomplete="off">
+        <button class="buscador-modal__cerrar" id="btnCerrarBuscador" aria-label="Cerrar buscador">&times;</button>
+      </div>
+
+      <!-- Acá aparecerán los resultados de búsqueda dinámicamente -->
+      <div class="buscador-modal__resultados" id="resultadosBuscador">
+        <p class="buscador-modal__vacio">Escribí arriba para buscar productos.</p>
+      </div>
+
+    </div>
+  </div>
+  <script src="productos.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

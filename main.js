@@ -259,3 +259,70 @@ document.addEventListener('DOMContentLoaded', () => {
       window.open(`https://wa.me/${numeroWhatsApp}?text=Hola,%20tengo%20una%20consulta%20sobre%20sus%20productos.`, '_blank');
     });
   }
+
+  // 4. LÓGICA DE FILTRADO OPTIMIZADA (Debounce + Límite)
+  let temporizadorBuscador; // Variable para controlar el retraso
+
+  if (inputBuscador) {
+    inputBuscador.addEventListener('keyup', (e) => {
+      
+      // DEBOUNCE: Limpiamos el temporizador anterior. 
+      // Esto evita que busque "c", "cr", "cre", "crea" en milisegundos.
+      // Solo buscará cuando el usuario deje de teclear por 300ms.
+      clearTimeout(temporizadorBuscador);
+
+      temporizadorBuscador = setTimeout(() => {
+        const textoBusqueda = e.target.value.toLowerCase().trim();
+
+        if (textoBusqueda === '') {
+          resultadosBuscador.innerHTML = '<p class="buscador-modal__vacio">Escribí arriba para buscar productos.</p>';
+          return;
+        }
+
+        // Filtramos en la lista (que ahora viene del archivo productos.js)
+        let resultados = inventarioProductos.filter(producto => 
+          producto.nombre.toLowerCase().includes(textoBusqueda) || 
+          producto.cat.toLowerCase().includes(textoBusqueda)
+        );
+
+        // LÍMITE DE RENDERIZADO: Cortamos los resultados a un máximo de 12.
+        // Dibujar HTML es pesado. Si el cliente busca "Proteína" y tenés 80,
+        // dibujar 80 tarjetas congela el celular. Mostramos solo las primeras 12.
+        const resultadosLimitados = resultados.slice(0, 12);
+
+        resultadosBuscador.innerHTML = '';
+
+        if (resultadosLimitados.length === 0) {
+          resultadosBuscador.innerHTML = `<p class="buscador-modal__vacio">No encontramos nada para "<strong>${textoBusqueda}</strong>".</p>`;
+        } else {
+          resultadosLimitados.forEach(prod => {
+            const tarjetaHTML = `
+              <article class="producto-tarjeta tarjeta-sombra_efecto">
+                <div class="producto-tarjeta__imagen-caja">
+                  <div class="producto-tarjeta__placeholder">${prod.img}</div>
+                </div>
+                <div class="producto-tarjeta__info">
+                  <span class="producto-tarjeta__marca">${prod.cat}</span>
+                  <h3 class="producto-tarjeta__nombre" style="font-size: 0.9rem;">${prod.nombre}</h3>
+                  <div class="producto-tarjeta__precios">
+                    <span class="producto-tarjeta__precio-actual">$ ${prod.precio.toLocaleString('es-AR')}</span>
+                  </div>
+                  <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
+                </div>
+              </article>
+            `;
+            resultadosBuscador.insertAdjacentHTML('beforeend', tarjetaHTML);
+          });
+          
+          // Si hay más resultados de los que mostramos, damos un aviso
+          if (resultados.length > 12) {
+             resultadosBuscador.insertAdjacentHTML('beforeend', `
+               <p class="buscador-modal__vacio" style="width: 100%; grid-column: 1 / -1;">
+                 Mostrando los 12 mejores resultados. Sé más específico en tu búsqueda.
+               </p>
+             `);
+          }
+        }
+      }, 300); // 300 milisegundos de espera antes de ejecutar la búsqueda
+    });
+  }
