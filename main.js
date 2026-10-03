@@ -434,3 +434,44 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 1500);
     });
   }
+
+  // =========================================
+  // 8. PREGUNTAS FRECUENTES (MODAL + ACORDEÓN)
+  // =========================================
+  const faqModal = document.getElementById('faqModal');
+  const btnCerrarFaq = document.getElementById('btnCerrarFaq');
+  const btnCerrarFondoFaq = document.getElementById('btnCerrarFondoFaq');
+  const linksAbrirFaq = document.querySelectorAll('.js-abrir-faq'); // Captura el link del footer
+
+  // Función para abrir
+  linksAbrirFaq.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      faqModal.classList.add('faq-modal--activo');
+    });
+  });
+
+  // Funciones para cerrar (botón "x" y click afuera)
+  const cerrarFaq = () => faqModal.classList.remove('faq-modal--activo');
+  if (btnCerrarFaq) btnCerrarFaq.addEventListener('click', cerrarFaq);
+  if (btnCerrarFondoFaq) btnCerrarFondoFaq.addEventListener('click', cerrarFaq);
+
+  // Lógica del acordeón adentro del modal
+  const preguntasFaq = document.querySelectorAll('.faq__pregunta');
+  if (preguntasFaq.length > 0) {
+    preguntasFaq.forEach(pregunta => {
+      pregunta.addEventListener('click', () => {
+        const itemActual = pregunta.parentElement;
+        
+        // Cerrar los otros
+        document.querySelectorAll('.faq__item').forEach(item => {
+          if (item !== itemActual) {
+            item.classList.remove('faq__item--activo');
+          }
+        });
+        
+        // Abrir/Cerrar el actual
+        itemActual.classList.toggle('faq__item--activo');
+      });
+    });
+  }

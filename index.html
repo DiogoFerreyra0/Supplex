@@ -661,7 +661,7 @@
 
         <div class="pie-pagina__enlaces">
           <h4 class="pie-pagina__titulo-columna">Ayuda</h4>
-          <a href="#" class="pie-pagina__link enlace_efecto">Preguntas frecuentes</a>
+          <a href="#" class="pie-pagina__link enlace_efecto js-abrir-faq">Preguntas frecuentes</a>
           <a href="#" class="pie-pagina__link enlace_efecto">Envíos</a>
         </div>
 
@@ -764,6 +764,7 @@
 
     </div>
   </div>
+  
   <!-- --- MODAL VISTA RÁPIDA DE PRODUCTO --- -->
   <div class="producto-modal" id="productoModal">
     <div class="producto-modal__fondo" id="btnCerrarFondoProducto"></div>
@@ -788,6 +789,51 @@
 
     </div>
   </div>
+
+  <!-- --- MODAL DE PREGUNTAS FRECUENTES --- -->
+  <div class="faq-modal" id="faqModal">
+    <div class="faq-modal__fondo" id="btnCerrarFondoFaq"></div>
+    <div class="faq-modal__panel">
+      <button class="faq-modal__cerrar" id="btnCerrarFaq" aria-label="Cerrar FAQ">&times;</button>
+      
+      <div class="faq-modal__contenido">
+        <h2 class="faq-modal__titulo">Preguntas Frecuentes</h2>
+        <p class="faq-modal__subtitulo">Resolvemos tus dudas más comunes de forma rápida.</p>
+
+        <div class="faq__acordeon">
+          <div class="faq__item">
+            <button class="faq__pregunta">¿Hacen envíos a todo el país? <span class="faq__icono">+</span></button>
+            <div class="faq__respuesta">
+              <p>Sí, realizamos envíos a toda la Argentina. Despachamos dentro de las 24/48 hs hábiles luego de confirmado el pago mediante correo y servicios de mensajería privada.</p>
+            </div>
+          </div>
+
+          <div class="faq__item">
+            <button class="faq__pregunta">¿Cuáles son los medios de pago aceptados? <span class="faq__icono">+</span></button>
+            <div class="faq__respuesta">
+              <p>Aceptamos tarjetas de crédito, débito, Mercado Pago y transferencias bancarias (estas últimas con un descuento especial aplicado al total).</p>
+            </div>
+          </div>
+
+          <div class="faq__item">
+            <button class="faq__pregunta">¿Cómo sé qué suplemento es el indicado para mí? <span class="faq__icono">+</span></button>
+            <div class="faq__respuesta">
+              <p>Depende de tu objetivo. Si buscás ganar masa muscular, recomendamos Proteína + Creatina. Podés usar nuestra "Calculadora de Calorías" en la web o contactarnos por WhatsApp para asesoramiento personalizado.</p>
+            </div>
+          </div>
+
+          <div class="faq__item">
+            <button class="faq__pregunta">¿Tienen local a la calle para retirar? <span class="faq__icono">+</span></button>
+            <div class="faq__respuesta">
+              <p>Actualmente somos una tienda 100% online. Sin embargo, podés coordinar con nosotros por WhatsApp para retirar tu pedido en nuestros puntos de entrega habilitados sin costo.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script src="productos.js"></script>
   <script src="main.js"></script>
 </body>

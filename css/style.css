@@ -381,3 +381,38 @@ ul { list-style: none; }
 @media (max-width: 768px) {
   .contacto__grilla { grid-template-columns: 1fr; gap: 40px; padding: 30px 20px; }
 }
+
+/* =========================================
+   FAQ MODAL (VENTANA EMERGENTE)
+========================================= */
+.faq-modal { position: fixed; inset: 0; z-index: 3000; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: visibility 0.3s, opacity 0.3s ease; padding: 20px; }
+.faq-modal--activo { visibility: visible; opacity: 1; }
+
+.faq-modal__fondo { position: absolute; inset: 0; background: rgba(0,0,0,0.7); cursor: pointer; }
+
+.faq-modal__panel { position: relative; background: var(--color-claro); width: 100%; max-width: 650px; border-radius: 12px; z-index: 2; transform: translateY(30px) scale(0.95); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; max-height: 90vh; }
+.faq-modal--activo .faq-modal__panel { transform: translateY(0) scale(1); }
+
+.faq-modal__cerrar { position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.05); border: none; font-size: 2rem; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--color-oscuro); z-index: 10; transition: background 0.2s, color 0.2s; line-height: 1; }
+.faq-modal__cerrar:hover { background: var(--color-alerta); color: var(--color-claro); }
+
+.faq-modal__contenido { padding: 40px; overflow-y: auto; }
+.faq-modal__titulo { font-size: 1.8rem; font-weight: 900; color: var(--color-oscuro); margin-bottom: 5px; text-transform: uppercase; padding-right: 30px; }
+.faq-modal__subtitulo { font-size: 0.95rem; color: #555; margin-bottom: 30px; }
+
+/* Acordeón interno del modal */
+.faq__acordeon { display: flex; flex-direction: column; gap: 12px; }
+.faq__item { border: 1px solid var(--color-borde); border-radius: 8px; overflow: hidden; background: var(--color-fondo-gris); }
+.faq__pregunta { width: 100%; text-align: left; padding: 16px 20px; background: transparent; border: none; font-size: 0.95rem; font-weight: 800; color: var(--color-oscuro); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s ease; font-family: inherit; }
+.faq__pregunta:hover { background: var(--color-borde); }
+.faq__icono { font-size: 1.5rem; font-weight: 400; transition: transform 0.3s ease, color 0.3s ease; line-height: 1; }
+.faq__respuesta { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; background: var(--color-claro); }
+.faq__respuesta p { padding: 20px; margin: 0; color: #555; font-size: 0.9rem; line-height: 1.6; border-top: 1px solid var(--color-borde); }
+
+.faq__item--activo .faq__icono { transform: rotate(45deg); color: var(--color-primario); }
+.faq__item--activo .faq__respuesta { max-height: 400px; }
+
+@media (max-width: 768px) {
+  .faq-modal__contenido { padding: 30px 20px; }
+  .faq-modal__titulo { font-size: 1.5rem; }
+}
