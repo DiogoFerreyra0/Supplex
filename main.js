@@ -127,3 +127,84 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// =========================================
+  // CARRITO DE COMPRAS A WHATSAPP
+  // =========================================
+  
+  // 1. Configuración
+  const numeroWhatsApp = "5491100000000"; // ACÁ PONÉ TU NÚMERO REAL CON CÓDIGO DE PAÍS
+  let carrito = [];
+
+  // 2. Elementos del DOM
+  const botonesAgregar = document.querySelectorAll('.js-agregar-carrito');
+  const contadorCarrito = document.querySelector('.encabezado__contador-carrito');
+  const botonFlotanteWsp = document.querySelector('.whatsapp-flotante');
+  const iconoCarritoNav = document.querySelector('[aria-label="Carrito"]');
+
+  // 3. Función para actualizar el numerito rojo arriba
+  const actualizarContador = () => {
+    if (contadorCarrito) {
+      contadorCarrito.textContent = carrito.length;
+      // Pequeña animación para que se note que se agregó algo
+      contadorCarrito.style.transform = 'scale(1.5)';
+      setTimeout(() => contadorCarrito.style.transform = 'scale(1)', 200);
+    }
+  };
+
+  // 4. Lógica para agregar productos al carrito
+  botonesAgregar.forEach(boton => {
+    boton.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      // Leer los datos que pusimos en el HTML
+      const nombre = boton.getAttribute('data-nombre');
+      const precio = parseInt(boton.getAttribute('data-precio'));
+
+      // Guardar en la lista del carrito
+      carrito.push({ nombre, precio });
+      actualizarContador();
+
+      // Feedback visual: Cambiar el botón temporalmente
+      const textoOriginal = boton.textContent;
+      boton.textContent = "¡AGREGADO ✔!";
+      boton.style.backgroundColor = "var(--color-primario)";
+      boton.style.color = "var(--color-oscuro)";
+      
+      setTimeout(() => {
+        boton.textContent = textoOriginal;
+        boton.style.backgroundColor = "";
+        boton.style.color = "";
+      }, 1500);
+    });
+  });
+
+  // 5. Generar el mensaje y enviar a WhatsApp
+  const enviarPedidoWsp = (e) => {
+    e.preventDefault();
+
+    // Si el carrito está vacío, manda un mensaje de consulta general
+    if (carrito.length === 0) {
+      window.open(`https://wa.me/${numeroWhatsApp}?text=Hola,%20tengo%20una%20consulta%20sobre%20los%20suplementos.`, '_blank');
+      return;
+    }
+
+    // Si hay productos, armamos el ticket
+    let mensaje = "Hola buenas, quiero estos productos:\n\n";
+    let total = 0;
+
+    carrito.forEach(item => {
+      mensaje += `✅ ${item.nombre} ($${item.precio.toLocaleString('es-AR')})\n`;
+      total += item.precio;
+    });
+
+    mensaje += `\n*Total estimado: $${total.toLocaleString('es-AR')}*\n\nPor favor, confirmame stock y medios de pago. ¡Gracias!`;
+
+    // Codificar el texto para que los espacios y saltos de línea funcionen en la URL
+    const urlWsp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+    window.open(urlWsp, '_blank');
+  };
+
+  // 6. Asignar el envío al botón de WhatsApp y al ícono del carrito en el menú
+  if (botonFlotanteWsp) botonFlotanteWsp.addEventListener('click', enviarPedidoWsp);
+  if (iconoCarritoNav) iconoCarritoNav.addEventListener('click', enviarPedidoWsp);

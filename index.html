@@ -58,6 +58,7 @@
 
         <div class="encabezado__acciones">
           <button class="encabezado__boton-accion icono_efecto" aria-label="Buscar">🔍</button>
+          <button class="encabezado__boton-accion icono_efecto" aria-label="Usuario">👤</button>
           <button class="encabezado__boton-accion icono_efecto" aria-label="Carrito">
             🛒 <span class="encabezado__contador-carrito">0</span>
           </button>
@@ -117,6 +118,7 @@
       </div>
     </section>
 
+    <!-- --- SECCIÓN DESCUBRÍ TU POTENCIAL --- -->
     <section class="descubrir" id="categorias">
       <div class="descubrir__contenedor">
         <div class="descubrir__encabezado">
@@ -177,6 +179,7 @@
       </div>
     </section>
 
+    <!-- --- SECCIÓN LO MÁS VENDIDO --- -->
     <section class="mas-vendidos">
       <div class="mas-vendidos__contenedor">
         <div class="mas-vendidos__encabezado">
@@ -191,8 +194,8 @@
         </div>
 
         <div class="carrusel-horizontal" id="carruselMasVendidos">
+          <!-- PRODUCTO 1 -->
           <article class="producto-tarjeta tarjeta-sombra_efecto">
-
             <div class="producto-tarjeta__imagen-caja">
               <div class="producto-tarjeta__etiquetas">
                 <span class="etiqueta etiqueta--negra">MÁS VENDIDO</span>
@@ -209,10 +212,12 @@
                 <span class="producto-tarjeta__precio-actual">$ 42.500</span>
                 <span class="producto-tarjeta__precio-viejo">$ 56.000</span>
               </div>
-              <button class="producto-tarjeta__boton boton-oscuro_efecto">AGREGAR AL CARRITO</button>
+              <!-- ATRIBUTOS DATA AÑADIDOS AQUÍ -->
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="100% Whey Gold Standard - Optimum Nutrition" data-precio="42500">AGREGAR AL CARRITO</button>
             </div>
           </article>
 
+          <!-- PRODUCTO 2 -->
           <article class="producto-tarjeta tarjeta-sombra_efecto">
             <div class="producto-tarjeta__imagen-caja">
               <div class="producto-tarjeta__etiquetas">
@@ -230,10 +235,11 @@
                 <span class="producto-tarjeta__precio-actual">$ 18.900</span>
                 <span class="producto-tarjeta__precio-viejo">$ 22.000</span>
               </div>
-              <button class="producto-tarjeta__boton boton-oscuro_efecto">AGREGAR AL CARRITO</button>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="Creatine Monohydrate - Dymatize" data-precio="18900">AGREGAR AL CARRITO</button>
             </div>
           </article>
 
+          <!-- PRODUCTO 3 -->
           <article class="producto-tarjeta tarjeta-sombra_efecto">
             <div class="producto-tarjeta__imagen-caja">
               <div class="producto-tarjeta__etiquetas">
@@ -249,10 +255,11 @@
               <div class="producto-tarjeta__precios">
                 <span class="producto-tarjeta__precio-actual">$ 31.200</span>
               </div>
-              <button class="producto-tarjeta__boton boton-oscuro_efecto">AGREGAR AL CARRITO</button>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="Pre-Workout C4 Original - Cellucor" data-precio="31200">AGREGAR AL CARRITO</button>
             </div>
           </article>
 
+          <!-- PRODUCTO 4 -->
           <article class="producto-tarjeta tarjeta-sombra_efecto">
             <div class="producto-tarjeta__imagen-caja">
               <div class="producto-tarjeta__etiquetas">
@@ -269,13 +276,92 @@
                 <span class="producto-tarjeta__precio-actual">$ 22.400</span>
                 <span class="producto-tarjeta__precio-viejo">$ 27.000</span>
               </div>
-              <button class="producto-tarjeta__boton boton-oscuro_efecto">AGREGAR AL CARRITO</button>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="BCAA 2:1:1 Instantized - Muscletech" data-precio="22400">AGREGAR AL CARRITO</button>
+            </div>
+          </article>
+
+          <!-- PRODUCTO 5 (NUEVO) -->
+          <article class="producto-tarjeta tarjeta-sombra_efecto">
+            <div class="producto-tarjeta__imagen-caja">
+              <div class="producto-tarjeta__etiquetas">
+                <span class="etiqueta etiqueta--verde">OFERTA</span>
+              </div>
+              <button class="producto-tarjeta__favorito icono_efecto" aria-label="Favoritos">♡</button>
+              <div class="producto-tarjeta__placeholder">IMG 5</div>
+            </div>
+            <div class="producto-tarjeta__info">
+              <span class="producto-tarjeta__marca">STAR NUTRITION</span>
+              <h3 class="producto-tarjeta__nombre">Premium Whey Protein</h3>
+              <p class="producto-tarjeta__variante">Proteína • 1 kg</p>
+              <div class="producto-tarjeta__precios">
+                <span class="producto-tarjeta__precio-actual">$ 28.500</span>
+              </div>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="Premium Whey Protein - Star Nutrition" data-precio="28500">AGREGAR AL CARRITO</button>
+            </div>
+          </article>
+
+          <!-- PRODUCTO 6 (NUEVO) -->
+          <article class="producto-tarjeta tarjeta-sombra_efecto">
+            <div class="producto-tarjeta__imagen-caja">
+              <button class="producto-tarjeta__favorito icono_efecto" aria-label="Favoritos">♡</button>
+              <div class="producto-tarjeta__placeholder">IMG 6</div>
+            </div>
+            <div class="producto-tarjeta__info">
+              <span class="producto-tarjeta__marca">ENA SPORT</span>
+              <h3 class="producto-tarjeta__nombre">Creatina Micronizada</h3>
+              <p class="producto-tarjeta__variante">Creatina • 300 g</p>
+              <div class="producto-tarjeta__precios">
+                <span class="producto-tarjeta__precio-actual">$ 15.000</span>
+              </div>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="Creatina Micronizada - ENA Sport" data-precio="15000">AGREGAR AL CARRITO</button>
+            </div>
+          </article>
+
+          <!-- PRODUCTO 7 (NUEVO) -->
+          <article class="producto-tarjeta tarjeta-sombra_efecto">
+            <div class="producto-tarjeta__imagen-caja">
+              <div class="producto-tarjeta__etiquetas">
+                <span class="etiqueta etiqueta--negra">MÁS VENDIDO</span>
+              </div>
+              <button class="producto-tarjeta__favorito icono_efecto" aria-label="Favoritos">♡</button>
+              <div class="producto-tarjeta__placeholder">IMG 7</div>
+            </div>
+            <div class="producto-tarjeta__info">
+              <span class="producto-tarjeta__marca">BSN</span>
+              <h3 class="producto-tarjeta__nombre">Syntha-6 Protein Matrix</h3>
+              <p class="producto-tarjeta__variante">Proteína Blend • 2.27 kg</p>
+              <div class="producto-tarjeta__precios">
+                <span class="producto-tarjeta__precio-actual">$ 48.000</span>
+              </div>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="Syntha-6 Protein - BSN" data-precio="48000">AGREGAR AL CARRITO</button>
+            </div>
+          </article>
+
+          <!-- PRODUCTO 8 (NUEVO) -->
+          <article class="producto-tarjeta tarjeta-sombra_efecto">
+            <div class="producto-tarjeta__imagen-caja">
+              <div class="producto-tarjeta__etiquetas">
+                <span class="etiqueta etiqueta--roja">-10%</span>
+              </div>
+              <button class="producto-tarjeta__favorito icono_efecto" aria-label="Favoritos">♡</button>
+              <div class="producto-tarjeta__placeholder">IMG 8</div>
+            </div>
+            <div class="producto-tarjeta__info">
+              <span class="producto-tarjeta__marca">UNIVERSAL NUTRITION</span>
+              <h3 class="producto-tarjeta__nombre">Animal Pak</h3>
+              <p class="producto-tarjeta__variante">Multivitamínico • 44 Packs</p>
+              <div class="producto-tarjeta__precios">
+                <span class="producto-tarjeta__precio-actual">$ 35.000</span>
+                <span class="producto-tarjeta__precio-viejo">$ 39.000</span>
+              </div>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="Animal Pak - Universal Nutrition" data-precio="35000">AGREGAR AL CARRITO</button>
             </div>
           </article>
         </div>
       </div>
     </section>
 
+    <!-- --- SECCIÓN NUESTROS COMBOS --- -->
     <section class="seccion-combos" id="promociones">
       <div class="seccion-combos__contenedor">
         <div class="seccion-combos__encabezado">
@@ -302,7 +388,8 @@
                 <span class="combo-tarjeta__precio-actual">$ 68.900</span>
                 <span class="combo-tarjeta__precio-viejo">$ 80.500</span>
               </div>
-              <a href="#" class="combo-tarjeta__enlace enlace-borde_efecto">VER COMBO &gt;</a>
+              <!-- REEMPLAZADO: Enlace por Botón con atributos para el carrito -->
+              <button class="combo-tarjeta__enlace enlace-borde_efecto js-agregar-carrito" style="width: 100%; background: transparent; cursor: pointer; font-family: inherit;" data-nombre="Combo Volumen Extremo" data-precio="68900">AGREGAR COMBO</button>
             </div>
           </article>
 
@@ -318,7 +405,7 @@
                 <span class="combo-tarjeta__precio-actual">$ 52.000</span>
                 <span class="combo-tarjeta__precio-viejo">$ 61.000</span>
               </div>
-              <a href="#" class="combo-tarjeta__enlace enlace-borde_efecto">VER COMBO &gt;</a>
+              <button class="combo-tarjeta__enlace enlace-borde_efecto js-agregar-carrito" style="width: 100%; background: transparent; cursor: pointer; font-family: inherit;" data-nombre="Combo Definición Total" data-precio="52000">AGREGAR COMBO</button>
             </div>
           </article>
 
@@ -333,7 +420,7 @@
               <div class="combo-tarjeta__precios">
                 <span class="combo-tarjeta__precio-actual">$ 45.500</span>
               </div>
-              <a href="#" class="combo-tarjeta__enlace enlace-borde_efecto">VER COMBO &gt;</a>
+              <button class="combo-tarjeta__enlace enlace-borde_efecto js-agregar-carrito" style="width: 100%; background: transparent; cursor: pointer; font-family: inherit;" data-nombre="Combo Rendimiento Runner" data-precio="45500">AGREGAR COMBO</button>
             </div>
           </article>
 
@@ -349,13 +436,31 @@
                 <span class="combo-tarjeta__precio-actual">$ 71.000</span>
                 <span class="combo-tarjeta__precio-viejo">$ 85.000</span>
               </div>
-              <a href="#" class="combo-tarjeta__enlace enlace-borde_efecto">VER COMBO &gt;</a>
+              <button class="combo-tarjeta__enlace enlace-borde_efecto js-agregar-carrito" style="width: 100%; background: transparent; cursor: pointer; font-family: inherit;" data-nombre="Combo Fuerza y Potencia" data-precio="71000">AGREGAR COMBO</button>
             </div>
           </article>
+
+          <article class="combo-tarjeta tarjeta_efecto">
+            <div class="combo-tarjeta__imagen-caja">
+              <span class="combo-tarjeta__etiqueta">COMBO</span>
+              <div class="combo-tarjeta__placeholder">IMG COMBO 5</div>
+            </div>
+            <div class="combo-tarjeta__info">
+              <h3 class="combo-tarjeta__nombre">COMBO FUERZA Y POTENCIA</h3>
+              <p class="combo-tarjeta__desc">Pre-entreno + Creatina + Aminoácidos. Supera tus límites en cada serie.</p>
+              <div class="combo-tarjeta__precios">
+                <span class="combo-tarjeta__precio-actual">$ 71.000</span>
+                <span class="combo-tarjeta__precio-viejo">$ 85.000</span>
+              </div>
+              <button class="combo-tarjeta__enlace enlace-borde_efecto js-agregar-carrito" style="width: 100%; background: transparent; cursor: pointer; font-family: inherit;" data-nombre="Combo Fuerza y Potencia" data-precio="71000">AGREGAR COMBO</button>
+            </div>
+          </article>
+
         </div>
       </div>
     </section>
 
+    <!-- --- SECCIÓN TESTIMONIOS --- -->
     <section class="testimonios">
       <div class="testimonios__contenedor">
         <h2 class="testimonios__titulo">TESTIMONIOS</h2>
@@ -401,6 +506,7 @@
       </div>
     </section>
 
+    <!-- --- SECCIÓN MARCAS DESTACADAS --- -->
     <section class="marcas">
       <div class="marcas__contenedor">
         
@@ -429,6 +535,7 @@
       </div>
     </section>
 
+    <!-- --- SECCIÓN CALCULADORA --- -->
     <section class="calculadora" id="calculadora">
       <div class="calculadora__contenedor">
         
