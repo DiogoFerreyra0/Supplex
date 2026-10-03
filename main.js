@@ -129,43 +129,94 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // =========================================
-  // CARRITO DE COMPRAS A WHATSAPP
+  // CARRITO CON MODAL LATERAL
   // =========================================
-  
-  // 1. Configuración
-  const numeroWhatsApp = "5491100000000"; // ACÁ PONÉ TU NÚMERO REAL CON CÓDIGO DE PAÍS
+  const numeroWhatsApp = "5491100000000"; // TU NÚMERO
   let carrito = [];
 
-  // 2. Elementos del DOM
+  // Selectores
   const botonesAgregar = document.querySelectorAll('.js-agregar-carrito');
   const contadorCarrito = document.querySelector('.encabezado__contador-carrito');
-  const botonFlotanteWsp = document.querySelector('.whatsapp-flotante');
   const iconoCarritoNav = document.querySelector('[aria-label="Carrito"]');
+  const botonFlotanteWsp = document.querySelector('.whatsapp-flotante');
+  
+  const carritoModal = document.getElementById('carritoModal');
+  const carritoFondo = document.getElementById('carritoFondo');
+  const btnCerrarCarrito = document.getElementById('btnCerrarCarrito');
+  const listaCarrito = document.getElementById('listaCarrito');
+  const totalCarrito = document.getElementById('totalCarrito');
+  const btnEnviarWhatsApp = document.getElementById('btnEnviarWhatsApp');
 
-  // 3. Función para actualizar el numerito rojo arriba
-  const actualizarContador = () => {
+  // Funciones de Modal
+  const abrirCarrito = (e) => {
+    if(e) e.preventDefault();
+    carritoModal.classList.add('carrito-modal--activo');
+    renderizarCarrito();
+  };
+
+  const cerrarCarrito = () => carritoModal.classList.remove('carrito-modal--activo');
+
+  // Eventos para abrir y cerrar
+  if(iconoCarritoNav) iconoCarritoNav.addEventListener('click', abrirCarrito);
+  if(btnCerrarCarrito) btnCerrarCarrito.addEventListener('click', cerrarCarrito);
+  if(carritoFondo) carritoFondo.addEventListener('click', cerrarCarrito);
+
+  // Renderizar visualmente los productos adentro del modal
+  const renderizarCarrito = () => {
+    if (contadorCarrito) contadorCarrito.textContent = carrito.length;
+    
+    listaCarrito.innerHTML = '';
+    let total = 0;
+
+    if (carrito.length === 0) {
+      listaCarrito.innerHTML = '<p class="carrito-modal__vacio">Tu carrito está vacío. ¡Agregá algunos suplementos!</p>';
+      totalCarrito.textContent = '$ 0';
+      return;
+    }
+
+    carrito.forEach((item, index) => {
+      total += item.precio;
+      const divItem = document.createElement('div');
+      divItem.classList.add('carrito-item');
+      divItem.innerHTML = `
+        <div class="carrito-item__info">
+          <span class="carrito-item__nombre">${item.nombre}</span>
+          <span class="carrito-item__precio">$${item.precio.toLocaleString('es-AR')}</span>
+        </div>
+        <button class="carrito-item__eliminar" onclick="eliminarDelCarrito(${index})" aria-label="Eliminar producto">×</button>
+      `;
+      listaCarrito.appendChild(divItem);
+    });
+
+    totalCarrito.textContent = `$ ${total.toLocaleString('es-AR')}`;
+  };
+
+  // Función global para que funcione el botón de "x" (eliminar)
+  window.eliminarDelCarrito = (index) => {
+    carrito.splice(index, 1);
+    renderizarCarrito();
     if (contadorCarrito) {
-      contadorCarrito.textContent = carrito.length;
-      // Pequeña animación para que se note que se agregó algo
       contadorCarrito.style.transform = 'scale(1.5)';
       setTimeout(() => contadorCarrito.style.transform = 'scale(1)', 200);
     }
   };
 
-  // 4. Lógica para agregar productos al carrito
+  // Agregar al carrito desde las tarjetas de producto
   botonesAgregar.forEach(boton => {
     boton.addEventListener('click', (e) => {
       e.preventDefault();
-      
-      // Leer los datos que pusimos en el HTML
       const nombre = boton.getAttribute('data-nombre');
       const precio = parseInt(boton.getAttribute('data-precio'));
 
-      // Guardar en la lista del carrito
       carrito.push({ nombre, precio });
-      actualizarContador();
+      renderizarCarrito();
+      
+      if (contadorCarrito) {
+        contadorCarrito.style.transform = 'scale(1.5)';
+        setTimeout(() => contadorCarrito.style.transform = 'scale(1)', 200);
+      }
 
-      // Feedback visual: Cambiar el botón temporalmente
+      // Animación del botón al clickear
       const textoOriginal = boton.textContent;
       boton.textContent = "¡AGREGADO ✔!";
       boton.style.backgroundColor = "var(--color-primario)";
@@ -179,32 +230,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 5. Generar el mensaje y enviar a WhatsApp
-  const enviarPedidoWsp = (e) => {
-    e.preventDefault();
+  // Enviar a WhatsApp al finalizar la compra
+  if (btnEnviarWhatsApp) {
+    btnEnviarWhatsApp.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (carrito.length === 0) return;
 
-    // Si el carrito está vacío, manda un mensaje de consulta general
-    if (carrito.length === 0) {
-      window.open(`https://wa.me/${numeroWhatsApp}?text=Hola,%20tengo%20una%20consulta%20sobre%20los%20suplementos.`, '_blank');
-      return;
-    }
+      let mensaje = "Hola buenas, quiero confirmar la compra de estos productos:\n\n";
+      let total = 0;
 
-    // Si hay productos, armamos el ticket
-    let mensaje = "Hola buenas, quiero estos productos:\n\n";
-    let total = 0;
+      carrito.forEach(item => {
+        mensaje += `✅ ${item.nombre} ($${item.precio.toLocaleString('es-AR')})\n`;
+        total += item.precio;
+      });
 
-    carrito.forEach(item => {
-      mensaje += `✅ ${item.nombre} ($${item.precio.toLocaleString('es-AR')})\n`;
-      total += item.precio;
+      mensaje += `\n*Total a pagar: $${total.toLocaleString('es-AR')}*\n\nPor favor, pasame los datos para el pago. ¡Gracias!`;
+
+      const urlWsp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+      window.open(urlWsp, '_blank');
+      cerrarCarrito();
     });
+  }
 
-    mensaje += `\n*Total estimado: $${total.toLocaleString('es-AR')}*\n\nPor favor, confirmame stock y medios de pago. ¡Gracias!`;
-
-    // Codificar el texto para que los espacios y saltos de línea funcionen en la URL
-    const urlWsp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
-    window.open(urlWsp, '_blank');
-  };
-
-  // 6. Asignar el envío al botón de WhatsApp y al ícono del carrito en el menú
-  if (botonFlotanteWsp) botonFlotanteWsp.addEventListener('click', enviarPedidoWsp);
-  if (iconoCarritoNav) iconoCarritoNav.addEventListener('click', enviarPedidoWsp);
+  // El botón flotante abajo a la izquierda ahora sirve para consultas generales
+  if (botonFlotanteWsp) {
+    botonFlotanteWsp.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.open(`https://wa.me/${numeroWhatsApp}?text=Hola,%20tengo%20una%20consulta%20sobre%20sus%20productos.`, '_blank');
+    });
+  }

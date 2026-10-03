@@ -671,7 +671,33 @@
   </footer>
 
   <a href="#" class="whatsapp-flotante icono_efecto" aria-label="Escribinos por WhatsApp">💬</a> 
-    
+  
+  <!-- --- CARRITO MODAL (PANEL LATERAL) --- -->
+  <div class="carrito-modal" id="carritoModal">
+    <div class="carrito-modal__fondo" id="carritoFondo"></div>
+    <div class="carrito-modal__panel">
+      
+      <div class="carrito-modal__cabecera">
+        <h3 class="carrito-modal__titulo">Tu Carrito</h3>
+        <button class="carrito-modal__cerrar" id="btnCerrarCarrito" aria-label="Cerrar carrito">&times;</button>
+      </div>
+
+      <div class="carrito-modal__cuerpo" id="listaCarrito">
+        <!-- Los productos se inyectan acá automáticamente con JavaScript -->
+        <p class="carrito-modal__vacio">Tu carrito está vacío.</p>
+      </div>
+
+      <div class="carrito-modal__pie">
+        <div class="carrito-modal__total">
+          <span>Total:</span>
+          <span id="totalCarrito">$ 0</span>
+        </div>
+        <button class="carrito-modal__boton" id="btnEnviarWhatsApp">FINALIZAR COMPRA POR WHATSAPP</button>
+      </div>
+
+    </div>
+  </div>
+  
   <script src="main.js"></script>
 </body>
 </html>

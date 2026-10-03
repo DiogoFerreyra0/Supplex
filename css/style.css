@@ -247,3 +247,38 @@ ul { list-style: none; }
 @media (max-width: 576px) {
   .marcas__grilla { grid-template-columns: repeat(2, minmax(100px, 140px)); }
 }
+
+/* =========================================
+   CARRITO MODAL (LATERAL OFF-CANVAS)
+========================================= */
+.carrito-modal { position: fixed; inset: 0; z-index: 2000; display: flex; justify-content: flex-end; visibility: hidden; opacity: 0; transition: visibility 0.3s, opacity 0.3s ease; }
+.carrito-modal--activo { visibility: visible; opacity: 1; }
+.carrito-modal__fondo { position: absolute; inset: 0; background: rgba(0,0,0,0.6); cursor: pointer; }
+
+/* El panel que entra desde la derecha */
+.carrito-modal__panel { position: relative; width: 100%; max-width: 400px; background: var(--color-claro); height: 100%; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.15); }
+.carrito-modal--activo .carrito-modal__panel { transform: translateX(0); }
+
+/* Cabecera del panel */
+.carrito-modal__cabecera { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--color-borde); }
+.carrito-modal__titulo { font-size: 1.2rem; font-weight: 900; color: var(--color-oscuro); margin: 0; text-transform: uppercase; }
+.carrito-modal__cerrar { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--color-texto-claro); transition: color 0.2s ease; line-height: 1; }
+.carrito-modal__cerrar:hover { color: var(--color-alerta); }
+
+/* Cuerpo (Lista de productos) */
+.carrito-modal__cuerpo { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+.carrito-modal__vacio { text-align: center; color: var(--color-texto-claro); font-size: 0.95rem; margin-top: 30px; font-weight: 500;}
+
+/* Cada producto dentro del carrito */
+.carrito-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--color-borde); }
+.carrito-item__info { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; padding-right: 15px; }
+.carrito-item__nombre { font-size: 0.85rem; font-weight: 700; color: var(--color-texto); line-height: 1.3;}
+.carrito-item__precio { font-size: 1rem; font-weight: 900; color: var(--color-oscuro); }
+.carrito-item__eliminar { background: transparent; border: none; color: var(--color-alerta); font-size: 1.5rem; cursor: pointer; font-weight: bold; transition: transform 0.2s;}
+.carrito-item__eliminar:hover { transform: scale(1.2); }
+
+/* Pie (Total y Botón) */
+.carrito-modal__pie { padding: 20px; border-top: 1px solid var(--color-borde); background: var(--color-fondo-gris); }
+.carrito-modal__total { display: flex; justify-content: space-between; align-items: center; font-size: 1.3rem; font-weight: 900; color: var(--color-oscuro); margin-bottom: 20px; }
+.carrito-modal__boton { width: 100%; padding: 16px; border: none; border-radius: 6px; font-weight: 900; font-size: 0.9rem; color: var(--color-claro); background: #25d366; cursor: pointer; transition: background-color 0.2s ease; text-transform: uppercase;}
+.carrito-modal__boton:hover { background: #1ebe57; }
