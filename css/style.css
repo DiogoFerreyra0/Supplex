@@ -344,3 +344,40 @@ ul { list-style: none; }
   .producto-modal__info { padding: 30px 20px; }
   .producto-modal__titulo { font-size: 1.5rem; }
 }
+
+/* =========================================
+   SECCIÓN CONTACTO
+========================================= */
+.contacto { padding: 80px 0; background: var(--color-fondo-gris); }
+.contacto__contenedor { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+.contacto__encabezado { text-align: center; margin-bottom: 40px; }
+.contacto__titulo { font-size: 2rem; font-weight: 900; color: var(--color-oscuro); text-transform: uppercase; margin-bottom: 10px; }
+.contacto__subtitulo { font-size: 1rem; color: #555; }
+
+/* Tarjeta contenedora con sombra */
+.contacto__grilla { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; background: var(--color-claro); padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+
+/* Columna de info */
+.contacto__info { display: flex; flex-direction: column; gap: 30px; justify-content: center; }
+.contacto__item { display: flex; align-items: flex-start; gap: 15px; }
+.contacto__icono { font-size: 1.8rem; line-height: 1; }
+.contacto__item-titulo { font-size: 1rem; font-weight: 800; color: var(--color-oscuro); margin-bottom: 5px; }
+.contacto__item-texto { font-size: 0.9rem; color: #555; margin: 0; }
+
+/* Formulario */
+.contacto__formulario { display: flex; flex-direction: column; gap: 20px; }
+.contacto__campo { display: flex; flex-direction: column; gap: 8px; }
+.contacto__campo label { font-weight: 700; font-size: 0.85rem; color: var(--color-oscuro); }
+.contacto__campo input, .contacto__campo textarea { padding: 12px 15px; border: 1px solid var(--color-borde); border-radius: 6px; font-family: inherit; font-size: 0.95rem; background: #fafafa; transition: border-color 0.3s ease; resize: vertical; }
+.contacto__campo input:focus, .contacto__campo textarea:focus { outline: none; border-color: var(--color-oscuro); }
+.contacto__boton { padding: 15px; font-weight: 800; border: none; border-radius: 6px; font-size: 1rem; text-transform: uppercase; color: var(--color-claro); background: var(--color-oscuro); margin-top: 10px; }
+
+/* Mensaje de éxito oculto por defecto */
+.contacto__exito { display: none; text-align: center; color: #25d366; font-weight: 700; font-size: 0.9rem; margin-top: 10px; }
+.contacto__exito--activo { display: block; animation: aparecer 0.5s ease; }
+
+/* --- Ajuste Responsivo para el CSS que ya tenías --- */
+/* Agregá esto adentro de tu @media (max-width: 768px) existente */
+@media (max-width: 768px) {
+  .contacto__grilla { grid-template-columns: 1fr; gap: 40px; padding: 30px 20px; }
+}

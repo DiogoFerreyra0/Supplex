@@ -397,3 +397,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+
+// =========================================
+  // 7. FORMULARIO DE CONTACTO
+  // =========================================
+  const formContacto = document.getElementById('formContacto');
+  const msjExitoContacto = document.getElementById('msjExitoContacto');
+  const btnEnviarContacto = document.getElementById('btnEnviarContacto');
+
+  if (formContacto) {
+    formContacto.addEventListener('submit', (e) => {
+      e.preventDefault(); // Evita que la página recargue
+      
+      // Cambiamos el texto del botón temporalmente
+      const textoOriginalBtn = btnEnviarContacto.textContent;
+      btnEnviarContacto.textContent = "ENVIANDO...";
+      btnEnviarContacto.style.opacity = "0.7";
+
+      // Simulamos un tiempo de carga de servidor (1.5 segundos)
+      setTimeout(() => {
+        // Limpiamos los campos del formulario
+        formContacto.reset();
+        
+        // Restauramos el botón
+        btnEnviarContacto.textContent = textoOriginalBtn;
+        btnEnviarContacto.style.opacity = "1";
+        
+        // Mostramos el mensaje de éxito
+        msjExitoContacto.classList.add('contacto__exito--activo');
+        
+        // Ocultamos el mensaje de éxito después de 4 segundos
+        setTimeout(() => {
+          msjExitoContacto.classList.remove('contacto__exito--activo');
+        }, 4000);
+        
+      }, 1500);
+    });
+  }

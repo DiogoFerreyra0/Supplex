@@ -572,6 +572,70 @@
 
       </div>
     </section>
+
+    <!-- --- SECCIÓN CONTACTO --- -->
+    <section class="contacto" id="contactanos">
+      <div class="contacto__contenedor">
+        
+        <div class="contacto__encabezado">
+          <h2 class="contacto__titulo">CONTÁCTANOS</h2>
+          <p class="contacto__subtitulo">¿Tenés alguna duda o consulta? Escribinos y te responderemos a la brevedad.</p>
+        </div>
+
+        <div class="contacto__grilla">
+          
+          <!-- Columna Izquierda: Información -->
+          <div class="contacto__info">
+            <div class="contacto__item">
+              <span class="contacto__icono">📍</span>
+              <div>
+                <h4 class="contacto__item-titulo">Ubicación</h4>
+                <p class="contacto__item-texto">Av. Siempre Viva 123, Buenos Aires</p>
+              </div>
+            </div>
+            
+            <div class="contacto__item">
+              <span class="contacto__icono">📞</span>
+              <div>
+                <h4 class="contacto__item-titulo">WhatsApp / Teléfono</h4>
+                <p class="contacto__item-texto">+54 9 11 0000-0000</p>
+              </div>
+            </div>
+            
+            <div class="contacto__item">
+              <span class="contacto__icono">✉️</span>
+              <div>
+                <h4 class="contacto__item-titulo">Email</h4>
+                <p class="contacto__item-texto">info@supplex.com</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Formulario -->
+          <form class="contacto__formulario" id="formContacto">
+            <div class="contacto__campo">
+              <label for="contNombre">Nombre completo:</label>
+              <input type="text" id="contNombre" placeholder="Tu nombre" required>
+            </div>
+            
+            <div class="contacto__campo">
+              <label for="contEmail">Email:</label>
+              <input type="email" id="contEmail" placeholder="tu@email.com" required>
+            </div>
+            
+            <div class="contacto__campo">
+              <label for="contMensaje">Mensaje:</label>
+              <textarea id="contMensaje" rows="5" placeholder="¿En qué te podemos ayudar?" required></textarea>
+            </div>
+            
+            <!-- Usamos la clase global de efecto que armamos antes -->
+            <button type="submit" class="contacto__boton boton-oscuro_efecto" id="btnEnviarContacto">ENVIAR MENSAJE</button>
+            <p class="contacto__exito" id="msjExitoContacto">¡Mensaje enviado con éxito! Te responderemos pronto.</p>
+          </form>
+
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="pie-pagina">
