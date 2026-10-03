@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  
+  // HEADER FIJO
   const encabezadoPrincipal = document.getElementById('encabezadoPrincipal');
   const barraSuperior = document.querySelector('.encabezado__barra-superior');
   
@@ -17,7 +17,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  
+  // LÓGICA DEL CARRUSEL DEL HERO (FADE CLÁSICO)
+  const slidesHero = document.querySelectorAll('.portada__diapositiva');
+  const puntosHero = document.querySelectorAll('.portada__punto');
+  const btnAntHero = document.getElementById('btnAntHero');
+  const btnSigHero = document.getElementById('btnSigHero');
+  let slideActual = 0;
+
+  if (slidesHero.length > 0 && btnAntHero && btnSigHero) {
+    const mostrarSlide = (index) => {
+      // Ocultar todos
+      slidesHero.forEach(slide => slide.classList.remove('portada__diapositiva--activa'));
+      puntosHero.forEach(punto => punto.classList.remove('portada__punto--activo'));
+
+      // Mostrar el actual
+      slidesHero[index].classList.add('portada__diapositiva--activa');
+      if(puntosHero[index]) puntosHero[index].classList.add('portada__punto--activo');
+    };
+
+    btnSigHero.addEventListener('click', () => {
+      slideActual = (slideActual === slidesHero.length - 1) ? 0 : slideActual + 1;
+      mostrarSlide(slideActual);
+    });
+
+    btnAntHero.addEventListener('click', () => {
+      slideActual = (slideActual === 0) ? slidesHero.length - 1 : slideActual - 1;
+      mostrarSlide(slideActual);
+    });
+  }
+
+  // --- SOLUCIÓN: VOLVEMOS A DEFINIR LA FUNCIÓN ACTIVARCARRUSEL ---
   const activarCarrusel = (idCarrusel, idBotonAnt, idBotonSig) => {
     const carrusel = document.getElementById(idCarrusel);
     const btnAnt = document.getElementById(idBotonAnt);
@@ -30,13 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  
+  // Ahora sí llamamos a la función porque ya existe
   activarCarrusel('carruselExplorar', 'btnAntExplorar', 'btnSigExplorar');
   activarCarrusel('carruselMasVendidos', 'btnAntMasVendidos', 'btnSigMasVendidos');
   activarCarrusel('carruselCombos', 'btnAntCombos', 'btnSigCombos');
 
 
-  
+  // CALCULADORA HARRIS-BENEDICT
   const formCalculadora = document.getElementById('formCalculadora');
   const resultadosCalc = document.getElementById('resultadosCalc');
   const tituloResultados = document.getElementById('tituloResultados');
@@ -45,7 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (formCalculadora) {
     formCalculadora.addEventListener('submit', (e) => {
       e.preventDefault();
-
     
       const sexo = document.getElementById('calcSexo').value;
       const edad = parseInt(document.getElementById('calcEdad').value);
@@ -54,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const actividad = parseFloat(document.getElementById('calcActividad').value);
       const objetivo = document.getElementById('calcObjetivo').value;
 
-     
       let tmb = 0;
       if (sexo === 'hombre') {
         tmb = 66.5 + (13.75 * peso) + (5.003 * altura) - (6.75 * edad);
@@ -62,10 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tmb = 655.1 + (9.563 * peso) + (1.850 * altura) - (4.676 * edad);
       }
 
-      
       const tdee = Math.round(tmb * actividad);
-
-      
       let tableHTML = '';
       
       if (objetivo === 'deficit') {
@@ -93,31 +117,13 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
       }
 
-      
       cuerpoTablaCalc.innerHTML = tableHTML;
       resultadosCalc.style.display = 'block';
       
       const botonSubmit = formCalculadora.querySelector('button[type="submit"]');
       botonSubmit.textContent = 'Volver a calcular';
       
-      
       resultadosCalc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   }
 });
-
-
-  const trackHero = document.getElementById('trackHero');
-  const btnAntHero = document.getElementById('btnAntHero');
-  const btnSigHero = document.getElementById('btnSigHero');
-
-  if (trackHero && btnAntHero && btnSigHero) {
-    btnSigHero.addEventListener('click', () => {
-      
-      trackHero.scrollBy({ left: window.innerWidth, behavior: 'smooth' });
-    });
-    btnAntHero.addEventListener('click', () => {
-      
-      trackHero.scrollBy({ left: -window.innerWidth, behavior: 'smooth' });
-    });
-  }

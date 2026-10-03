@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- SEO Básico -->
     <title>Supplex | Suplementación Deportiva y Nutrición</title>
     <meta name="description" content="Encontrá los mejores suplementos deportivos: Proteínas, Creatina, Pre-entrenos y más. Calculá tus calorías y potenciá tu rendimiento con Supplex.">
     <meta name="keywords" content="suplementos, proteína, creatina, pre-entreno, nutrición deportiva, Supplex, fitness">
@@ -12,14 +11,12 @@
     <link rel="canonical" href="https://www.tusitio.com/">
     <meta name="robots" content="index, follow">
 
-    <!-- Open Graph / Redes Sociales -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Supplex | Suplementación Deportiva">
     <meta property="og:description" content="Potenciá tu rendimiento con los mejores suplementos del mercado. Envíos a todo el país.">
     <meta property="og:image" content="https://www.tusitio.com/img/og-image.jpg">
     <meta property="og:url" content="https://www.tusitio.com/">
 
-    <!-- Schema.org JSON-LD para Google -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -36,71 +33,50 @@
 </head>
 <body>
     
-  <!-- --- ENCABEZADO --- -->
-  <!-- --- SECCIÓN PORTADA (HERO) --- -->
-<section class="portada" id="inicio">
-  <div class="portada__carrusel">
-    
-    <!-- Agregamos IDs a los botones -->
-    <button class="portada__navegacion portada__navegacion--previo boton-redondo_efecto" id="btnAntHero" aria-label="Anterior">&lt;</button>
-    <button class="portada__navegacion portada__navegacion--siguiente boton-redondo_efecto" id="btnSigHero" aria-label="Siguiente">&gt;</button>
+  <header class="encabezado">
+    <div class="encabezado__barra-superior">
+      <p class="encabezado__texto-superior">ENVÍO GRATIS EN COMPRAS SUPERIORES A $50.000 - RETIRO EN LOCAL SIN CARGO</p>
+    </div>
 
-    <!-- PISTA DE DESLIZAMIENTO -->
-    <div class="portada__lista" id="trackHero">
-      
-      <!-- Diapositiva 1 -->
-      <div class="portada__diapositiva">
-        <div class="portada__fondo"></div>
-        <div class="portada__contenedor">
-          <div class="portada__contenido">
-            <span class="portada__etiqueta">COLECCIÓN RUNNING</span>
-            <h1 class="portada__titulo">CORRÉ MÁS LEJOS</h1>
-            <p class="portada__subtitulo">Energía sostenida y recuperación óptima para cada kilómetro.</p>
-            <a href="#categorias" class="portada__boton boton_efecto">VER RUNNING</a>
-          </div>
+    <div class="encabezado__principal" id="encabezadoPrincipal">
+      <div class="encabezado__contenedor">
+        
+        <a href="/" class="encabezado__logo">
+          <span class="encabezado__icono-logo">★</span>
+          <span class="encabezado__texto-logo">SUPPLEX</span>
+        </a>
+
+        <nav class="encabezado__navegacion">
+          <ul class="encabezado__menu">
+            <li class="encabezado__item"><a href="#inicio" class="encabezado__enlace enlace_efecto">Inicio</a></li>
+            <li class="encabezado__item"><a href="#categorias" class="encabezado__enlace enlace_efecto">Categorías</a></li>
+            <li class="encabezado__item"><a href="#promociones" class="encabezado__enlace enlace_efecto">Promociones</a></li>
+            <li class="encabezado__item"><a href="#calculadora" class="encabezado__enlace enlace_efecto">Calculadora</a></li>
+            <li class="encabezado__item"><a href="#contactanos" class="encabezado__enlace enlace_efecto">Contáctanos</a></li>
+          </ul>
+        </nav>
+
+        <div class="encabezado__acciones">
+          <button class="encabezado__boton-accion icono_efecto" aria-label="Buscar">🔍</button>
+          <button class="encabezado__boton-accion icono_efecto" aria-label="Carrito">
+            🛒 <span class="encabezado__contador-carrito">0</span>
+          </button>
         </div>
+
       </div>
-
-      <!-- Diapositiva 2 -->
-      <div class="portada__diapositiva">
-        <!-- Fondo temporal distinto para que notes el cambio -->
-        <div class="portada__fondo" style="background: linear-gradient(90deg, rgba(17,17,17,0.9) 0%, rgba(17,17,17,0.3) 100%), #333;"></div>
-        <div class="portada__contenedor">
-          <div class="portada__contenido">
-            <span class="portada__etiqueta">NUEVOS INGRESOS</span>
-            <h1 class="portada__titulo">ALCANZÁ TU META</h1>
-            <p class="portada__subtitulo">Potenciá tu entrenamiento con la mejor suplementación.</p>
-            <a href="#promociones" class="portada__boton boton_efecto">VER COMBOS</a>
-          </div>
-        </div>
-      </div>
-
     </div>
-
-    <div class="portada__paginacion">
-      <span class="portada__punto portada__punto--activo"></span>
-      <span class="portada__punto"></span>
-    </div>
-  </div>
-
-  <div class="portada__estadisticas">
-    <div class="portada__estadisticas-contenedor">
-      <div class="portada__dato"><span class="portada__numero">+15.000</span><span class="portada__texto">Clientes satisfechos</span></div>
-      <div class="portada__dato"><span class="portada__numero">200+</span><span class="portada__texto">Productos en stock</span></div>
-      <div class="portada__dato"><span class="portada__numero">48 hs</span><span class="portada__texto">Envío express</span></div>
-      <div class="portada__dato"><span class="portada__numero">5★</span><span class="portada__texto">Valoración promedio</span></div>
-    </div>
-  </div>
-</section>
+  </header>
 
   <main>
-    <!-- --- SECCIÓN PORTADA (HERO) --- -->
+    <!-- --- SECCIÓN PORTADA (HERO ESTABLE) --- -->
     <section class="portada" id="inicio">
       <div class="portada__carrusel">
-        <button class="portada__navegacion portada__navegacion--previo boton-redondo_efecto" aria-label="Anterior">&lt;</button>
-        <button class="portada__navegacion portada__navegacion--siguiente boton-redondo_efecto" aria-label="Siguiente">&gt;</button>
+        
+        <button class="portada__navegacion portada__navegacion--previo boton-redondo_efecto" id="btnAntHero" aria-label="Anterior">&lt;</button>
+        <button class="portada__navegacion portada__navegacion--siguiente boton-redondo_efecto" id="btnSigHero" aria-label="Siguiente">&gt;</button>
 
-        <div class="portada__diapositiva">
+        <!-- DIAPOSITIVA 1 (Activa por defecto) -->
+        <div class="portada__diapositiva portada__diapositiva--activa">
           <div class="portada__fondo"></div>
           <div class="portada__contenedor">
             <div class="portada__contenido">
@@ -112,35 +88,35 @@
           </div>
         </div>
 
+        <!-- DIAPOSITIVA 2 -->
+        <div class="portada__diapositiva">
+          <div class="portada__fondo" style="background: linear-gradient(90deg, rgba(17,17,17,0.9) 0%, rgba(17,17,17,0.3) 100%), #333;"></div>
+          <div class="portada__contenedor">
+            <div class="portada__contenido">
+              <span class="portada__etiqueta">NUEVOS INGRESOS</span>
+              <h1 class="portada__titulo">ALCANZÁ TU META</h1>
+              <p class="portada__subtitulo">Potenciá tu entrenamiento con la mejor suplementación.</p>
+              <a href="#promociones" class="portada__boton boton_efecto">VER COMBOS</a>
+            </div>
+          </div>
+        </div>
+
         <div class="portada__paginacion">
-          <span class="portada__punto"></span>
           <span class="portada__punto portada__punto--activo"></span>
+          <span class="portada__punto"></span>
         </div>
       </div>
 
       <div class="portada__estadisticas">
         <div class="portada__estadisticas-contenedor">
-          <div class="portada__dato">
-            <span class="portada__numero">+15.000</span>
-            <span class="portada__texto">Clientes satisfechos</span>
-          </div>
-          <div class="portada__dato">
-            <span class="portada__numero">200+</span>
-            <span class="portada__texto">Productos en stock</span>
-          </div>
-          <div class="portada__dato">
-            <span class="portada__numero">48 hs</span>
-            <span class="portada__texto">Envío express</span>
-          </div>
-          <div class="portada__dato">
-            <span class="portada__numero">5★</span>
-            <span class="portada__texto">Valoración promedio</span>
-          </div>
+          <div class="portada__dato"><span class="portada__numero">+15.000</span><span class="portada__texto">Clientes satisfechos</span></div>
+          <div class="portada__dato"><span class="portada__numero">200+</span><span class="portada__texto">Productos en stock</span></div>
+          <div class="portada__dato"><span class="portada__numero">48 hs</span><span class="portada__texto">Envío express</span></div>
+          <div class="portada__dato"><span class="portada__numero">5★</span><span class="portada__texto">Valoración promedio</span></div>
         </div>
       </div>
     </section>
 
-    <!-- --- SECCIÓN DESCUBRIR TU POTENCIAL --- -->
     <section class="descubrir" id="categorias">
       <div class="descubrir__contenedor">
         <div class="descubrir__encabezado">
@@ -201,7 +177,6 @@
       </div>
     </section>
 
-    <!-- --- SECCIÓN LO MÁS VENDIDO --- -->
     <section class="mas-vendidos">
       <div class="mas-vendidos__contenedor">
         <div class="mas-vendidos__encabezado">
@@ -300,7 +275,6 @@
       </div>
     </section>
 
-    <!-- --- SECCIÓN NUESTROS COMBOS --- -->
     <section class="seccion-combos" id="promociones">
       <div class="seccion-combos__contenedor">
         <div class="seccion-combos__encabezado">
@@ -381,7 +355,6 @@
       </div>
     </section>
 
-    <!-- --- SECCIÓN TESTIMONIOS --- -->
     <section class="testimonios">
       <div class="testimonios__contenedor">
         <h2 class="testimonios__titulo">TESTIMONIOS</h2>
@@ -427,7 +400,6 @@
       </div>
     </section>
 
-    <!-- --- SECCIÓN MARCAS DESTACADAS --- -->
     <section class="marcas">
       <div class="marcas__contenedor">
         
@@ -456,7 +428,6 @@
       </div>
     </section>
 
-    <!-- --- SECCIÓN CALCULADORA --- -->
     <section class="calculadora" id="calculadora">
       <div class="calculadora__contenedor">
         
@@ -531,7 +502,6 @@
     </section>
   </main>
 
-  <!-- --- PIE DE PÁGINA --- -->
   <footer class="pie-pagina">
     <div class="pie-pagina__contenedor">
       
@@ -592,7 +562,6 @@
     </div>
   </footer>
 
-  <!-- Botón WhatsApp -->
   <a href="#" class="whatsapp-flotante icono_efecto" aria-label="Escribinos por WhatsApp">💬</a> 
     
   <script src="main.js"></script>
