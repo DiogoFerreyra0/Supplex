@@ -700,6 +700,30 @@
 
     </div>
   </div>
+  <!-- --- MODAL VISTA RÁPIDA DE PRODUCTO --- -->
+  <div class="producto-modal" id="productoModal">
+    <div class="producto-modal__fondo" id="btnCerrarFondoProducto"></div>
+    <div class="producto-modal__panel">
+      <button class="producto-modal__cerrar" id="btnCerrarProducto" aria-label="Cerrar">&times;</button>
+      
+      <div class="producto-modal__contenido">
+        <div class="producto-modal__imagen" id="modalProdImg">IMG</div>
+        
+        <div class="producto-modal__info">
+          <span class="producto-modal__categoria" id="modalProdCat">Categoría</span>
+          <h3 class="producto-modal__titulo" id="modalProdTitulo">Nombre del Producto</h3>
+          <p class="producto-modal__descripcion" id="modalProdDesc">Descripción detallada del producto...</p>
+          <div class="producto-modal__precio" id="modalProdPrecio">$ 0</div>
+          
+          <!-- Botón de agregar al carrito (mágicamente funcional gracias a la clase js-agregar-carrito) -->
+          <button class="producto-modal__boton boton-oscuro_efecto js-agregar-carrito" id="modalProdBtn" data-nombre="" data-precio="">
+            AGREGAR AL CARRITO
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
   <script src="productos.js"></script>
   <script src="main.js"></script>
 </body>

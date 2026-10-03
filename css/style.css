@@ -308,3 +308,39 @@ ul { list-style: none; }
   .buscador-modal__input { font-size: 1.5rem; }
   .buscador-modal__cerrar { font-size: 3rem; }
 }
+
+/* =========================================
+   MODAL DE PRODUCTO (VISTA RÁPIDA)
+========================================= */
+.producto-modal { position: fixed; inset: 0; z-index: 3000; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: visibility 0.3s, opacity 0.3s ease; padding: 20px; }
+.producto-modal--activo { visibility: visible; opacity: 1; }
+
+.producto-modal__fondo { position: absolute; inset: 0; background: rgba(0,0,0,0.7); cursor: pointer; }
+
+.producto-modal__panel { position: relative; background: var(--color-claro); width: 100%; max-width: 850px; border-radius: 12px; overflow: hidden; z-index: 2; transform: translateY(30px) scale(0.95); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+.producto-modal--activo .producto-modal__panel { transform: translateY(0) scale(1); }
+
+.producto-modal__cerrar { position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.8); border: none; font-size: 2rem; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--color-oscuro); z-index: 10; transition: background 0.2s, color 0.2s; }
+.producto-modal__cerrar:hover { background: var(--color-alerta); color: var(--color-claro); }
+
+.producto-modal__contenido { display: flex; flex-direction: row; }
+
+.producto-modal__imagen { flex: 1; background: #e5e5e5; display: flex; justify-content: center; align-items: center; font-weight: 800; font-size: 2rem; color: #aaa; min-height: 400px; }
+
+.producto-modal__info { flex: 1; padding: 50px 40px; display: flex; flex-direction: column; justify-content: center; }
+.producto-modal__categoria { font-size: 0.8rem; font-weight: 800; color: var(--color-texto-claro); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.producto-modal__titulo { font-size: 2rem; font-weight: 900; margin: 0 0 20px 0; line-height: 1.1; color: var(--color-oscuro); text-transform: uppercase; }
+.producto-modal__descripcion { font-size: 1rem; color: #555; line-height: 1.6; margin: 0 0 30px 0; }
+.producto-modal__precio { font-size: 2rem; font-weight: 900; color: var(--color-primario); margin-bottom: 25px; text-shadow: 1px 1px 0px #000; }
+
+.producto-modal__boton { width: 100%; padding: 18px; font-size: 1rem; text-transform: uppercase; }
+
+/* Para que las tarjetas del HTML muestren la manito al pasar el mouse por la foto o título */
+.producto-tarjeta__imagen-caja, .producto-tarjeta__nombre, .combo-tarjeta__imagen-caja, .combo-tarjeta__nombre { cursor: pointer; }
+
+@media (max-width: 768px) {
+  .producto-modal__contenido { flex-direction: column; }
+  .producto-modal__imagen { min-height: 250px; }
+  .producto-modal__info { padding: 30px 20px; }
+  .producto-modal__titulo { font-size: 1.5rem; }
+}

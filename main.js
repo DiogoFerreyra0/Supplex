@@ -197,14 +197,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Delegación de eventos para AGREGAR AL CARRITO (sirve para los botones estáticos y los del buscador)
+  // =========================================
+  // DELEGACIÓN DE EVENTOS (CARRITO Y VISTA RÁPIDA)
+  // =========================================
+  
+  // Elementos del Modal de Producto
+  const productoModal = document.getElementById('productoModal');
+  const modalProdImg = document.getElementById('modalProdImg');
+  const modalProdCat = document.getElementById('modalProdCat');
+  const modalProdTitulo = document.getElementById('modalProdTitulo');
+  const modalProdDesc = document.getElementById('modalProdDesc');
+  const modalProdPrecio = document.getElementById('modalProdPrecio');
+  const modalProdBtn = document.getElementById('modalProdBtn');
+  
+  const cerrarVistaRapida = () => productoModal.classList.remove('producto-modal--activo');
+  
+  document.getElementById('btnCerrarProducto')?.addEventListener('click', cerrarVistaRapida);
+  document.getElementById('btnCerrarFondoProducto')?.addEventListener('click', cerrarVistaRapida);
+
   document.addEventListener('click', (e) => {
-    const boton = e.target.closest('.js-agregar-carrito');
-    if (boton) {
+    
+    // 1. SI HACE CLIC EN "AGREGAR AL CARRITO"
+    const botonAgregar = e.target.closest('.js-agregar-carrito');
+    if (botonAgregar) {
       e.preventDefault();
-      
-      const nombre = boton.getAttribute('data-nombre');
-      const precio = parseInt(boton.getAttribute('data-precio'));
+      const nombre = botonAgregar.getAttribute('data-nombre');
+      const precio = parseInt(botonAgregar.getAttribute('data-precio'));
 
       carrito.push({ nombre, precio });
       renderizarCarrito();
@@ -214,16 +232,52 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => contadorCarrito.style.transform = 'scale(1)', 200);
       }
 
-      const textoOriginal = boton.textContent;
-      boton.textContent = "¡AGREGADO ✔!";
-      boton.style.backgroundColor = "var(--color-primario)";
-      boton.style.color = "var(--color-oscuro)";
+      const textoOriginal = botonAgregar.textContent;
+      botonAgregar.textContent = "¡AGREGADO ✔!";
+      botonAgregar.style.backgroundColor = "var(--color-primario)";
+      botonAgregar.style.color = "var(--color-oscuro)";
       
       setTimeout(() => {
-        boton.textContent = textoOriginal;
-        boton.style.backgroundColor = "";
-        boton.style.color = "";
+        botonAgregar.textContent = textoOriginal;
+        botonAgregar.style.backgroundColor = "";
+        botonAgregar.style.color = "";
       }, 1500);
+      return; // Cortamos acá para que no siga evaluando
+    }
+
+    // 2. SI HACE CLIC EN LA FOTO O EL TÍTULO (VISTA RÁPIDA)
+    const clicEnTarjeta = e.target.closest('.producto-tarjeta, .combo-tarjeta');
+    const clicEnFavorito = e.target.closest('.producto-tarjeta__favorito');
+
+    // Si tocó una tarjeta, PERO NO fue el botón de carrito ni el corazón de favoritos
+    if (clicEnTarjeta && !clicEnFavorito) {
+      e.preventDefault();
+      
+      // Buscamos el nombre del producto en el HTML que se clickeó
+      const elementoNombre = clicEnTarjeta.querySelector('.producto-tarjeta__nombre, .combo-tarjeta__nombre');
+      
+      if (elementoNombre && typeof inventarioProductos !== 'undefined') {
+        const nombreBusqueda = elementoNombre.textContent.trim();
+        
+        // Lo buscamos en la base de datos de productos.js
+        const productoData = inventarioProductos.find(p => p.nombre.includes(nombreBusqueda));
+
+        if (productoData) {
+          // Llenamos la ventana flotante con los datos
+          modalProdImg.textContent = productoData.img;
+          modalProdCat.textContent = productoData.cat;
+          modalProdTitulo.textContent = productoData.nombre;
+          modalProdDesc.textContent = productoData.desc || "Suplemento deportivo de alta calidad diseñado para mejorar tu rendimiento.";
+          modalProdPrecio.textContent = `$ ${productoData.precio.toLocaleString('es-AR')}`;
+          
+          // Configuramos el botón de compra del modal con los datos exactos
+          modalProdBtn.setAttribute('data-nombre', productoData.nombre);
+          modalProdBtn.setAttribute('data-precio', productoData.precio);
+
+          // Mostramos la ventana
+          productoModal.classList.add('producto-modal--activo');
+        }
+      }
     }
   });
 
