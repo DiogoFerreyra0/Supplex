@@ -396,9 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-});
-
-// =========================================
+  // =========================================
   // 7. FORMULARIO DE CONTACTO
   // =========================================
   const formContacto = document.getElementById('formContacto');
@@ -452,7 +450,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Funciones para cerrar (botón "x" y click afuera)
-  const cerrarFaq = () => faqModal.classList.remove('faq-modal--activo');
+  const cerrarFaq = () => {
+      if (faqModal) {
+          faqModal.classList.remove('faq-modal--activo');
+      }
+  };
   if (btnCerrarFaq) btnCerrarFaq.addEventListener('click', cerrarFaq);
   if (btnCerrarFondoFaq) btnCerrarFondoFaq.addEventListener('click', cerrarFaq);
 
@@ -475,3 +477,75 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+  
+  // =========================================
+  // 9. LÓGICA DE LA PÁGINA CATÁLOGO (FILTROS)
+  // =========================================
+  const grillaCatalogo = document.getElementById('grillaCatalogo');
+  const botonesFiltro = document.querySelectorAll('.catalogo__filtro-btn');
+
+  if (grillaCatalogo && typeof inventarioProductos !== 'undefined') {
+    
+    // Función que dibuja las tarjetas según el filtro seleccionado
+    const renderizarCatalogo = (filtro) => {
+      grillaCatalogo.innerHTML = '';
+      
+      let productosFiltrados = inventarioProductos;
+      
+      // Si el filtro no es "todos", filtramos el array por la propiedad "cat"
+      if (filtro !== 'todos') {
+        productosFiltrados = inventarioProductos.filter(prod => prod.cat.toLowerCase() === filtro.toLowerCase());
+      }
+
+      // Si no hay productos en esa categoría
+      if (productosFiltrados.length === 0) {
+        grillaCatalogo.innerHTML = '<div class="catalogo__vacio">Aún no hay productos en esta categoría.</div>';
+        return;
+      }
+
+      // Generar el HTML de las tarjetas
+      productosFiltrados.forEach(prod => {
+        const tarjeta = `
+          <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
+            <div class="producto-tarjeta__imagen-caja">
+              <div class="producto-tarjeta__placeholder">${prod.img}</div>
+            </div>
+            <div class="producto-tarjeta__info">
+              <span class="producto-tarjeta__marca">${prod.cat}</span>
+              <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem;">${prod.nombre}</h3>
+              <div class="producto-tarjeta__precios">
+                <span class="producto-tarjeta__precio-actual">$ ${prod.precio.toLocaleString('es-AR')}</span>
+              </div>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
+            </div>
+          </article>
+        `;
+        grillaCatalogo.insertAdjacentHTML('beforeend', tarjeta);
+      });
+    };
+
+    // Al cargar la página, mostramos "todos" los productos
+    renderizarCatalogo('todos');
+
+    // Eventos al hacer clic en las categorías (menú lateral)
+    botonesFiltro.forEach(boton => {
+      boton.addEventListener('click', (e) => {
+        // 1. Quitar la clase "activo" a todos los botones
+        botonesFiltro.forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
+        
+        // 2. Ponerle la clase "activo" solo al botón que se tocó
+        e.target.classList.add('catalogo__filtro-btn--activo');
+        
+        // 3. Obtener qué categoría quiere ver y dibujar la grilla de nuevo
+        const filtroSeleccionado = e.target.getAttribute('data-filtro');
+        renderizarCatalogo(filtroSeleccionado);
+        
+        // En celulares, subir el scroll un poco para ver los resultados
+        if(window.innerWidth <= 768) {
+           window.scrollTo({ top: grillaCatalogo.offsetTop - 120, behavior: 'smooth' });
+        }
+      });
+    });
+  }
+
+}); // Final de DOMContentLoaded

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Productos | Supplex</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    
+  <!-- ================= ENCABEZADO ================= -->
+  <header class="encabezado">
+    <div class="encabezado__barra-superior">
+      <p class="encabezado__texto-superior">ENVÍO GRATIS EN COMPRAS SUPERIORES A $50.000 - RETIRO EN LOCAL SIN CARGO</p>
+    </div>
+    <div class="encabezado__principal" id="encabezadoPrincipal">
+      <div class="encabezado__contenedor">
+        <a href="index.html" class="encabezado__logo">
+          <span class="encabezado__icono-logo">★</span>
+          <span class="encabezado__texto-logo">SUPPLEX</span>
+        </a>
+        <nav class="encabezado__navegacion">
+          <ul class="encabezado__menu">
+            <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto">Inicio</a></li>
+            <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto" style="color: var(--color-primario);">Tienda</a></li>
+            <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto">Promociones</a></li>
+            <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto">Calculadora</a></li>
+            <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto">Contáctanos</a></li>
+          </ul>
+        </nav>
+        <div class="encabezado__acciones">
+          <button class="encabezado__boton-accion icono_efecto" aria-label="Buscar">🔍</button>
+          <button class="encabezado__boton-accion icono_efecto" aria-label="Carrito">
+            🛒 <span class="encabezado__contador-carrito">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= CATÁLOGO DE PRODUCTOS ================= -->
+  <main style="background: var(--color-fondo-gris); padding-top: 40px; padding-bottom: 80px;">
+    <section class="catalogo">
+      <div class="catalogo__contenedor">
+        
+        
+        <aside class="catalogo__filtros">
+          <h3 class="catalogo__filtros-titulo">Categorías</h3>
+          <ul class="catalogo__lista-filtros">
+            <li><button class="catalogo__filtro-btn catalogo__filtro-btn--activo" data-filtro="todos">Todos los productos</button></li>
+            <li><button class="catalogo__filtro-btn" data-filtro="Proteína">Proteínas</button></li>
+            <li><button class="catalogo__filtro-btn" data-filtro="Creatina">Creatinas</button></li>
+            <li><button class="catalogo__filtro-btn" data-filtro="Pre-entreno">Pre-entrenos</button></li>
+            <li><button class="catalogo__filtro-btn" data-filtro="Aminoácidos">Aminoácidos</button></li>
+            <li><button class="catalogo__filtro-btn" data-filtro="Vitaminas">Vitaminas & Salud</button></li>
+            <li><button class="catalogo__filtro-btn" data-filtro="Combo">Combos Armados</button></li>
+          </ul>
+        </aside>
+
+        <div class="catalogo__grilla" id="grillaCatalogo">
+   
+</div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= PIE DE PÁGINA ================= -->
+  <footer class="pie-pagina">
+    <div class="pie-pagina__contenedor">
+      <div class="pie-pagina__arriba">
+        <div class="pie-pagina__marca">
+          <a href="index.html" class="pie-pagina__logo">★</a>
+          <p class="pie-pagina__texto">Suplementación deportiva de calidad para atletas que buscan resultados reales.</p>
+        </div>
+      </div>
+      <div class="pie-pagina__abajo">
+        <p>© 2026 SUPPLEX. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <a href="#" class="whatsapp-flotante icono_efecto" aria-label="Escribinos por WhatsApp">💬</a> 
+
+  <!-- ================= MODALES (Igual al Index) ================= -->
+  
+  <div class="carrito-modal" id="carritoModal">
+    <div class="carrito-modal__fondo" id="carritoFondo"></div>
+    <div class="carrito-modal__panel">
+      <div class="carrito-modal__cabecera">
+        <h3 class="carrito-modal__titulo">Tu Carrito</h3>
+        <button class="carrito-modal__cerrar" id="btnCerrarCarrito">&times;</button>
+      </div>
+      <div class="carrito-modal__cuerpo" id="listaCarrito"><p class="carrito-modal__vacio">Tu carrito está vacío.</p></div>
+      <div class="carrito-modal__pie">
+        <div class="carrito-modal__total"><span>Total:</span><span id="totalCarrito">$ 0</span></div>
+        <button class="carrito-modal__boton" id="btnEnviarWhatsApp">FINALIZAR COMPRA</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="producto-modal" id="productoModal">
+    <div class="producto-modal__fondo" id="btnCerrarFondoProducto"></div>
+    <div class="producto-modal__panel">
+      <button class="producto-modal__cerrar" id="btnCerrarProducto">&times;</button>
+      <div class="producto-modal__contenido">
+        <div class="producto-modal__imagen" id="modalProdImg">IMG</div>
+        <div class="producto-modal__info">
+          <span class="producto-modal__categoria" id="modalProdCat">Cat</span>
+          <h3 class="producto-modal__titulo" id="modalProdTitulo">Título</h3>
+          <p class="producto-modal__descripcion" id="modalProdDesc">Desc</p>
+          <div class="producto-modal__precio" id="modalProdPrecio">$ 0</div>
+          <button class="producto-modal__boton boton-oscuro_efecto js-agregar-carrito" id="modalProdBtn" data-nombre="" data-precio="">AGREGAR AL CARRITO</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="buscador-modal" id="buscadorModal">
+    <div class="buscador-modal__contenido">
+      <div class="buscador-modal__cabecera">
+        <input type="text" class="buscador-modal__input" id="inputBuscador" placeholder="Buscar..." autocomplete="off">
+        <button class="buscador-modal__cerrar" id="btnCerrarBuscador">&times;</button>
+      </div>
+      <div class="buscador-modal__resultados" id="resultadosBuscador"></div>
+    </div>
+  </div>
+
+  
+  <script src="../productos.js"></script>
+  <script src="../main.js"></script>
+</body>
+</html>
