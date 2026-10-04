@@ -416,3 +416,58 @@ ul { list-style: none; }
   .faq-modal__contenido { padding: 30px 20px; }
   .faq-modal__titulo { font-size: 1.5rem; }
 }
+
+/* =========================================
+   PÁGINA: QUIÉNES SOMOS
+========================================= */
+
+/* Portada Grupal */
+.nosotros-portada { position: relative; padding: 120px 20px; background: var(--color-oscuro); display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; min-height: 50vh; }
+.nosotros-portada__fondo { position: absolute; inset: 0; background: #222; /* ACÁ SE PONDRÁ LA FOTO REAL DE FONDO LUEGO */ display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: #444; z-index: 1; opacity: 0.6; }
+.nosotros-portada__contenedor { position: relative; z-index: 2; max-width: 800px; }
+.nosotros-portada__etiqueta { background: var(--color-primario); color: var(--color-oscuro); padding: 5px 15px; font-weight: 900; font-size: 0.8rem; text-transform: uppercase; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
+.nosotros-portada__titulo { font-size: 3.5rem; font-weight: 900; color: var(--color-claro); text-transform: uppercase; margin-bottom: 20px; line-height: 1; }
+.nosotros-portada__texto { font-size: 1.1rem; color: #ddd; line-height: 1.6; }
+
+/* Sección Equipo */
+.equipo { padding: 80px 0; background: var(--color-fondo-gris); }
+.equipo__contenedor { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.equipo__encabezado { text-align: center; margin-bottom: 50px; }
+.equipo__titulo { font-size: 2.2rem; font-weight: 900; color: var(--color-oscuro); margin-bottom: 10px; }
+.equipo__subtitulo { font-size: 1rem; color: var(--color-texto-claro); }
+
+.equipo__grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+.miembro-tarjeta { background: var(--color-claro); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; text-align: center; }
+.miembro-tarjeta__foto-caja { width: 100%; aspect-ratio: 1/1; background: #eaeaea; display: flex; align-items: center; justify-content: center; }
+.miembro-tarjeta__placeholder { color: #999; font-weight: 800; font-size: 1.2rem; }
+.miembro-tarjeta__info { padding: 30px 20px; }
+.miembro-tarjeta__nombre { font-size: 1.5rem; font-weight: 900; color: var(--color-oscuro); margin-bottom: 5px; }
+.miembro-tarjeta__rol { display: block; font-size: 0.85rem; font-weight: 800; color: var(--color-primario); text-transform: uppercase; margin-bottom: 15px; }
+.miembro-tarjeta__desc { font-size: 0.95rem; color: #555; line-height: 1.5; margin: 0; }
+
+/* Galería Detrás de Escena */
+.galeria { padding: 80px 0; background: var(--color-claro); }
+.galeria__contenedor { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.galeria__titulo { font-size: 2.2rem; font-weight: 900; text-align: center; margin-bottom: 40px; color: var(--color-oscuro); }
+
+.galeria__grilla { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 250px; gap: 15px; }
+.galeria__item { position: relative; border-radius: 8px; overflow: hidden; background: #333; cursor: pointer; }
+/* Hacemos que un item ocupe 2 columnas y 2 filas para romper la monotonía visual */
+.galeria__item--grande { grid-column: span 2; grid-row: span 2; } 
+
+.galeria__placeholder { width: 100%; height: 100%; background: #eaeaea; display: flex; align-items: center; justify-content: center; text-align: center; color: #999; font-weight: 800; padding: 20px; }
+.imagen-zoom_efecto { transition: transform 0.4s ease; }
+.galeria__item:hover .imagen-zoom_efecto { transform: scale(1.1); }
+
+.galeria__capa { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; color: var(--color-claro); font-weight: 800; font-size: 1.2rem; opacity: 0; transition: opacity 0.3s ease; text-align: center; padding: 20px; }
+.galeria__item:hover .galeria__capa { opacity: 1; }
+
+/* Responsividad de Quiénes Somos */
+@media (max-width: 992px) {
+  .galeria__grilla { grid-template-columns: repeat(2, 1fr); }
+  .galeria__item--grande { grid-column: span 1; grid-row: span 1; }
+}
+@media (max-width: 768px) {
+  .nosotros-portada__titulo { font-size: 2.5rem; }
+  .galeria__grilla { grid-template-columns: 1fr; grid-auto-rows: 200px; }
+}
