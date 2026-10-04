@@ -255,21 +255,21 @@ ul { list-style: none; }
 .carrito-modal--activo { visibility: visible; opacity: 1; }
 .carrito-modal__fondo { position: absolute; inset: 0; background: rgba(0,0,0,0.6); cursor: pointer; }
 
-/* El panel que entra desde la derecha */
+
 .carrito-modal__panel { position: relative; width: 100%; max-width: 400px; background: var(--color-claro); height: 100%; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.15); }
 .carrito-modal--activo .carrito-modal__panel { transform: translateX(0); }
 
-/* Cabecera del panel */
+
 .carrito-modal__cabecera { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--color-borde); }
 .carrito-modal__titulo { font-size: 1.2rem; font-weight: 900; color: var(--color-oscuro); margin: 0; text-transform: uppercase; }
 .carrito-modal__cerrar { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--color-texto-claro); transition: color 0.2s ease; line-height: 1; }
 .carrito-modal__cerrar:hover { color: var(--color-alerta); }
 
-/* Cuerpo (Lista de productos) */
+
 .carrito-modal__cuerpo { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
 .carrito-modal__vacio { text-align: center; color: var(--color-texto-claro); font-size: 0.95rem; margin-top: 30px; font-weight: 500;}
 
-/* Cada producto dentro del carrito */
+
 .carrito-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--color-borde); }
 .carrito-item__info { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; padding-right: 15px; }
 .carrito-item__nombre { font-size: 0.85rem; font-weight: 700; color: var(--color-texto); line-height: 1.3;}
@@ -277,7 +277,7 @@ ul { list-style: none; }
 .carrito-item__eliminar { background: transparent; border: none; color: var(--color-alerta); font-size: 1.5rem; cursor: pointer; font-weight: bold; transition: transform 0.2s;}
 .carrito-item__eliminar:hover { transform: scale(1.2); }
 
-/* Pie (Total y Botón) */
+
 .carrito-modal__pie { padding: 20px; border-top: 1px solid var(--color-borde); background: var(--color-fondo-gris); }
 .carrito-modal__total { display: flex; justify-content: space-between; align-items: center; font-size: 1.3rem; font-weight: 900; color: var(--color-oscuro); margin-bottom: 20px; }
 .carrito-modal__boton { width: 100%; padding: 16px; border: none; border-radius: 6px; font-weight: 900; font-size: 0.9rem; color: var(--color-claro); background: #25d366; cursor: pointer; transition: background-color 0.2s ease; text-transform: uppercase;}
@@ -303,7 +303,7 @@ ul { list-style: none; }
 
 .buscador-modal__vacio { grid-column: 1 / -1; text-align: center; color: var(--color-texto-claro); font-size: 1.2rem; margin-top: 40px; font-weight: 500; }
 
-/* Responsividad para la barra de búsqueda */
+
 @media (max-width: 768px) {
   .buscador-modal__input { font-size: 1.5rem; }
   .buscador-modal__cerrar { font-size: 3rem; }
@@ -335,7 +335,7 @@ ul { list-style: none; }
 
 .producto-modal__boton { width: 100%; padding: 18px; font-size: 1rem; text-transform: uppercase; }
 
-/* Para que las tarjetas del HTML muestren la manito al pasar el mouse por la foto o título */
+
 .producto-tarjeta__imagen-caja, .producto-tarjeta__nombre, .combo-tarjeta__imagen-caja, .combo-tarjeta__nombre { cursor: pointer; }
 
 @media (max-width: 768px) {
@@ -354,10 +354,10 @@ ul { list-style: none; }
 .contacto__titulo { font-size: 2rem; font-weight: 900; color: var(--color-oscuro); text-transform: uppercase; margin-bottom: 10px; }
 .contacto__subtitulo { font-size: 1rem; color: #555; }
 
-/* Tarjeta contenedora con sombra */
+
 .contacto__grilla { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; background: var(--color-claro); padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
 
-/* Columna de info */
+
 .contacto__info { display: flex; flex-direction: column; gap: 30px; justify-content: center; }
 .contacto__item { display: flex; align-items: flex-start; gap: 15px; }
 .contacto__icono { font-size: 1.8rem; line-height: 1; }
@@ -372,12 +372,11 @@ ul { list-style: none; }
 .contacto__campo input:focus, .contacto__campo textarea:focus { outline: none; border-color: var(--color-oscuro); }
 .contacto__boton { padding: 15px; font-weight: 800; border: none; border-radius: 6px; font-size: 1rem; text-transform: uppercase; color: var(--color-claro); background: var(--color-oscuro); margin-top: 10px; }
 
-/* Mensaje de éxito oculto por defecto */
+
 .contacto__exito { display: none; text-align: center; color: #25d366; font-weight: 700; font-size: 0.9rem; margin-top: 10px; }
 .contacto__exito--activo { display: block; animation: aparecer 0.5s ease; }
 
-/* --- Ajuste Responsivo para el CSS que ya tenías --- */
-/* Agregá esto adentro de tu @media (max-width: 768px) existente */
+
 @media (max-width: 768px) {
   .contacto__grilla { grid-template-columns: 1fr; gap: 40px; padding: 30px 20px; }
 }
@@ -400,7 +399,7 @@ ul { list-style: none; }
 .faq-modal__titulo { font-size: 1.8rem; font-weight: 900; color: var(--color-oscuro); margin-bottom: 5px; text-transform: uppercase; padding-right: 30px; }
 .faq-modal__subtitulo { font-size: 0.95rem; color: #555; margin-bottom: 30px; }
 
-/* Acordeón interno del modal */
+
 .faq__acordeon { display: flex; flex-direction: column; gap: 12px; }
 .faq__item { border: 1px solid var(--color-borde); border-radius: 8px; overflow: hidden; background: var(--color-fondo-gris); }
 .faq__pregunta { width: 100%; text-align: left; padding: 16px 20px; background: transparent; border: none; font-size: 0.95rem; font-weight: 800; color: var(--color-oscuro); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s ease; font-family: inherit; }
@@ -421,7 +420,7 @@ ul { list-style: none; }
    PÁGINA: QUIÉNES SOMOS
 ========================================= */
 
-/* Portada Grupal */
+
 .nosotros-portada { position: relative; padding: 120px 20px; background: var(--color-oscuro); display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; min-height: 50vh; }
 .nosotros-portada__fondo { position: absolute; inset: 0; background: #222; /* ACÁ SE PONDRÁ LA FOTO REAL DE FONDO LUEGO */ display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: #444; z-index: 1; opacity: 0.6; }
 .nosotros-portada__contenedor { position: relative; z-index: 2; max-width: 800px; }
@@ -429,7 +428,7 @@ ul { list-style: none; }
 .nosotros-portada__titulo { font-size: 3.5rem; font-weight: 900; color: var(--color-claro); text-transform: uppercase; margin-bottom: 20px; line-height: 1; }
 .nosotros-portada__texto { font-size: 1.1rem; color: #ddd; line-height: 1.6; }
 
-/* Sección Equipo */
+
 .equipo { padding: 80px 0; background: var(--color-fondo-gris); }
 .equipo__contenedor { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 .equipo__encabezado { text-align: center; margin-bottom: 50px; }
@@ -445,14 +444,14 @@ ul { list-style: none; }
 .miembro-tarjeta__rol { display: block; font-size: 0.85rem; font-weight: 800; color: var(--color-primario); text-transform: uppercase; margin-bottom: 15px; }
 .miembro-tarjeta__desc { font-size: 0.95rem; color: #555; line-height: 1.5; margin: 0; }
 
-/* Galería Detrás de Escena */
+
 .galeria { padding: 80px 0; background: var(--color-claro); }
 .galeria__contenedor { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 .galeria__titulo { font-size: 2.2rem; font-weight: 900; text-align: center; margin-bottom: 40px; color: var(--color-oscuro); }
 
 .galeria__grilla { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 250px; gap: 15px; }
 .galeria__item { position: relative; border-radius: 8px; overflow: hidden; background: #333; cursor: pointer; }
-/* Hacemos que un item ocupe 2 columnas y 2 filas para romper la monotonía visual */
+
 .galeria__item--grande { grid-column: span 2; grid-row: span 2; } 
 
 .galeria__placeholder { width: 100%; height: 100%; background: #eaeaea; display: flex; align-items: center; justify-content: center; text-align: center; color: #999; font-weight: 800; padding: 20px; }
@@ -462,7 +461,7 @@ ul { list-style: none; }
 .galeria__capa { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; color: var(--color-claro); font-weight: 800; font-size: 1.2rem; opacity: 0; transition: opacity 0.3s ease; text-align: center; padding: 20px; }
 .galeria__item:hover .galeria__capa { opacity: 1; }
 
-/* Responsividad de Quiénes Somos */
+
 @media (max-width: 992px) {
   .galeria__grilla { grid-template-columns: repeat(2, 1fr); }
   .galeria__item--grande { grid-column: span 1; grid-row: span 1; }
@@ -477,7 +476,7 @@ ul { list-style: none; }
 ========================================= */
 .catalogo__contenedor { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: 250px 1fr; gap: 40px; align-items: start; }
 
-/* Menú Lateral de Filtros */
+
 .catalogo__filtros { background: var(--color-claro); padding: 25px; border-radius: 12px; border: 1px solid var(--color-borde); box-shadow: 0 4px 15px rgba(0,0,0,0.02); position: sticky; top: 100px; }
 .catalogo__filtros-titulo { font-size: 1.1rem; font-weight: 900; color: var(--color-oscuro); text-transform: uppercase; border-bottom: 2px solid var(--color-oscuro); padding-bottom: 15px; margin-bottom: 20px; }
 .catalogo__lista-filtros { display: flex; flex-direction: column; gap: 8px; }
@@ -485,15 +484,15 @@ ul { list-style: none; }
 .catalogo__filtro-btn { background: transparent; border: none; text-align: left; font-size: 0.95rem; color: #666; cursor: pointer; padding: 8px 0; transition: color 0.2s ease, padding-left 0.2s ease; font-family: var(--fuente-principal); }
 .catalogo__filtro-btn:hover { color: var(--color-primario); font-weight: 700; padding-left: 5px; }
 
-/* Estilo para el filtro seleccionado */
+
 .catalogo__filtro-btn--activo { color: var(--color-oscuro); font-weight: 900; padding-left: 12px; border-left: 3px solid var(--color-primario); }
 .catalogo__filtro-btn--activo:hover { padding-left: 12px; color: var(--color-oscuro); }
 
-/* Grilla de productos */
+
 .catalogo__grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; }
 .catalogo__vacio { grid-column: 1 / -1; text-align: center; padding: 50px; color: var(--color-texto-claro); font-size: 1.2rem; background: var(--color-claro); border-radius: 12px; border: 1px dashed var(--color-borde); }
 
-/* Adaptación para Celulares */
+
 @media (max-width: 992px) {
   .catalogo__contenedor { grid-template-columns: 200px 1fr; gap: 20px; }
 }

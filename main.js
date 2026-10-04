@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================
   // 5. MODAL DEL CARRITO Y WHATSAPP
   // =========================================
-  const numeroWhatsApp = "5491100000000"; // TU NÚMERO DE WHATSAPP ACÁ
+  const numeroWhatsApp = "5491100000000"; 
   let carrito = [];
 
   const contadorCarrito = document.querySelector('.encabezado__contador-carrito');
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // DELEGACIÓN DE EVENTOS (CARRITO Y VISTA RÁPIDA)
   // =========================================
   
-  // Elementos del Modal de Producto
+  
   const productoModal = document.getElementById('productoModal');
   const modalProdImg = document.getElementById('modalProdImg');
   const modalProdCat = document.getElementById('modalProdCat');
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('click', (e) => {
     
-    // 1. SI HACE CLIC EN "AGREGAR AL CARRITO"
+    
     const botonAgregar = e.target.closest('.js-agregar-carrito');
     if (botonAgregar) {
       e.preventDefault();
@@ -242,39 +242,39 @@ document.addEventListener('DOMContentLoaded', () => {
         botonAgregar.style.backgroundColor = "";
         botonAgregar.style.color = "";
       }, 1500);
-      return; // Cortamos acá para que no siga evaluando
+      return; 
     }
 
-    // 2. SI HACE CLIC EN LA FOTO O EL TÍTULO (VISTA RÁPIDA)
+    
     const clicEnTarjeta = e.target.closest('.producto-tarjeta, .combo-tarjeta');
     const clicEnFavorito = e.target.closest('.producto-tarjeta__favorito');
 
-    // Si tocó una tarjeta, PERO NO fue el botón de carrito ni el corazón de favoritos
+    
     if (clicEnTarjeta && !clicEnFavorito) {
       e.preventDefault();
       
-      // Buscamos el nombre del producto en el HTML que se clickeó
+      
       const elementoNombre = clicEnTarjeta.querySelector('.producto-tarjeta__nombre, .combo-tarjeta__nombre');
       
       if (elementoNombre && typeof inventarioProductos !== 'undefined') {
         const nombreBusqueda = elementoNombre.textContent.trim();
         
-        // Lo buscamos en la base de datos de productos.js
+       
         const productoData = inventarioProductos.find(p => p.nombre.includes(nombreBusqueda));
 
         if (productoData) {
-          // Llenamos la ventana flotante con los datos
+          
           modalProdImg.textContent = productoData.img;
           modalProdCat.textContent = productoData.cat;
           modalProdTitulo.textContent = productoData.nombre;
           modalProdDesc.textContent = productoData.desc || "Suplemento deportivo de alta calidad diseñado para mejorar tu rendimiento.";
           modalProdPrecio.textContent = `$ ${productoData.precio.toLocaleString('es-AR')}`;
           
-          // Configuramos el botón de compra del modal con los datos exactos
+          
           modalProdBtn.setAttribute('data-nombre', productoData.nombre);
           modalProdBtn.setAttribute('data-precio', productoData.precio);
 
-          // Mostramos la ventana
+          
           productoModal.classList.add('producto-modal--activo');
         }
       }
@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
     iconoLupaNav.addEventListener('click', (e) => {
       e.preventDefault();
       buscadorModal.classList.add('buscador-modal--activo');
-      // Pequeño delay para enfocar el input una vez terminada la animación del modal
+      
       setTimeout(() => inputBuscador.focus(), 100); 
     });
   }
@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // Verificamos que inventarioProductos exista (viene del archivo productos.js)
+        
         if(typeof inventarioProductos !== 'undefined') {
             let resultados = inventarioProductos.filter(producto => 
               producto.nombre.toLowerCase().includes(textoBusqueda) || 
@@ -405,26 +405,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (formContacto) {
     formContacto.addEventListener('submit', (e) => {
-      e.preventDefault(); // Evita que la página recargue
+      e.preventDefault(); 
       
-      // Cambiamos el texto del botón temporalmente
+      
       const textoOriginalBtn = btnEnviarContacto.textContent;
       btnEnviarContacto.textContent = "ENVIANDO...";
       btnEnviarContacto.style.opacity = "0.7";
 
-      // Simulamos un tiempo de carga de servidor (1.5 segundos)
+      
       setTimeout(() => {
-        // Limpiamos los campos del formulario
+        
         formContacto.reset();
         
-        // Restauramos el botón
+        
         btnEnviarContacto.textContent = textoOriginalBtn;
         btnEnviarContacto.style.opacity = "1";
         
-        // Mostramos el mensaje de éxito
+        
         msjExitoContacto.classList.add('contacto__exito--activo');
         
-        // Ocultamos el mensaje de éxito después de 4 segundos
+        
         setTimeout(() => {
           msjExitoContacto.classList.remove('contacto__exito--activo');
         }, 4000);
@@ -441,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCerrarFondoFaq = document.getElementById('btnCerrarFondoFaq');
   const linksAbrirFaq = document.querySelectorAll('.js-abrir-faq'); // Captura el link del footer
 
-  // Función para abrir
+  
   linksAbrirFaq.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
@@ -449,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Funciones para cerrar (botón "x" y click afuera)
+  
   const cerrarFaq = () => {
       if (faqModal) {
           faqModal.classList.remove('faq-modal--activo');
@@ -458,21 +458,21 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCerrarFaq) btnCerrarFaq.addEventListener('click', cerrarFaq);
   if (btnCerrarFondoFaq) btnCerrarFondoFaq.addEventListener('click', cerrarFaq);
 
-  // Lógica del acordeón adentro del modal
+  
   const preguntasFaq = document.querySelectorAll('.faq__pregunta');
   if (preguntasFaq.length > 0) {
     preguntasFaq.forEach(pregunta => {
       pregunta.addEventListener('click', () => {
         const itemActual = pregunta.parentElement;
         
-        // Cerrar los otros
+       
         document.querySelectorAll('.faq__item').forEach(item => {
           if (item !== itemActual) {
             item.classList.remove('faq__item--activo');
           }
         });
         
-        // Abrir/Cerrar el actual
+        
         itemActual.classList.toggle('faq__item--activo');
       });
     });
@@ -486,24 +486,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (grillaCatalogo && typeof inventarioProductos !== 'undefined') {
     
-    // Función que dibuja las tarjetas según el filtro seleccionado
+    
     const renderizarCatalogo = (filtro) => {
       grillaCatalogo.innerHTML = '';
       
       let productosFiltrados = inventarioProductos;
       
-      // Si el filtro no es "todos", filtramos el array por la propiedad "cat"
+      
       if (filtro !== 'todos') {
         productosFiltrados = inventarioProductos.filter(prod => prod.cat.toLowerCase() === filtro.toLowerCase());
       }
 
-      // Si no hay productos en esa categoría
+      
       if (productosFiltrados.length === 0) {
         grillaCatalogo.innerHTML = '<div class="catalogo__vacio">Aún no hay productos en esta categoría.</div>';
         return;
       }
 
-      // Generar el HTML de las tarjetas
+      
       productosFiltrados.forEach(prod => {
         const tarjeta = `
           <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
@@ -524,23 +524,23 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     };
 
-    // Al cargar la página, mostramos "todos" los productos
+    
     renderizarCatalogo('todos');
 
-    // Eventos al hacer clic en las categorías (menú lateral)
+    
     botonesFiltro.forEach(boton => {
       boton.addEventListener('click', (e) => {
-        // 1. Quitar la clase "activo" a todos los botones
+        
         botonesFiltro.forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
         
-        // 2. Ponerle la clase "activo" solo al botón que se tocó
+        
         e.target.classList.add('catalogo__filtro-btn--activo');
         
-        // 3. Obtener qué categoría quiere ver y dibujar la grilla de nuevo
+        
         const filtroSeleccionado = e.target.getAttribute('data-filtro');
         renderizarCatalogo(filtroSeleccionado);
         
-        // En celulares, subir el scroll un poco para ver los resultados
+        
         if(window.innerWidth <= 768) {
            window.scrollTo({ top: grillaCatalogo.offsetTop - 120, behavior: 'smooth' });
         }
@@ -548,4 +548,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-}); // Final de DOMContentLoaded
+}); 
