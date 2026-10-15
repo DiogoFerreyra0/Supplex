@@ -10,9 +10,6 @@
     
   <!-- ================= ENCABEZADO ================= -->
   <header class="encabezado">
-    <div class="encabezado__barra-superior">
-      <p class="encabezado__texto-superior">ENVÍO GRATIS EN COMPRAS SUPERIORES A $50.000 - RETIRO EN LOCAL SIN CARGO</p>
-    </div>
     <div class="encabezado__principal" id="encabezadoPrincipal">
       <div class="encabezado__contenedor">
         <a href="index.html" class="encabezado__logo">
@@ -22,7 +19,7 @@
         <nav class="encabezado__navegacion">
           <ul class="encabezado__menu">
             <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto">Inicio</a></li>
-            <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto" style="color: var(--color-primario);">Tienda</a></li>
+            <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto" style="color: var(--color-primario);">Productos</a></li>
             <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto">Promociones</a></li>
             <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto">Calculadora</a></li>
             <li class="encabezado__item"><a href="../index.html" class="encabezado__enlace enlace_efecto">Contáctanos</a></li>
@@ -82,53 +79,97 @@
 
   <a href="#" class="whatsapp-flotante icono_efecto" aria-label="Escribinos por WhatsApp">💬</a> 
 
-  <!-- ================= MODALES (Igual al Index) ================= -->
+  <!-- ================= MODALES ================= -->
   
+  <!-- Librería SheetJS para generar Excel -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <!-- --- CARRITO MODAL (ACTUALIZADO V2.0) --- -->
   <div class="carrito-modal" id="carritoModal">
     <div class="carrito-modal__fondo" id="carritoFondo"></div>
     <div class="carrito-modal__panel">
+      
       <div class="carrito-modal__cabecera">
         <h3 class="carrito-modal__titulo">Tu Carrito</h3>
-        <button class="carrito-modal__cerrar" id="btnCerrarCarrito">&times;</button>
+        <button class="carrito-modal__cerrar" id="btnCerrarCarrito" aria-label="Cerrar carrito">&times;</button>
       </div>
-      <div class="carrito-modal__cuerpo" id="listaCarrito"><p class="carrito-modal__vacio">Tu carrito está vacío.</p></div>
+
+      <div class="carrito-modal__cuerpo" id="listaCarrito">
+        <p class="carrito-modal__vacio">Tu carrito está vacío.</p>
+      </div>
+
+      <!-- Formulario de Envío y Descuentos -->
+      <div class="carrito-modal__datos">
+        <div class="carrito-modal__campo">
+          <input type="text" id="cartNombre" placeholder="Tu Nombre Completo" class="carrito-modal__input">
+        </div>
+        <div class="carrito-modal__campo">
+          <input type="text" id="cartDireccion" placeholder="Dirección de Envío" class="carrito-modal__input">
+        </div>
+        <div class="carrito-modal__campo carrito-modal__campo--cupon">
+          <input type="text" id="cartCupon" placeholder="Código de descuento (Ej: GYM)" class="carrito-modal__input" style="text-transform: uppercase;">
+          <button type="button" id="btnAplicarCupon" class="carrito-modal__boton-cupon">Aplicar</button>
+        </div>
+        <p id="msjCupon" class="carrito-modal__msj-cupon"></p>
+      </div>
+
       <div class="carrito-modal__pie">
-        <div class="carrito-modal__total"><span>Total:</span><span id="totalCarrito">$ 0</span></div>
+        <!-- Resumen de totales -->
+        <div class="carrito-modal__resumen">
+          <div class="carrito-modal__linea"><span>Subtotal:</span> <span id="cartSubtotal">$ 0</span></div>
+          <div class="carrito-modal__linea carrito-modal__linea--descuento" id="lineaDescuento" style="display: none;">
+            <span>Descuento (<span id="cartNombreCupon"></span>):</span> 
+            <span id="cartMontoDescuento">-$ 0</span>
+          </div>
+          <div class="carrito-modal__linea carrito-modal__linea--total"><span>Total:</span> <span id="totalCarrito">$ 0</span></div>
+        </div>
+
         <button class="carrito-modal__boton" id="btnEnviarWhatsApp">FINALIZAR COMPRA</button>
       </div>
+
     </div>
   </div>
 
-  
+  <!-- --- BUSCADOR A PANTALLA COMPLETA --- -->
+  <div class="buscador-modal" id="buscadorModal">
+    <div class="buscador-modal__contenido">
+      
+      <div class="buscador-modal__cabecera">
+        <input type="text" class="buscador-modal__input" id="inputBuscador" placeholder="Buscar proteínas, creatina, combos..." autocomplete="off">
+        <button class="buscador-modal__cerrar" id="btnCerrarBuscador" aria-label="Cerrar buscador">&times;</button>
+      </div>
+
+      <div class="buscador-modal__resultados" id="resultadosBuscador">
+        <p class="buscador-modal__vacio">Escribí arriba para buscar productos.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- --- MODAL VISTA RÁPIDA DE PRODUCTO --- -->
   <div class="producto-modal" id="productoModal">
     <div class="producto-modal__fondo" id="btnCerrarFondoProducto"></div>
     <div class="producto-modal__panel">
-      <button class="producto-modal__cerrar" id="btnCerrarProducto">&times;</button>
+      <button class="producto-modal__cerrar" id="btnCerrarProducto" aria-label="Cerrar">&times;</button>
+      
       <div class="producto-modal__contenido">
         <div class="producto-modal__imagen" id="modalProdImg">IMG</div>
+        
         <div class="producto-modal__info">
-          <span class="producto-modal__categoria" id="modalProdCat">Cat</span>
-          <h3 class="producto-modal__titulo" id="modalProdTitulo">Título</h3>
-          <p class="producto-modal__descripcion" id="modalProdDesc">Desc</p>
+          <span class="producto-modal__categoria" id="modalProdCat">Categoría</span>
+          <h3 class="producto-modal__titulo" id="modalProdTitulo">Nombre del Producto</h3>
+          <p class="producto-modal__descripcion" id="modalProdDesc">Descripción detallada del producto...</p>
           <div class="producto-modal__precio" id="modalProdPrecio">$ 0</div>
-          <button class="producto-modal__boton boton-oscuro_efecto js-agregar-carrito" id="modalProdBtn" data-nombre="" data-precio="">AGREGAR AL CARRITO</button>
+          
+          <button class="producto-modal__boton boton-oscuro_efecto js-agregar-carrito" id="modalProdBtn" data-nombre="" data-precio="">
+            AGREGAR AL CARRITO
+          </button>
         </div>
       </div>
+
     </div>
   </div>
 
-  
-  <div class="buscador-modal" id="buscadorModal">
-    <div class="buscador-modal__contenido">
-      <div class="buscador-modal__cabecera">
-        <input type="text" class="buscador-modal__input" id="inputBuscador" placeholder="Buscar..." autocomplete="off">
-        <button class="buscador-modal__cerrar" id="btnCerrarBuscador">&times;</button>
-      </div>
-      <div class="buscador-modal__resultados" id="resultadosBuscador"></div>
-    </div>
-  </div>
-
-  
   <script src="../productos.js"></script>
   <script src="../main.js"></script>
 </body>
