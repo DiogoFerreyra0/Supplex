@@ -506,3 +506,25 @@ ul { list-style: none; }
   .catalogo__filtro-btn--activo { background: var(--color-oscuro); color: var(--color-claro); padding-left: 15px; border: none; }
   .catalogo__filtro-btn--activo:hover { color: var(--color-claro); }
 }
+
+/* =========================================
+   CARRITO V2.0: DATOS DE ENVÍO Y CUPONES
+========================================= */
+.carrito-modal__datos { padding: 0 20px 20px 20px; display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid var(--color-borde); background: var(--color-claro); }
+.carrito-modal__campo { display: flex; width: 100%; }
+.carrito-modal__input { flex-grow: 1; padding: 12px; border: 1px solid var(--color-borde); border-radius: 6px; font-family: var(--fuente-principal); font-size: 0.9rem; background: #fafafa; transition: border-color 0.3s ease; }
+.carrito-modal__input:focus { outline: none; border-color: var(--color-oscuro); }
+
+.carrito-modal__campo--cupon { display: flex; gap: 10px; }
+.carrito-modal__boton-cupon { padding: 0 15px; background: var(--color-oscuro); color: var(--color-claro); border: none; border-radius: 6px; font-weight: 800; cursor: pointer; transition: 0.2s ease; font-size: 0.85rem;}
+.carrito-modal__boton-cupon:hover { background: var(--color-primario); color: var(--color-oscuro); }
+.carrito-modal__msj-cupon { font-size: 0.8rem; font-weight: 700; margin: -5px 0 0 0; display: none; }
+
+.carrito-modal__resumen { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; width: 100%; }
+.carrito-modal__linea { display: flex; justify-content: space-between; font-size: 0.95rem; color: #555; }
+.carrito-modal__linea--descuento { color: var(--color-alerta); font-weight: 800; }
+.carrito-modal__linea--total { font-size: 1.3rem; font-weight: 900; color: var(--color-oscuro); border-top: 1px solid var(--color-borde); padding-top: 12px; margin-top: 5px; }
+
+/* Ajuste visual del item en el carrito para mostrar la cantidad (ej: 2x) */
+.carrito-item__info { display: flex; align-items: center; }
+.carrito-item__cant { font-size: 0.85rem; font-weight: 900; background: var(--color-borde); color: var(--color-oscuro); padding: 4px 8px; border-radius: 4px; margin-right: 12px; }

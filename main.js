@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 3. CARRUSELES HORIZONTALES (Productos/Combos)
+  // 3. CARRUSELES HORIZONTALES
   // =========================================
   const activarCarrusel = (idCarrusel, idBotonAnt, idBotonSig) => {
     const carrusel = document.getElementById(idCarrusel);
@@ -132,76 +132,126 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 5. MODAL DEL CARRITO Y WHATSAPP
+  // 5. SISTEMA DE CARRITO V2.0 Y DELEGACIÓN
   // =========================================
   const numeroWhatsApp = "5491100000000"; 
   let carrito = [];
+  let cuponAplicado = null;
+  let descuentoPorcentaje = 0;
+  const cuponesValidos = { "GYM": 15, "SUPPLEX10": 10 };
 
+  // Selectores
   const contadorCarrito = document.querySelector('.encabezado__contador-carrito');
-  const iconoCarritoNav = document.querySelector('[aria-label="Carrito"]');
-  const botonFlotanteWsp = document.querySelector('.whatsapp-flotante');
   const carritoModal = document.getElementById('carritoModal');
   const carritoFondo = document.getElementById('carritoFondo');
   const btnCerrarCarrito = document.getElementById('btnCerrarCarrito');
   const listaCarrito = document.getElementById('listaCarrito');
+  const cartSubtotal = document.getElementById('cartSubtotal');
+  const lineaDescuento = document.getElementById('lineaDescuento');
+  const cartNombreCupon = document.getElementById('cartNombreCupon');
+  const cartMontoDescuento = document.getElementById('cartMontoDescuento');
   const totalCarrito = document.getElementById('totalCarrito');
   const btnEnviarWhatsApp = document.getElementById('btnEnviarWhatsApp');
+  const inputCupon = document.getElementById('cartCupon');
+  const btnAplicarCupon = document.getElementById('btnAplicarCupon');
+  const msjCupon = document.getElementById('msjCupon');
 
   const abrirCarrito = (e) => {
     if(e) e.preventDefault();
-    carritoModal.classList.add('carrito-modal--activo');
+    carritoModal?.classList.add('carrito-modal--activo');
     renderizarCarrito();
   };
+  const cerrarCarrito = () => carritoModal?.classList.remove('carrito-modal--activo');
 
-  const cerrarCarrito = () => carritoModal.classList.remove('carrito-modal--activo');
+  document.querySelector('[aria-label="Carrito"]')?.addEventListener('click', abrirCarrito);
+  btnCerrarCarrito?.addEventListener('click', cerrarCarrito);
+  carritoFondo?.addEventListener('click', cerrarCarrito);
 
-  if(iconoCarritoNav) iconoCarritoNav.addEventListener('click', abrirCarrito);
-  if(btnCerrarCarrito) btnCerrarCarrito.addEventListener('click', cerrarCarrito);
-  if(carritoFondo) carritoFondo.addEventListener('click', cerrarCarrito);
+  // Lógica del Cupón
+  btnAplicarCupon?.addEventListener('click', () => {
+    const codigo = inputCupon.value.trim().toUpperCase();
+    if (cuponesValidos[codigo]) {
+      cuponAplicado = codigo;
+      descuentoPorcentaje = cuponesValidos[codigo];
+      msjCupon.textContent = `¡Cupón ${codigo} aplicado! (${descuentoPorcentaje}% OFF)`;
+      msjCupon.style.color = "#25d366";
+      msjCupon.style.display = "block";
+    } else {
+      cuponAplicado = null;
+      descuentoPorcentaje = 0;
+      msjCupon.textContent = "Cupón inválido o expirado.";
+      msjCupon.style.color = "red";
+      msjCupon.style.display = "block";
+    }
+    renderizarCarrito();
+  });
 
+  // Renderizar
   const renderizarCarrito = () => {
-    if (contadorCarrito) contadorCarrito.textContent = carrito.length;
-    
+    let cantidadTotal = 0;
+    let subtotal = 0;
     listaCarrito.innerHTML = '';
-    let total = 0;
 
     if (carrito.length === 0) {
-      listaCarrito.innerHTML = '<p class="carrito-modal__vacio">Tu carrito está vacío. ¡Agregá algunos suplementos!</p>';
-      totalCarrito.textContent = '$ 0';
+      listaCarrito.innerHTML = '<p class="carrito-modal__vacio">Tu carrito está vacío.</p>';
+      if(contadorCarrito) contadorCarrito.textContent = "0";
+      if(cartSubtotal) cartSubtotal.textContent = "$ 0";
+      if(lineaDescuento) lineaDescuento.style.display = "none";
+      if(totalCarrito) totalCarrito.textContent = "$ 0";
       return;
     }
 
     carrito.forEach((item, index) => {
-      total += item.precio;
+      cantidadTotal += item.cantidad;
+      let totalItem = item.precio * item.cantidad;
+      subtotal += totalItem;
+
       const divItem = document.createElement('div');
       divItem.classList.add('carrito-item');
       divItem.innerHTML = `
-        <div class="carrito-item__info">
-          <span class="carrito-item__nombre">${item.nombre}</span>
-          <span class="carrito-item__precio">$${item.precio.toLocaleString('es-AR')}</span>
+        <div class="carrito-item__info" style="flex-direction: row; align-items: center;">
+          <span class="carrito-item__cant">${item.cantidad}x</span>
+          <div style="display: flex; flex-direction: column;">
+            <span class="carrito-item__nombre">${item.nombre}</span>
+            <span class="carrito-item__precio">$${totalItem.toLocaleString('es-AR')}</span>
+          </div>
         </div>
-        <button class="carrito-item__eliminar" onclick="eliminarDelCarrito(${index})" aria-label="Eliminar producto">×</button>
+        <button class="carrito-item__eliminar" onclick="eliminarDelCarrito(${index})">×</button>
       `;
       listaCarrito.appendChild(divItem);
     });
 
-    totalCarrito.textContent = `$ ${total.toLocaleString('es-AR')}`;
+    if(contadorCarrito) contadorCarrito.textContent = cantidadTotal;
+
+    let descuentoMonto = subtotal * (descuentoPorcentaje / 100);
+    let totalF = subtotal - descuentoMonto;
+
+    if(cartSubtotal) cartSubtotal.textContent = `$ ${subtotal.toLocaleString('es-AR')}`;
+    if(totalCarrito) totalCarrito.textContent = `$ ${totalF.toLocaleString('es-AR')}`;
+
+    if (descuentoMonto > 0 && lineaDescuento) {
+      lineaDescuento.style.display = "flex";
+      cartNombreCupon.textContent = cuponAplicado;
+      cartMontoDescuento.textContent = `-$ ${descuentoMonto.toLocaleString('es-AR')}`;
+    } else if (lineaDescuento) {
+      lineaDescuento.style.display = "none";
+    }
   };
 
   window.eliminarDelCarrito = (index) => {
     carrito.splice(index, 1);
     renderizarCarrito();
+    animarContador();
+  };
+
+  const animarContador = () => {
     if (contadorCarrito) {
       contadorCarrito.style.transform = 'scale(1.5)';
       setTimeout(() => contadorCarrito.style.transform = 'scale(1)', 200);
     }
   };
 
-  // =========================================
-  // DELEGACIÓN DE EVENTOS (CARRITO Y VISTA RÁPIDA)
-  // =========================================
-  
-  
+  // Selectores Vista Rápida
   const productoModal = document.getElementById('productoModal');
   const modalProdImg = document.getElementById('modalProdImg');
   const modalProdCat = document.getElementById('modalProdCat');
@@ -209,34 +259,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalProdDesc = document.getElementById('modalProdDesc');
   const modalProdPrecio = document.getElementById('modalProdPrecio');
   const modalProdBtn = document.getElementById('modalProdBtn');
-  
-  const cerrarVistaRapida = () => productoModal.classList.remove('producto-modal--activo');
-  
+
+  const cerrarVistaRapida = () => productoModal?.classList.remove('producto-modal--activo');
   document.getElementById('btnCerrarProducto')?.addEventListener('click', cerrarVistaRapida);
   document.getElementById('btnCerrarFondoProducto')?.addEventListener('click', cerrarVistaRapida);
 
+  // DELEGACIÓN GLOBAL (Escucha clics en carritos y tarjetas)
   document.addEventListener('click', (e) => {
     
-    
+    // Si tocó "Agregar al Carrito"
     const botonAgregar = e.target.closest('.js-agregar-carrito');
     if (botonAgregar) {
       e.preventDefault();
       const nombre = botonAgregar.getAttribute('data-nombre');
       const precio = parseInt(botonAgregar.getAttribute('data-precio'));
 
-      carrito.push({ nombre, precio });
-      renderizarCarrito();
-      
-      if (contadorCarrito) {
-        contadorCarrito.style.transform = 'scale(1.5)';
-        setTimeout(() => contadorCarrito.style.transform = 'scale(1)', 200);
+      const productoExistente = carrito.find(item => item.nombre === nombre);
+      if (productoExistente) {
+        productoExistente.cantidad++;
+      } else {
+        carrito.push({ nombre, precio, cantidad: 1 });
       }
+      
+      renderizarCarrito();
+      animarContador();
 
       const textoOriginal = botonAgregar.textContent;
       botonAgregar.textContent = "¡AGREGADO ✔!";
       botonAgregar.style.backgroundColor = "var(--color-primario)";
       botonAgregar.style.color = "var(--color-oscuro)";
-      
       setTimeout(() => {
         botonAgregar.textContent = textoOriginal;
         botonAgregar.style.backgroundColor = "";
@@ -245,99 +296,136 @@ document.addEventListener('DOMContentLoaded', () => {
       return; 
     }
 
-    
+    // Si tocó una tarjeta para la vista rápida
     const clicEnTarjeta = e.target.closest('.producto-tarjeta, .combo-tarjeta');
     const clicEnFavorito = e.target.closest('.producto-tarjeta__favorito');
 
-    
     if (clicEnTarjeta && !clicEnFavorito) {
       e.preventDefault();
-      
-      
       const elementoNombre = clicEnTarjeta.querySelector('.producto-tarjeta__nombre, .combo-tarjeta__nombre');
       
       if (elementoNombre && typeof inventarioProductos !== 'undefined') {
         const nombreBusqueda = elementoNombre.textContent.trim();
-        
-       
         const productoData = inventarioProductos.find(p => p.nombre.includes(nombreBusqueda));
 
-        if (productoData) {
-          
+        if (productoData && productoModal) {
           modalProdImg.textContent = productoData.img;
           modalProdCat.textContent = productoData.cat;
           modalProdTitulo.textContent = productoData.nombre;
-          modalProdDesc.textContent = productoData.desc || "Suplemento deportivo de alta calidad diseñado para mejorar tu rendimiento.";
+          modalProdDesc.textContent = productoData.desc || "Suplemento deportivo de alta calidad.";
           modalProdPrecio.textContent = `$ ${productoData.precio.toLocaleString('es-AR')}`;
-          
           
           modalProdBtn.setAttribute('data-nombre', productoData.nombre);
           modalProdBtn.setAttribute('data-precio', productoData.precio);
 
-          
           productoModal.classList.add('producto-modal--activo');
         }
       }
     }
   });
 
-  // Enviar a WhatsApp
-  if (btnEnviarWhatsApp) {
-    btnEnviarWhatsApp.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (carrito.length === 0) return;
+  // Generar Excel y WhatsApp
+  btnEnviarWhatsApp?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (carrito.length === 0) return;
 
-      let mensaje = "Hola buenas, quiero confirmar la compra de estos productos:\n\n";
-      let total = 0;
+    const nombreCliente = document.getElementById('cartNombre').value.trim();
+    const direccionCliente = document.getElementById('cartDireccion').value.trim();
+
+    if (!nombreCliente || !direccionCliente) {
+      alert("⚠️ Por favor, completá tu Nombre y Dirección de Envío para procesar el pedido.");
+      return;
+    }
+
+    const orderId = "PED-" + Math.floor(Math.random() * 90000 + 10000); 
+    const fecha = new Date().toLocaleDateString();
+    
+    let subtotal = 0;
+    carrito.forEach(item => subtotal += (item.precio * item.cantidad));
+    let descuentoMonto = subtotal * (descuentoPorcentaje / 100);
+    let totalFinal = subtotal - descuentoMonto;
+
+    // Excel
+    if (typeof XLSX !== 'undefined') {
+      const formatoExcel = [
+        ["SUPPLEX - COMPROBANTE DE VENTA"], [],
+        ["ID Pedido:", orderId, "Fecha:", fecha],
+        ["Cliente:", nombreCliente, "Dirección:", direccionCliente], [],
+        ["CANTIDAD", "PRODUCTO", "PRECIO UNIT.", "SUBTOTAL ITEM"]
+      ];
 
       carrito.forEach(item => {
-        mensaje += `✅ ${item.nombre} ($${item.precio.toLocaleString('es-AR')})\n`;
-        total += item.precio;
+        formatoExcel.push([item.cantidad, item.nombre, item.precio, (item.precio * item.cantidad)]);
       });
 
-      mensaje += `\n*Total a pagar: $${total.toLocaleString('es-AR')}*\n\nPor favor, pasame los datos para el pago. ¡Gracias!`;
+      formatoExcel.push([]);
+      formatoExcel.push(["", "", "SUBTOTAL:", subtotal]);
+      if (descuentoMonto > 0) formatoExcel.push(["", "", `DESCUENTO (${cuponAplicado}):`, -descuentoMonto]);
+      formatoExcel.push(["", "", "TOTAL A PAGAR:", totalFinal]);
 
-      const urlWsp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
-      window.open(urlWsp, '_blank');
+      const hoja = XLSX.utils.aoa_to_sheet(formatoExcel);
+      const libro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(libro, hoja, "Pedido");
+      XLSX.writeFile(libro, `${orderId}_Supplex.xlsx`);
+    }
+
+    // Mensaje Wsp
+    let msjWsp = `*NUEVO PEDIDO: ${orderId}*\n📅 Fecha: ${fecha}\n👤 Cliente: ${nombreCliente}\n📍 Dirección: ${direccionCliente}\n---------------------------\n*ARTÍCULOS:*\n`;
+    carrito.forEach(item => {
+      msjWsp += `🔸 ${item.cantidad}x ${item.nombre} ($${(item.precio * item.cantidad).toLocaleString('es-AR')})\n`;
+    });
+    msjWsp += `---------------------------\nSubtotal: $${subtotal.toLocaleString('es-AR')}\n`;
+    if (descuentoMonto > 0) msjWsp += `Descuento (${cuponAplicado}): -$${descuentoMonto.toLocaleString('es-AR')}\n`;
+    msjWsp += `*TOTAL A PAGAR: $${totalFinal.toLocaleString('es-AR')}*\n\n(Se descargó el archivo Excel del pedido). ¡Gracias!`;
+
+    btnEnviarWhatsApp.textContent = "PROCESANDO...";
+    setTimeout(() => {
+      window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msjWsp)}`, '_blank');
+      
+      carrito = [];
+      cuponAplicado = null;
+      descuentoPorcentaje = 0;
+      document.getElementById('cartNombre').value = "";
+      document.getElementById('cartDireccion').value = "";
+      inputCupon.value = "";
+      if(msjCupon) msjCupon.style.display = "none";
+      btnEnviarWhatsApp.textContent = "FINALIZAR COMPRA";
       cerrarCarrito();
-    });
-  }
+      renderizarCarrito();
+      animarContador();
+    }, 1500);
+  });
 
-  if (botonFlotanteWsp) {
-    botonFlotanteWsp.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.open(`https://wa.me/${numeroWhatsApp}?text=Hola,%20tengo%20una%20consulta%20sobre%20sus%20productos.`, '_blank');
-    });
-  }
 
   // =========================================
-  // 6. BUSCADOR EN TIEMPO REAL (MODAL)
+  // 6. BUSCADOR EN TIEMPO REAL (CORREGIDO)
   // =========================================
   const buscadorModal = document.getElementById('buscadorModal');
   const inputBuscador = document.getElementById('inputBuscador');
   const btnCerrarBuscador = document.getElementById('btnCerrarBuscador');
   const resultadosBuscador = document.getElementById('resultadosBuscador');
-  const iconoLupaNav = document.querySelector('[aria-label="Buscar"]');
+  
+  // Apuntamos directo al atributo aria-label que tenés en tu index.html
+  const btnAbrirBuscador = document.querySelector('[aria-label="Buscar"]');
 
-  if (iconoLupaNav) {
-    iconoLupaNav.addEventListener('click', (e) => {
+  if (btnAbrirBuscador && buscadorModal) {
+    btnAbrirBuscador.addEventListener('click', (e) => {
       e.preventDefault();
       buscadorModal.classList.add('buscador-modal--activo');
-      
-      setTimeout(() => inputBuscador.focus(), 100); 
+      setTimeout(() => inputBuscador?.focus(), 100); 
     });
   }
 
-  if (btnCerrarBuscador) {
+  if (btnCerrarBuscador && buscadorModal) {
     btnCerrarBuscador.addEventListener('click', () => {
       buscadorModal.classList.remove('buscador-modal--activo');
-      inputBuscador.value = '';
-      resultadosBuscador.innerHTML = '<p class="buscador-modal__vacio">Escribí arriba para buscar productos.</p>';
+      if (inputBuscador) inputBuscador.value = '';
+      if (resultadosBuscador) resultadosBuscador.innerHTML = '<p class="buscador-modal__vacio">Escribí arriba para buscar productos.</p>';
     });
   }
 
   let temporizadorBuscador;
-  if (inputBuscador) {
+  if (inputBuscador && resultadosBuscador) {
     inputBuscador.addEventListener('keyup', (e) => {
       clearTimeout(temporizadorBuscador);
       
@@ -349,7 +437,6 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        
         if(typeof inventarioProductos !== 'undefined') {
             let resultados = inventarioProductos.filter(producto => 
               producto.nombre.toLowerCase().includes(textoBusqueda) || 
@@ -380,17 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 resultadosBuscador.insertAdjacentHTML('beforeend', tarjetaHTML);
               });
-
-              if (resultados.length > 12) {
-                 resultadosBuscador.insertAdjacentHTML('beforeend', `
-                   <p class="buscador-modal__vacio" style="width: 100%; grid-column: 1 / -1;">
-                     Mostrando los 12 mejores resultados. Sé más específico en tu búsqueda.
-                   </p>
-                 `);
-              }
             }
-        } else {
-             resultadosBuscador.innerHTML = '<p class="buscador-modal__vacio" style="color:red;">Error: No se pudo cargar el archivo de productos.</p>';
         }
       }, 300);
     });
@@ -406,104 +483,67 @@ document.addEventListener('DOMContentLoaded', () => {
   if (formContacto) {
     formContacto.addEventListener('submit', (e) => {
       e.preventDefault(); 
-      
-      
       const textoOriginalBtn = btnEnviarContacto.textContent;
       btnEnviarContacto.textContent = "ENVIANDO...";
       btnEnviarContacto.style.opacity = "0.7";
-
-      
       setTimeout(() => {
-        
         formContacto.reset();
-        
-        
         btnEnviarContacto.textContent = textoOriginalBtn;
         btnEnviarContacto.style.opacity = "1";
-        
-        
         msjExitoContacto.classList.add('contacto__exito--activo');
-        
-        
-        setTimeout(() => {
-          msjExitoContacto.classList.remove('contacto__exito--activo');
-        }, 4000);
-        
+        setTimeout(() => msjExitoContacto.classList.remove('contacto__exito--activo'), 4000);
       }, 1500);
     });
   }
 
   // =========================================
-  // 8. PREGUNTAS FRECUENTES (MODAL + ACORDEÓN)
+  // 8. PREGUNTAS FRECUENTES (MODAL)
   // =========================================
   const faqModal = document.getElementById('faqModal');
   const btnCerrarFaq = document.getElementById('btnCerrarFaq');
   const btnCerrarFondoFaq = document.getElementById('btnCerrarFondoFaq');
-  const linksAbrirFaq = document.querySelectorAll('.js-abrir-faq'); // Captura el link del footer
-
   
-  linksAbrirFaq.forEach(link => {
+  document.querySelectorAll('.js-abrir-faq').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      faqModal.classList.add('faq-modal--activo');
+      faqModal?.classList.add('faq-modal--activo');
     });
   });
 
-  
-  const cerrarFaq = () => {
-      if (faqModal) {
-          faqModal.classList.remove('faq-modal--activo');
-      }
-  };
-  if (btnCerrarFaq) btnCerrarFaq.addEventListener('click', cerrarFaq);
-  if (btnCerrarFondoFaq) btnCerrarFondoFaq.addEventListener('click', cerrarFaq);
+  const cerrarFaq = () => faqModal?.classList.remove('faq-modal--activo');
+  btnCerrarFaq?.addEventListener('click', cerrarFaq);
+  btnCerrarFondoFaq?.addEventListener('click', cerrarFaq);
 
-  
-  const preguntasFaq = document.querySelectorAll('.faq__pregunta');
-  if (preguntasFaq.length > 0) {
-    preguntasFaq.forEach(pregunta => {
-      pregunta.addEventListener('click', () => {
-        const itemActual = pregunta.parentElement;
-        
-       
-        document.querySelectorAll('.faq__item').forEach(item => {
-          if (item !== itemActual) {
-            item.classList.remove('faq__item--activo');
-          }
-        });
-        
-        
-        itemActual.classList.toggle('faq__item--activo');
+  document.querySelectorAll('.faq__pregunta').forEach(pregunta => {
+    pregunta.addEventListener('click', () => {
+      const itemActual = pregunta.parentElement;
+      document.querySelectorAll('.faq__item').forEach(item => {
+        if (item !== itemActual) item.classList.remove('faq__item--activo');
       });
+      itemActual.classList.toggle('faq__item--activo');
     });
-  }
-  
+  });
+
   // =========================================
-  // 9. LÓGICA DE LA PÁGINA CATÁLOGO (FILTROS)
+  // 9. LÓGICA FILTROS PÁGINA PRODUCTOS
   // =========================================
   const grillaCatalogo = document.getElementById('grillaCatalogo');
   const botonesFiltro = document.querySelectorAll('.catalogo__filtro-btn');
 
   if (grillaCatalogo && typeof inventarioProductos !== 'undefined') {
-    
-    
     const renderizarCatalogo = (filtro) => {
       grillaCatalogo.innerHTML = '';
-      
       let productosFiltrados = inventarioProductos;
-      
       
       if (filtro !== 'todos') {
         productosFiltrados = inventarioProductos.filter(prod => prod.cat.toLowerCase() === filtro.toLowerCase());
       }
 
-      
       if (productosFiltrados.length === 0) {
         grillaCatalogo.innerHTML = '<div class="catalogo__vacio">Aún no hay productos en esta categoría.</div>';
         return;
       }
 
-      
       productosFiltrados.forEach(prod => {
         const tarjeta = `
           <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
@@ -524,23 +564,28 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     };
 
-    
-    renderizarCatalogo('todos');
+    // Leer URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoriaUrl = urlParams.get('cat');
 
-    
+    if (categoriaUrl) {
+      renderizarCatalogo(categoriaUrl);
+      botonesFiltro.forEach(b => {
+        b.classList.remove('catalogo__filtro-btn--activo');
+        if (b.getAttribute('data-filtro')?.toLowerCase() === categoriaUrl.toLowerCase()) {
+          b.classList.add('catalogo__filtro-btn--activo');
+        }
+      });
+    } else {
+      renderizarCatalogo('todos');
+    }
+
     botonesFiltro.forEach(boton => {
       boton.addEventListener('click', (e) => {
-        
         botonesFiltro.forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
-        
-        
         e.target.classList.add('catalogo__filtro-btn--activo');
-        
-        
         const filtroSeleccionado = e.target.getAttribute('data-filtro');
         renderizarCatalogo(filtroSeleccionado);
-        
-        
         if(window.innerWidth <= 768) {
            window.scrollTo({ top: grillaCatalogo.offsetTop - 120, behavior: 'smooth' });
         }
@@ -548,4 +593,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-}); 
+});

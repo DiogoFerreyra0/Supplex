@@ -34,9 +34,6 @@
 <body>
     
   <header class="encabezado">
-    <div class="encabezado__barra-superior">
-      <p class="encabezado__texto-superior">ENVÍO GRATIS EN COMPRAS SUPERIORES A $50.000 - RETIRO EN LOCAL SIN CARGO</p>
-    </div>
 
     <div class="encabezado__principal" id="encabezadoPrincipal">
       <div class="encabezado__contenedor">
@@ -699,8 +696,11 @@
   </footer>
 
   <a href="#" class="whatsapp-flotante icono_efecto" aria-label="Escribinos por WhatsApp">💬</a> 
-  
-  <!-- --- CARRITO MODAL (PANEL LATERAL) --- -->
+
+  <!-- Librería SheetJS para generar Excel -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <!-- --- CARRITO MODAL (ACTUALIZADO V2.0) --- -->
   <div class="carrito-modal" id="carritoModal">
     <div class="carrito-modal__fondo" id="carritoFondo"></div>
     <div class="carrito-modal__panel">
@@ -714,12 +714,33 @@
         <p class="carrito-modal__vacio">Tu carrito está vacío.</p>
       </div>
 
-      <div class="carrito-modal__pie">
-        <div class="carrito-modal__total">
-          <span>Total:</span>
-          <span id="totalCarrito">$ 0</span>
+      <!-- Formulario de Envío y Descuentos -->
+      <div class="carrito-modal__datos">
+        <div class="carrito-modal__campo">
+          <input type="text" id="cartNombre" placeholder="Tu Nombre Completo" class="carrito-modal__input">
         </div>
-        <button class="carrito-modal__boton" id="btnEnviarWhatsApp">FINALIZAR COMPRA POR WHATSAPP</button>
+        <div class="carrito-modal__campo">
+          <input type="text" id="cartDireccion" placeholder="Dirección de Envío" class="carrito-modal__input">
+        </div>
+        <div class="carrito-modal__campo carrito-modal__campo--cupon">
+          <input type="text" id="cartCupon" placeholder="Código de descuento (Ej: GYM)" class="carrito-modal__input" style="text-transform: uppercase;">
+          <button type="button" id="btnAplicarCupon" class="carrito-modal__boton-cupon">Aplicar</button>
+        </div>
+        <p id="msjCupon" class="carrito-modal__msj-cupon"></p>
+      </div>
+
+      <div class="carrito-modal__pie">
+        <!-- Resumen de totales -->
+        <div class="carrito-modal__resumen">
+          <div class="carrito-modal__linea"><span>Subtotal:</span> <span id="cartSubtotal">$ 0</span></div>
+          <div class="carrito-modal__linea carrito-modal__linea--descuento" id="lineaDescuento" style="display: none;">
+            <span>Descuento (<span id="cartNombreCupon"></span>):</span> 
+            <span id="cartMontoDescuento">-$ 0</span>
+          </div>
+          <div class="carrito-modal__linea carrito-modal__linea--total"><span>Total:</span> <span id="totalCarrito">$ 0</span></div>
+        </div>
+
+        <button class="carrito-modal__boton" id="btnEnviarWhatsApp">FINALIZAR COMPRA</button>
       </div>
 
     </div>
@@ -740,30 +761,6 @@
 
     </div>
   </div>
-  <div class="carrito-modal" id="carritoModal">
-    <div class="carrito-modal__fondo" id="carritoFondo"></div>
-    <div class="carrito-modal__panel">
-      
-      <div class="carrito-modal__cabecera">
-        <h3 class="carrito-modal__titulo">Tu Carrito</h3>
-        <button class="carrito-modal__cerrar" id="btnCerrarCarrito" aria-label="Cerrar carrito">&times;</button>
-      </div>
-
-      <div class="carrito-modal__cuerpo" id="listaCarrito">
-        <!-- Los productos se inyectan acá automáticamente con JavaScript -->
-        <p class="carrito-modal__vacio">Tu carrito está vacío.</p>
-      </div>
-
-      <div class="carrito-modal__pie">
-        <div class="carrito-modal__total">
-          <span>Total:</span>
-          <span id="totalCarrito">$ 0</span>
-        </div>
-        <button class="carrito-modal__boton" id="btnEnviarWhatsApp">FINALIZAR COMPRA POR WHATSAPP</button>
-      </div>
-
-    </div>
-  </div>
 
   <!-- --- MODAL VISTA RÁPIDA DE PRODUCTO --- -->
   <div class="producto-modal" id="productoModal">
@@ -780,7 +777,6 @@
           <p class="producto-modal__descripcion" id="modalProdDesc">Descripción detallada del producto...</p>
           <div class="producto-modal__precio" id="modalProdPrecio">$ 0</div>
           
-          <!-- Botón de agregar al carrito (mágicamente funcional gracias a la clase js-agregar-carrito) -->
           <button class="producto-modal__boton boton-oscuro_efecto js-agregar-carrito" id="modalProdBtn" data-nombre="" data-precio="">
             AGREGAR AL CARRITO
           </button>
