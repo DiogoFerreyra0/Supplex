@@ -112,11 +112,44 @@ ul { list-style: none; }
 .descubrir__boton-nav, .mas-vendidos__boton-nav { background: transparent; border: 1px solid var(--color-borde); border-radius: 50%; width: 40px; height: 40px; font-weight: bold; }
 
 /* Tarjetas Descubrir */
-.descubrir__tarjeta { flex: 0 0 calc(25% - 15px); aspect-ratio: 3/4; border-radius: 12px; position: relative; overflow: hidden; display: flex; align-items: flex-end; }
-.descubrir__fondo { position: absolute; inset: 0; background: linear-gradient(to bottom, #4a4a4a, #1a1a1a); z-index: 1; }
-.descubrir__contenido { position: relative; z-index: 3; padding: 20px; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
-.descubrir__nombre { color: var(--color-claro); font-weight: 800; font-size: 1.1rem; margin-bottom: 5px;}
-.descubrir__enlace { color: var(--color-primario); font-weight: 700; font-size: 0.85rem; }
+.descubrir__tarjeta { 
+  flex: 0 0 calc(25% - 15px); /* Esto le da el ancho fijo y evita que se estiren */
+  min-width: 250px; /* Asegura un tamaño mínimo en celulares */
+  aspect-ratio: 3/4; 
+  border-radius: 12px; 
+  position: relative; 
+  overflow: hidden; 
+  display: flex; 
+  align-items: flex-end; 
+}
+
+.descubrir__fondo { 
+  position: absolute; 
+  inset: 0; 
+  background: linear-gradient(to bottom, #4a4a4a, #1a1a1a); 
+  z-index: 1; 
+}
+
+.descubrir__contenido { 
+  position: relative; 
+  z-index: 3; 
+  padding: 20px; 
+  width: 100%; 
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); 
+}
+
+.descubrir__nombre { 
+  color: var(--color-claro); 
+  font-weight: 800; 
+  font-size: 1.1rem; 
+  margin-bottom: 5px;
+}
+
+.descubrir__enlace { 
+  color: var(--color-primario); 
+  font-weight: 700; 
+  font-size: 0.85rem; 
+}
 
 /* Tarjetas Productos */
 .producto-tarjeta { flex: 0 0 calc(25% - 15px); background: var(--color-claro); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
