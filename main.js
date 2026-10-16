@@ -267,7 +267,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Intentamos guardar el pedido en tu Base de Datos PHP
-    fetch('guardar_pedido.php', {
+    // Detectamos si el cliente está comprando desde /pages/ o desde el inicio
+    const rutaPedido = window.location.pathname.includes('/pages/') ? '../guardar_pedido.php' : 'guardar_pedido.php';
+
+    // Intentamos guardar el pedido en tu Base de Datos PHP usando la ruta inteligente
+    fetch(rutaPedido, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datosPedido)
+    })
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(datosPedido)
@@ -522,7 +530,10 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Llamada al backend
-  fetch('obtener_productos.php')
+  // Detecta si estamos adentro de la carpeta /pages/ o en el inicio
+  const rutaPHP = window.location.pathname.includes('/pages/') ? '../obtener_productos.php' : 'obtener_productos.php';
+
+  fetch(rutaPHP)
     .then(respuesta => respuesta.json())
     .then(datosDelServidor => {
         window.inventarioProductos = datosDelServidor;
