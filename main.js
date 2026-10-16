@@ -266,16 +266,11 @@ document.addEventListener('DOMContentLoaded', () => {
       articulos: carrito
     };
 
-    // Intentamos guardar el pedido en tu Base de Datos PHP
     // Detectamos si el cliente está comprando desde /pages/ o desde el inicio
     const rutaPedido = window.location.pathname.includes('/pages/') ? '../guardar_pedido.php' : 'guardar_pedido.php';
 
     // Intentamos guardar el pedido en tu Base de Datos PHP usando la ruta inteligente
     fetch(rutaPedido, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(datosPedido)
-    })
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(datosPedido)
@@ -496,7 +491,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================
   window.inventarioProductos = []; 
   
-  // Función para renderizar el catálogo si estamos en la página productos.html
   const renderizarCatalogo = (filtro) => {
     const grillaCatalogo = document.getElementById('grillaCatalogo');
     if (!grillaCatalogo || window.inventarioProductos.length === 0) return;
@@ -529,7 +523,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // Llamada al backend
   // Detecta si estamos adentro de la carpeta /pages/ o en el inicio
   const rutaPHP = window.location.pathname.includes('/pages/') ? '../obtener_productos.php' : 'obtener_productos.php';
 
@@ -538,7 +531,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(datosDelServidor => {
         window.inventarioProductos = datosDelServidor;
         
-        // Manejo de filtros en la página del catálogo
         const botonesFiltro = document.querySelectorAll('.catalogo__filtro-btn');
         const urlParams = new URLSearchParams(window.location.search);
         const categoriaUrl = urlParams.get('cat');
