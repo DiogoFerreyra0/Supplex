@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 2. LÓGICA DEL CARRUSEL DEL HERO
+  // 2. LÓGICA DEL CARRUSEL DEL HERO Y HORIZONTALES
   // =========================================
   const slidesHero = document.querySelectorAll('.portada__diapositiva');
   const puntosHero = document.querySelectorAll('.portada__punto');
@@ -32,43 +32,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const mostrarSlide = (index) => {
       slidesHero.forEach(slide => slide.classList.remove('portada__diapositiva--activa'));
       puntosHero.forEach(punto => punto.classList.remove('portada__punto--activo'));
-
       slidesHero[index].classList.add('portada__diapositiva--activa');
       if(puntosHero[index]) puntosHero[index].classList.add('portada__punto--activo');
     };
-
     btnSigHero.addEventListener('click', () => {
       slideActual = (slideActual === slidesHero.length - 1) ? 0 : slideActual + 1;
       mostrarSlide(slideActual);
     });
-
     btnAntHero.addEventListener('click', () => {
       slideActual = (slideActual === 0) ? slidesHero.length - 1 : slideActual - 1;
       mostrarSlide(slideActual);
     });
   }
 
-  // =========================================
-  // 3. CARRUSELES HORIZONTALES
-  // =========================================
   const activarCarrusel = (idCarrusel, idBotonAnt, idBotonSig) => {
     const carrusel = document.getElementById(idCarrusel);
     const btnAnt = document.getElementById(idBotonAnt);
     const btnSig = document.getElementById(idBotonSig);
-
     if (carrusel && btnAnt && btnSig) {
       const cantidadScroll = 320; 
       btnSig.addEventListener('click', () => carrusel.scrollBy({ left: cantidadScroll, behavior: 'smooth' }));
       btnAnt.addEventListener('click', () => carrusel.scrollBy({ left: -cantidadScroll, behavior: 'smooth' }));
     }
   };
-
   activarCarrusel('carruselExplorar', 'btnAntExplorar', 'btnSigExplorar');
   activarCarrusel('carruselMasVendidos', 'btnAntMasVendidos', 'btnSigMasVendidos');
   activarCarrusel('carruselCombos', 'btnAntCombos', 'btnSigCombos');
 
   // =========================================
-  // 4. CALCULADORA HARRIS-BENEDICT
+  // 3. CALCULADORA HARRIS-BENEDICT
   // =========================================
   const formCalculadora = document.getElementById('formCalculadora');
   const resultadosCalc = document.getElementById('resultadosCalc');
@@ -78,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (formCalculadora) {
     formCalculadora.addEventListener('submit', (e) => {
       e.preventDefault();
-    
       const sexo = document.getElementById('calcSexo').value;
       const edad = parseInt(document.getElementById('calcEdad').value);
       const peso = parseFloat(document.getElementById('calcPeso').value);
@@ -86,12 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const actividad = parseFloat(document.getElementById('calcActividad').value);
       const objetivo = document.getElementById('calcObjetivo').value;
 
-      let tmb = 0;
-      if (sexo === 'hombre') {
-        tmb = 66.5 + (13.75 * peso) + (5.003 * altura) - (6.75 * edad);
-      } else {
-        tmb = 655.1 + (9.563 * peso) + (1.850 * altura) - (4.676 * edad);
-      }
+      let tmb = (sexo === 'hombre') 
+        ? 66.5 + (13.75 * peso) + (5.003 * altura) - (6.75 * edad) 
+        : 655.1 + (9.563 * peso) + (1.850 * altura) - (4.676 * edad);
 
       const tdee = Math.round(tmb * actividad);
       let tableHTML = '';
@@ -99,40 +87,28 @@ document.addEventListener('DOMContentLoaded', () => {
       if (objetivo === 'deficit') {
         tituloResultados.textContent = 'Tus calorías para Déficit Calórico:';
         tableHTML = `
-          <tr><td>Mantenimiento (Tu gasto actual)</td><td>${tdee}</td></tr>
-          <tr style="background-color: #fef9c3;"><td>Déficit ligero (-250 kcal)</td><td>${tdee - 250}</td></tr>
-          <tr style="background-color: #fef08a;"><td>Déficit moderado (-500 kcal)</td><td>${tdee - 500}</td></tr>
-          <tr style="background-color: #fde047; font-weight: bold;"><td>Déficit agresivo (-750 kcal)</td><td>${tdee - 750}</td></tr>
-        `;
-      } 
-      else if (objetivo === 'superavit') {
-        tituloResultados.textContent = 'Tus calorías para Ganar Masa (Superávit):';
+          <tr><td>Mantenimiento</td><td>${tdee}</td></tr>
+          <tr style="background-color: #fef9c3;"><td>Déficit ligero</td><td>${tdee - 250}</td></tr>
+          <tr style="background-color: #fde047; font-weight: bold;"><td>Déficit agresivo</td><td>${tdee - 750}</td></tr>`;
+      } else if (objetivo === 'superavit') {
+        tituloResultados.textContent = 'Tus calorías para Ganar Masa:';
         tableHTML = `
-          <tr><td>Mantenimiento (Tu gasto actual)</td><td>${tdee}</td></tr>
-          <tr style="background-color: #fef9c3;"><td>Superávit ligero (+250 kcal)</td><td>${tdee + 250}</td></tr>
-          <tr style="background-color: #fef08a;"><td>Superávit moderado (+500 kcal)</td><td>${tdee + 500}</td></tr>
-          <tr style="background-color: #a3e635; font-weight: bold;"><td>Superávit agresivo (+750 kcal)</td><td>${tdee + 750}</td></tr>
-        `;
-      } 
-      else {
+          <tr><td>Mantenimiento</td><td>${tdee}</td></tr>
+          <tr style="background-color: #fef9c3;"><td>Superávit ligero</td><td>${tdee + 250}</td></tr>
+          <tr style="background-color: #a3e635; font-weight: bold;"><td>Superávit agresivo</td><td>${tdee + 750}</td></tr>`;
+      } else {
         tituloResultados.textContent = 'Tus calorías para Mantener tu peso:';
-        tableHTML = `
-          <tr style="background-color: #111; color: #fff;"><td>Mantenimiento estricto</td><td>${tdee}</td></tr>
-        `;
+        tableHTML = `<tr style="background-color: #111; color: #fff;"><td>Mantenimiento estricto</td><td>${tdee}</td></tr>`;
       }
 
       cuerpoTablaCalc.innerHTML = tableHTML;
       resultadosCalc.style.display = 'block';
-      
-      const botonSubmit = formCalculadora.querySelector('button[type="submit"]');
-      botonSubmit.textContent = 'Volver a calcular';
-      
       resultadosCalc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   }
 
   // =========================================
-  // 5. SISTEMA DE CARRITO V2.0 Y DELEGACIÓN
+  // 4. SISTEMA DE CARRITO (INTEGRACIÓN BD + WSP)
   // =========================================
   const numeroWhatsApp = "5491100000000"; 
   let carrito = [];
@@ -140,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let descuentoPorcentaje = 0;
   const cuponesValidos = { "GYM": 15, "SUPPLEX10": 10 };
 
-  // Selectores
   const contadorCarrito = document.querySelector('.encabezado__contador-carrito');
   const carritoModal = document.getElementById('carritoModal');
   const carritoFondo = document.getElementById('carritoFondo');
@@ -167,26 +142,24 @@ document.addEventListener('DOMContentLoaded', () => {
   btnCerrarCarrito?.addEventListener('click', cerrarCarrito);
   carritoFondo?.addEventListener('click', cerrarCarrito);
 
-  // Lógica del Cupón
   btnAplicarCupon?.addEventListener('click', () => {
     const codigo = inputCupon.value.trim().toUpperCase();
     if (cuponesValidos[codigo]) {
       cuponAplicado = codigo;
       descuentoPorcentaje = cuponesValidos[codigo];
-      msjCupon.textContent = `¡Cupón ${codigo} aplicado! (${descuentoPorcentaje}% OFF)`;
+      msjCupon.textContent = `¡Cupón ${codigo} aplicado!`;
       msjCupon.style.color = "#25d366";
       msjCupon.style.display = "block";
     } else {
       cuponAplicado = null;
       descuentoPorcentaje = 0;
-      msjCupon.textContent = "Cupón inválido o expirado.";
+      msjCupon.textContent = "Cupón inválido.";
       msjCupon.style.color = "red";
       msjCupon.style.display = "block";
     }
     renderizarCarrito();
   });
 
-  // Renderizar
   const renderizarCarrito = () => {
     let cantidadTotal = 0;
     let subtotal = 0;
@@ -251,7 +224,85 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Selectores Vista Rápida
+  // FINALIZAR COMPRA: ENVÍO AL SERVIDOR Y WSP
+  btnEnviarWhatsApp?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (carrito.length === 0) return;
+
+    const nombreCliente = document.getElementById('cartNombre').value.trim();
+    const direccionCliente = document.getElementById('cartDireccion').value.trim();
+
+    if (!nombreCliente || !direccionCliente) {
+      alert("⚠️ Por favor, completá tu Nombre y Dirección de Envío para procesar el pedido.");
+      return;
+    }
+
+    const orderId = "PED-" + Math.floor(Math.random() * 90000 + 10000); 
+    const fecha = new Date().toLocaleDateString();
+    
+    let subtotal = 0;
+    carrito.forEach(item => subtotal += (item.precio * item.cantidad));
+    let descuentoMonto = subtotal * (descuentoPorcentaje / 100);
+    let totalFinal = subtotal - descuentoMonto;
+
+    let msjWsp = `*NUEVO PEDIDO: ${orderId}*\n📅 Fecha: ${fecha}\n👤 Cliente: ${nombreCliente}\n📍 Dirección: ${direccionCliente}\n---------------------------\n*ARTÍCULOS:*\n`;
+    carrito.forEach(item => {
+      msjWsp += `🔸 ${item.cantidad}x ${item.nombre} ($${(item.precio * item.cantidad).toLocaleString('es-AR')})\n`;
+    });
+    msjWsp += `---------------------------\nSubtotal: $${subtotal.toLocaleString('es-AR')}\n`;
+    if (descuentoMonto > 0) msjWsp += `Descuento (${cuponAplicado}): -$${descuentoMonto.toLocaleString('es-AR')}\n`;
+    msjWsp += `*TOTAL A PAGAR: $${totalFinal.toLocaleString('es-AR')}*\n\nPor favor, confirmame los métodos de pago. ¡Gracias!`;
+
+    btnEnviarWhatsApp.textContent = "PROCESANDO...";
+
+    const datosPedido = {
+      orderId: orderId,
+      nombre: nombreCliente,
+      direccion: direccionCliente,
+      cupon: cuponAplicado,
+      subtotal: subtotal,
+      descuento: descuentoMonto,
+      total: totalFinal,
+      articulos: carrito
+    };
+
+    // Intentamos guardar el pedido en tu Base de Datos PHP
+    fetch('guardar_pedido.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datosPedido)
+    })
+    .then(respuesta => respuesta.json())
+    .then(datosDelServidor => {
+        // Todo salió bien en el servidor
+        window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msjWsp)}`, '_blank');
+        reiniciarFormularioCarrito();
+    })
+    .catch(error => {
+        // FALLBACK: Si todavía no tenés XAMPP/PHP configurado, igual abre WhatsApp para que no se trabe
+        console.warn("Base de datos no disponible aún. Abriendo WhatsApp directamente.");
+        window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msjWsp)}`, '_blank');
+        reiniciarFormularioCarrito();
+    });
+
+    function reiniciarFormularioCarrito() {
+        carrito = [];
+        cuponAplicado = null;
+        descuentoPorcentaje = 0;
+        document.getElementById('cartNombre').value = "";
+        document.getElementById('cartDireccion').value = "";
+        if(inputCupon) inputCupon.value = "";
+        if(msjCupon) msjCupon.style.display = "none";
+        btnEnviarWhatsApp.textContent = "FINALIZAR COMPRA";
+        cerrarCarrito();
+        renderizarCarrito();
+        animarContador();
+    }
+  });
+
+  // =========================================
+  // 5. EVENTOS GLOBALES (AGREGAR AL CARRITO / VISTA RÁPIDA)
+  // =========================================
   const productoModal = document.getElementById('productoModal');
   const modalProdImg = document.getElementById('modalProdImg');
   const modalProdCat = document.getElementById('modalProdCat');
@@ -264,10 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnCerrarProducto')?.addEventListener('click', cerrarVistaRapida);
   document.getElementById('btnCerrarFondoProducto')?.addEventListener('click', cerrarVistaRapida);
 
-  // DELEGACIÓN GLOBAL (Escucha clics en carritos y tarjetas)
   document.addEventListener('click', (e) => {
-    
-    // Si tocó "Agregar al Carrito"
     const botonAgregar = e.target.closest('.js-agregar-carrito');
     if (botonAgregar) {
       e.preventDefault();
@@ -296,7 +344,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return; 
     }
 
-    // Si tocó una tarjeta para la vista rápida
     const clicEnTarjeta = e.target.closest('.producto-tarjeta, .combo-tarjeta');
     const clicEnFavorito = e.target.closest('.producto-tarjeta__favorito');
 
@@ -304,9 +351,9 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const elementoNombre = clicEnTarjeta.querySelector('.producto-tarjeta__nombre, .combo-tarjeta__nombre');
       
-      if (elementoNombre && typeof inventarioProductos !== 'undefined') {
+      if (elementoNombre && typeof window.inventarioProductos !== 'undefined') {
         const nombreBusqueda = elementoNombre.textContent.trim();
-        const productoData = inventarioProductos.find(p => p.nombre.includes(nombreBusqueda));
+        const productoData = window.inventarioProductos.find(p => p.nombre.includes(nombreBusqueda));
 
         if (productoData && productoModal) {
           modalProdImg.textContent = productoData.img;
@@ -314,98 +361,21 @@ document.addEventListener('DOMContentLoaded', () => {
           modalProdTitulo.textContent = productoData.nombre;
           modalProdDesc.textContent = productoData.desc || "Suplemento deportivo de alta calidad.";
           modalProdPrecio.textContent = `$ ${productoData.precio.toLocaleString('es-AR')}`;
-          
           modalProdBtn.setAttribute('data-nombre', productoData.nombre);
           modalProdBtn.setAttribute('data-precio', productoData.precio);
-
           productoModal.classList.add('producto-modal--activo');
         }
       }
     }
   });
 
-  // Generar Excel y WhatsApp
-  btnEnviarWhatsApp?.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (carrito.length === 0) return;
-
-    const nombreCliente = document.getElementById('cartNombre').value.trim();
-    const direccionCliente = document.getElementById('cartDireccion').value.trim();
-
-    if (!nombreCliente || !direccionCliente) {
-      alert("⚠️ Por favor, completá tu Nombre y Dirección de Envío para procesar el pedido.");
-      return;
-    }
-
-    const orderId = "PED-" + Math.floor(Math.random() * 90000 + 10000); 
-    const fecha = new Date().toLocaleDateString();
-    
-    let subtotal = 0;
-    carrito.forEach(item => subtotal += (item.precio * item.cantidad));
-    let descuentoMonto = subtotal * (descuentoPorcentaje / 100);
-    let totalFinal = subtotal - descuentoMonto;
-
-    // Excel
-    if (typeof XLSX !== 'undefined') {
-      const formatoExcel = [
-        ["SUPPLEX - COMPROBANTE DE VENTA"], [],
-        ["ID Pedido:", orderId, "Fecha:", fecha],
-        ["Cliente:", nombreCliente, "Dirección:", direccionCliente], [],
-        ["CANTIDAD", "PRODUCTO", "PRECIO UNIT.", "SUBTOTAL ITEM"]
-      ];
-
-      carrito.forEach(item => {
-        formatoExcel.push([item.cantidad, item.nombre, item.precio, (item.precio * item.cantidad)]);
-      });
-
-      formatoExcel.push([]);
-      formatoExcel.push(["", "", "SUBTOTAL:", subtotal]);
-      if (descuentoMonto > 0) formatoExcel.push(["", "", `DESCUENTO (${cuponAplicado}):`, -descuentoMonto]);
-      formatoExcel.push(["", "", "TOTAL A PAGAR:", totalFinal]);
-
-      const hoja = XLSX.utils.aoa_to_sheet(formatoExcel);
-      const libro = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(libro, hoja, "Pedido");
-      XLSX.writeFile(libro, `${orderId}_Supplex.xlsx`);
-    }
-
-    // Mensaje Wsp
-    let msjWsp = `*NUEVO PEDIDO: ${orderId}*\n📅 Fecha: ${fecha}\n👤 Cliente: ${nombreCliente}\n📍 Dirección: ${direccionCliente}\n---------------------------\n*ARTÍCULOS:*\n`;
-    carrito.forEach(item => {
-      msjWsp += `🔸 ${item.cantidad}x ${item.nombre} ($${(item.precio * item.cantidad).toLocaleString('es-AR')})\n`;
-    });
-    msjWsp += `---------------------------\nSubtotal: $${subtotal.toLocaleString('es-AR')}\n`;
-    if (descuentoMonto > 0) msjWsp += `Descuento (${cuponAplicado}): -$${descuentoMonto.toLocaleString('es-AR')}\n`;
-    msjWsp += `*TOTAL A PAGAR: $${totalFinal.toLocaleString('es-AR')}*\n\n(Se descargó el archivo Excel del pedido). ¡Gracias!`;
-
-    btnEnviarWhatsApp.textContent = "PROCESANDO...";
-    setTimeout(() => {
-      window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msjWsp)}`, '_blank');
-      
-      carrito = [];
-      cuponAplicado = null;
-      descuentoPorcentaje = 0;
-      document.getElementById('cartNombre').value = "";
-      document.getElementById('cartDireccion').value = "";
-      inputCupon.value = "";
-      if(msjCupon) msjCupon.style.display = "none";
-      btnEnviarWhatsApp.textContent = "FINALIZAR COMPRA";
-      cerrarCarrito();
-      renderizarCarrito();
-      animarContador();
-    }, 1500);
-  });
-
-
   // =========================================
-  // 6. BUSCADOR EN TIEMPO REAL (CORREGIDO)
+  // 6. BUSCADOR EN TIEMPO REAL
   // =========================================
   const buscadorModal = document.getElementById('buscadorModal');
   const inputBuscador = document.getElementById('inputBuscador');
   const btnCerrarBuscador = document.getElementById('btnCerrarBuscador');
   const resultadosBuscador = document.getElementById('resultadosBuscador');
-  
-  // Apuntamos directo al atributo aria-label que tenés en tu index.html
   const btnAbrirBuscador = document.querySelector('[aria-label="Buscar"]');
 
   if (btnAbrirBuscador && buscadorModal) {
@@ -428,17 +398,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (inputBuscador && resultadosBuscador) {
     inputBuscador.addEventListener('keyup', (e) => {
       clearTimeout(temporizadorBuscador);
-      
       temporizadorBuscador = setTimeout(() => {
         const textoBusqueda = e.target.value.toLowerCase().trim();
-
         if (textoBusqueda === '') {
           resultadosBuscador.innerHTML = '<p class="buscador-modal__vacio">Escribí arriba para buscar productos.</p>';
           return;
         }
 
-        if(typeof inventarioProductos !== 'undefined') {
-            let resultados = inventarioProductos.filter(producto => 
+        if(typeof window.inventarioProductos !== 'undefined') {
+            let resultados = window.inventarioProductos.filter(producto => 
               producto.nombre.toLowerCase().includes(textoBusqueda) || 
               producto.cat.toLowerCase().includes(textoBusqueda)
             );
@@ -452,15 +420,11 @@ document.addEventListener('DOMContentLoaded', () => {
               resultadosLimitados.forEach(prod => {
                 const tarjetaHTML = `
                   <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
-                    <div class="producto-tarjeta__imagen-caja">
-                      <div class="producto-tarjeta__placeholder">${prod.img}</div>
-                    </div>
+                    <div class="producto-tarjeta__imagen-caja"><div class="producto-tarjeta__placeholder">${prod.img}</div></div>
                     <div class="producto-tarjeta__info">
                       <span class="producto-tarjeta__marca">${prod.cat}</span>
                       <h3 class="producto-tarjeta__nombre" style="font-size: 0.9rem;">${prod.nombre}</h3>
-                      <div class="producto-tarjeta__precios">
-                        <span class="producto-tarjeta__precio-actual">$ ${prod.precio.toLocaleString('es-AR')}</span>
-                      </div>
+                      <div class="producto-tarjeta__precios"><span class="producto-tarjeta__precio-actual">$ ${prod.precio.toLocaleString('es-AR')}</span></div>
                       <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
                     </div>
                   </article>
@@ -474,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 7. FORMULARIO DE CONTACTO
+  // 7. FORMULARIO CONTACTO Y FAQ
   // =========================================
   const formContacto = document.getElementById('formContacto');
   const msjExitoContacto = document.getElementById('msjExitoContacto');
@@ -496,20 +460,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // =========================================
-  // 8. PREGUNTAS FRECUENTES (MODAL)
-  // =========================================
   const faqModal = document.getElementById('faqModal');
   const btnCerrarFaq = document.getElementById('btnCerrarFaq');
   const btnCerrarFondoFaq = document.getElementById('btnCerrarFondoFaq');
-  
   document.querySelectorAll('.js-abrir-faq').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       faqModal?.classList.add('faq-modal--activo');
     });
   });
-
   const cerrarFaq = () => faqModal?.classList.remove('faq-modal--activo');
   btnCerrarFaq?.addEventListener('click', cerrarFaq);
   btnCerrarFondoFaq?.addEventListener('click', cerrarFaq);
@@ -525,72 +484,76 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =========================================
-  // 9. LÓGICA FILTROS PÁGINA PRODUCTOS
+  // 8. OBTENER PRODUCTOS DEL BACKEND PHP
   // =========================================
-  const grillaCatalogo = document.getElementById('grillaCatalogo');
-  const botonesFiltro = document.querySelectorAll('.catalogo__filtro-btn');
-
-  if (grillaCatalogo && typeof inventarioProductos !== 'undefined') {
-    const renderizarCatalogo = (filtro) => {
-      grillaCatalogo.innerHTML = '';
-      let productosFiltrados = inventarioProductos;
-      
-      if (filtro !== 'todos') {
-        productosFiltrados = inventarioProductos.filter(prod => prod.cat.toLowerCase() === filtro.toLowerCase());
-      }
-
-      if (productosFiltrados.length === 0) {
-        grillaCatalogo.innerHTML = '<div class="catalogo__vacio">Aún no hay productos en esta categoría.</div>';
-        return;
-      }
-
-      productosFiltrados.forEach(prod => {
-        const tarjeta = `
-          <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
-            <div class="producto-tarjeta__imagen-caja">
-              <div class="producto-tarjeta__placeholder">${prod.img}</div>
-            </div>
-            <div class="producto-tarjeta__info">
-              <span class="producto-tarjeta__marca">${prod.cat}</span>
-              <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem;">${prod.nombre}</h3>
-              <div class="producto-tarjeta__precios">
-                <span class="producto-tarjeta__precio-actual">$ ${prod.precio.toLocaleString('es-AR')}</span>
-              </div>
-              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
-            </div>
-          </article>
-        `;
-        grillaCatalogo.insertAdjacentHTML('beforeend', tarjeta);
-      });
-    };
-
-    // Leer URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoriaUrl = urlParams.get('cat');
-
-    if (categoriaUrl) {
-      renderizarCatalogo(categoriaUrl);
-      botonesFiltro.forEach(b => {
-        b.classList.remove('catalogo__filtro-btn--activo');
-        if (b.getAttribute('data-filtro')?.toLowerCase() === categoriaUrl.toLowerCase()) {
-          b.classList.add('catalogo__filtro-btn--activo');
-        }
-      });
-    } else {
-      renderizarCatalogo('todos');
+  window.inventarioProductos = []; 
+  
+  // Función para renderizar el catálogo si estamos en la página productos.html
+  const renderizarCatalogo = (filtro) => {
+    const grillaCatalogo = document.getElementById('grillaCatalogo');
+    if (!grillaCatalogo || window.inventarioProductos.length === 0) return;
+    
+    grillaCatalogo.innerHTML = '';
+    let productosFiltrados = window.inventarioProductos;
+    
+    if (filtro !== 'todos') {
+      productosFiltrados = window.inventarioProductos.filter(prod => prod.cat.toLowerCase() === filtro.toLowerCase());
     }
 
-    botonesFiltro.forEach(boton => {
-      boton.addEventListener('click', (e) => {
-        botonesFiltro.forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
-        e.target.classList.add('catalogo__filtro-btn--activo');
-        const filtroSeleccionado = e.target.getAttribute('data-filtro');
-        renderizarCatalogo(filtroSeleccionado);
-        if(window.innerWidth <= 768) {
-           window.scrollTo({ top: grillaCatalogo.offsetTop - 120, behavior: 'smooth' });
-        }
-      });
+    if (productosFiltrados.length === 0) {
+      grillaCatalogo.innerHTML = '<div class="catalogo__vacio">Aún no hay productos en esta categoría.</div>';
+      return;
+    }
+
+    productosFiltrados.forEach(prod => {
+      const tarjeta = `
+        <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
+          <div class="producto-tarjeta__imagen-caja"><div class="producto-tarjeta__placeholder">${prod.img}</div></div>
+          <div class="producto-tarjeta__info">
+            <span class="producto-tarjeta__marca">${prod.cat}</span>
+            <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem;">${prod.nombre}</h3>
+            <div class="producto-tarjeta__precios"><span class="producto-tarjeta__precio-actual">$ ${prod.precio.toLocaleString('es-AR')}</span></div>
+            <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
+          </div>
+        </article>
+      `;
+      grillaCatalogo.insertAdjacentHTML('beforeend', tarjeta);
     });
-  }
+  };
+
+  // Llamada al backend
+  fetch('obtener_productos.php')
+    .then(respuesta => respuesta.json())
+    .then(datosDelServidor => {
+        window.inventarioProductos = datosDelServidor;
+        
+        // Manejo de filtros en la página del catálogo
+        const botonesFiltro = document.querySelectorAll('.catalogo__filtro-btn');
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoriaUrl = urlParams.get('cat');
+
+        if (categoriaUrl) {
+          renderizarCatalogo(categoriaUrl);
+          botonesFiltro.forEach(b => {
+            b.classList.remove('catalogo__filtro-btn--activo');
+            if (b.getAttribute('data-filtro')?.toLowerCase() === categoriaUrl.toLowerCase()) {
+              b.classList.add('catalogo__filtro-btn--activo');
+            }
+          });
+        } else {
+          renderizarCatalogo('todos');
+        }
+
+        botonesFiltro.forEach(boton => {
+          boton.addEventListener('click', (e) => {
+            botonesFiltro.forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
+            e.target.classList.add('catalogo__filtro-btn--activo');
+            renderizarCatalogo(e.target.getAttribute('data-filtro'));
+          });
+        });
+    })
+    .catch(error => {
+        console.warn("PHP no conectado aún. El buscador y el catálogo estarán vacíos hasta configurar la base de datos.");
+    });
 
 });
