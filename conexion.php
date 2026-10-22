@@ -1,17 +1,19 @@
 <?php
-// Datos para tu servidor local XAMPP
-$host = "localhost"; 
-$user = "root";       // XAMPP usa 'root' por defecto
-$password = "";       // XAMPP no tiene contraseña por defecto
-$dbname = "supplex_db"; // El nombre que le pusiste a tu base en phpMyAdmin
+// Datos del servidor SQL Server (SQLEXPRESS) de Lauti vía Tailscale
+$serverName = "mi-bebe.tail2cdd95.ts.net\\SQLEXPRESS"; // Dominio Tailscale + instancia
+$database = "ComparadorSuplementos";
+$uid = "Diogof";
+$pwd = "Diogoferreyra271352992";
 
-$conn = new mysqli($host, $user, $password, $dbname);
-
-// Forzar la codificación para que los acentos y la 'ñ' se vean bien
-$conn->set_charset("utf8mb4");
-
-if ($conn->connect_error) {
-    // Si falla, le avisamos a JavaScript con un error en formato JSON
-    die(json_encode(["error" => "Falló la conexión: " . $conn->connect_error]));
+try {
+    // Conectamos usando PDO para SQL Server
+    $conn = new PDO("sqlsrv:server=$serverName;Database=$database;TrustServerCertificate=true", $uid, $pwd);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    header('Content-Type: application/json');
+    die(json_encode([
+        "error" => "No se pudo conectar a SQL Server",
+        "detalle" => $e->getMessage()
+    ]));
 }
 ?>

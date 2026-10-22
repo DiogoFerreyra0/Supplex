@@ -1,26 +1,28 @@
 <?php
-// 1. Se conecta a la base de tu amigo
 require 'conexion.php'; 
 
-// 2. Busca TODOS los productos
-$resultado = $conn->query("SELECT * FROM productos");
+try {
+    // Consulta de solo lectura (SELECT) a la base ComparadorSuplementos
+    $stmt = $conn->query("SELECT * FROM productos");
+    $productos = array();
 
-$productos = array();
+    while ($fila = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $productos[] = array(
+            "id" => $fila["id"] ?? 0,
+            "nombre" => ($fila["nombre"] ?? 'Sin nombre') . " - " . ($fila["marca"] ?? ''),
+            "cat" => $fila["tipo"] ?? 'General',
+            "desc" => $fila["descripcion"] ?? '',
+            "precio" => (float)($fila["precio"] ?? 0),
+            "img" => "IMG",
+            "stock" => (int)($fila["stock"] ?? 10)
+        );
+    }
 
-// 3. Los empaqueta uno por uno
-while($fila = $resultado->fetch_assoc()) {
-    $productos[] = array(
-        "id" => $fila["id"],
-        "nombre" => $fila["nombre"] . " - " . $fila["marca"], // Fusionamos Nombre y Marca
-        "cat" => $fila["tipo"],                               // Usamos "tipo" como la categoría
-        "desc" => $fila["descripcion"],
-        "precio" => (int)$fila["precio"],
-        "img" => "IMG", // Acá irá la URL de la foto en el futuro
-        "stock" => $fila["stock"]
-    );
+    header('Content-Type: application/json');
+    echo json_encode($productos);
+
+} catch (PDOException $e) {
+    header('Content-Type: application/json');
+    echo json_encode(["error" => "Error en la consulta SQL: " . $e->getMessage()]);
 }
-
-// 4. Se los envía a tu web en formato JSON (un idioma que JavaScript entiende)
-header('Content-Type: application/json');
-echo json_encode($productos);
 ?>
