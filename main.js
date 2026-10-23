@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
       slidesHero.forEach(slide => slide.classList.remove('portada__diapositiva--activa'));
       puntosHero.forEach(punto => punto.classList.remove('portada__punto--activo'));
       slidesHero[index].classList.add('portada__diapositiva--activa');
-      if(puntosHero[index]) puntosHero[index].classList.add('portada__punto--activo');
+      if (puntosHero[index]) puntosHero[index].classList.add('portada__punto--activo');
     };
     btnSigHero.addEventListener('click', () => {
       slideActual = (slideActual === slidesHero.length - 1) ? 0 : slideActual + 1;
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const msjCupon = document.getElementById('msjCupon');
 
   const abrirCarrito = (e) => {
-    if(e) e.preventDefault();
+    if (e) e.preventDefault();
     carritoModal?.classList.add('carrito-modal--activo');
     renderizarCarrito();
   };
@@ -167,10 +167,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (carrito.length === 0) {
       listaCarrito.innerHTML = '<p class="carrito-modal__vacio">Tu carrito está vacío.</p>';
-      if(contadorCarrito) contadorCarrito.textContent = "0";
-      if(cartSubtotal) cartSubtotal.textContent = "$ 0";
-      if(lineaDescuento) lineaDescuento.style.display = "none";
-      if(totalCarrito) totalCarrito.textContent = "$ 0";
+      if (contadorCarrito) contadorCarrito.textContent = "0";
+      if (cartSubtotal) cartSubtotal.textContent = "$ 0";
+      if (lineaDescuento) lineaDescuento.style.display = "none";
+      if (totalCarrito) totalCarrito.textContent = "$ 0";
       return;
     }
 
@@ -194,13 +194,13 @@ document.addEventListener('DOMContentLoaded', () => {
       listaCarrito.appendChild(divItem);
     });
 
-    if(contadorCarrito) contadorCarrito.textContent = cantidadTotal;
+    if (contadorCarrito) contadorCarrito.textContent = cantidadTotal;
 
     let descuentoMonto = subtotal * (descuentoPorcentaje / 100);
     let totalF = subtotal - descuentoMonto;
 
-    if(cartSubtotal) cartSubtotal.textContent = `$ ${subtotal.toLocaleString('es-AR')}`;
-    if(totalCarrito) totalCarrito.textContent = `$ ${totalF.toLocaleString('es-AR')}`;
+    if (cartSubtotal) cartSubtotal.textContent = `$ ${subtotal.toLocaleString('es-AR')}`;
+    if (totalCarrito) totalCarrito.textContent = `$ ${totalF.toLocaleString('es-AR')}`;
 
     if (descuentoMonto > 0 && lineaDescuento) {
       lineaDescuento.style.display = "flex";
@@ -266,24 +266,20 @@ document.addEventListener('DOMContentLoaded', () => {
       articulos: carrito
     };
 
-    // Detectamos si el cliente está comprando desde /pages/ o desde el inicio
     const rutaPedido = window.location.pathname.includes('/pages/') ? '../guardar_pedido.php' : 'guardar_pedido.php';
 
-    // Intentamos guardar el pedido en tu Base de Datos PHP usando la ruta inteligente
     fetch(rutaPedido, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(datosPedido)
     })
     .then(respuesta => respuesta.json())
-    .then(datosDelServidor => {
-        // Todo salió bien en el servidor
+    .then(() => {
         window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msjWsp)}`, '_blank');
         reiniciarFormularioCarrito();
     })
-    .catch(error => {
-        // FALLBACK: Si todavía no tenés XAMPP/PHP configurado, igual abre WhatsApp para que no se trabe
-        console.warn("Base de datos no disponible aún. Abriendo WhatsApp directamente.");
+    .catch(() => {
+        console.warn("Base de datos de pedidos no disponible aún. Abriendo WhatsApp directamente.");
         window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msjWsp)}`, '_blank');
         reiniciarFormularioCarrito();
     });
@@ -294,8 +290,8 @@ document.addEventListener('DOMContentLoaded', () => {
         descuentoPorcentaje = 0;
         document.getElementById('cartNombre').value = "";
         document.getElementById('cartDireccion').value = "";
-        if(inputCupon) inputCupon.value = "";
-        if(msjCupon) msjCupon.style.display = "none";
+        if (inputCupon) inputCupon.value = "";
+        if (msjCupon) msjCupon.style.display = "none";
         btnEnviarWhatsApp.textContent = "FINALIZAR COMPRA";
         cerrarCarrito();
         renderizarCarrito();
@@ -323,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (botonAgregar) {
       e.preventDefault();
       const nombre = botonAgregar.getAttribute('data-nombre');
-      const precio = parseInt(botonAgregar.getAttribute('data-precio'));
+      const precio = parseFloat(botonAgregar.getAttribute('data-precio')) || 0;
 
       const productoExistente = carrito.find(item => item.nombre === nombre);
       if (productoExistente) {
@@ -354,18 +350,20 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const elementoNombre = clicEnTarjeta.querySelector('.producto-tarjeta__nombre, .combo-tarjeta__nombre');
       
-      if (elementoNombre && typeof window.inventarioProductos !== 'undefined') {
+      if (elementoNombre && Array.isArray(window.inventarioProductos)) {
         const nombreBusqueda = elementoNombre.textContent.trim();
-        const productoData = window.inventarioProductos.find(p => p.nombre.includes(nombreBusqueda));
+        const productoData = window.inventarioProductos.find(p => p.nombre.trim() === nombreBusqueda || p.nombre.includes(nombreBusqueda));
 
         if (productoData && productoModal) {
-          modalProdImg.textContent = productoData.img;
-          modalProdCat.textContent = productoData.cat;
-          modalProdTitulo.textContent = productoData.nombre;
-          modalProdDesc.textContent = productoData.desc || "Suplemento deportivo de alta calidad.";
-          modalProdPrecio.textContent = `$ ${productoData.precio.toLocaleString('es-AR')}`;
-          modalProdBtn.setAttribute('data-nombre', productoData.nombre);
-          modalProdBtn.setAttribute('data-precio', productoData.precio);
+          if (modalProdImg) modalProdImg.textContent = productoData.img || 'IMG';
+          if (modalProdCat) modalProdCat.textContent = productoData.cat || 'General';
+          if (modalProdTitulo) modalProdTitulo.textContent = productoData.nombre;
+          if (modalProdDesc) modalProdDesc.textContent = productoData.desc || "Suplemento deportivo de alta calidad.";
+          if (modalProdPrecio) modalProdPrecio.textContent = `$ ${Number(productoData.precio).toLocaleString('es-AR')}`;
+          if (modalProdBtn) {
+            modalProdBtn.setAttribute('data-nombre', productoData.nombre);
+            modalProdBtn.setAttribute('data-precio', productoData.precio);
+          }
           productoModal.classList.add('producto-modal--activo');
         }
       }
@@ -408,33 +406,33 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        if(typeof window.inventarioProductos !== 'undefined') {
-            let resultados = window.inventarioProductos.filter(producto => 
-              producto.nombre.toLowerCase().includes(textoBusqueda) || 
-              producto.cat.toLowerCase().includes(textoBusqueda)
-            );
+        if (Array.isArray(window.inventarioProductos)) {
+          let resultados = window.inventarioProductos.filter(producto => 
+            producto.nombre.toLowerCase().includes(textoBusqueda) || 
+            (producto.cat && producto.cat.toLowerCase().includes(textoBusqueda))
+          );
 
-            const resultadosLimitados = resultados.slice(0, 12);
-            resultadosBuscador.innerHTML = '';
+          const resultadosLimitados = resultados.slice(0, 12);
+          resultadosBuscador.innerHTML = '';
 
-            if (resultadosLimitados.length === 0) {
-              resultadosBuscador.innerHTML = `<p class="buscador-modal__vacio">No encontramos nada para "<strong>${textoBusqueda}</strong>".</p>`;
-            } else {
-              resultadosLimitados.forEach(prod => {
-                const tarjetaHTML = `
-                  <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
-                    <div class="producto-tarjeta__imagen-caja"><div class="producto-tarjeta__placeholder">${prod.img}</div></div>
-                    <div class="producto-tarjeta__info">
-                      <span class="producto-tarjeta__marca">${prod.cat}</span>
-                      <h3 class="producto-tarjeta__nombre" style="font-size: 0.9rem;">${prod.nombre}</h3>
-                      <div class="producto-tarjeta__precios"><span class="producto-tarjeta__precio-actual">$ ${prod.precio.toLocaleString('es-AR')}</span></div>
-                      <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
-                    </div>
-                  </article>
-                `;
-                resultadosBuscador.insertAdjacentHTML('beforeend', tarjetaHTML);
-              });
-            }
+          if (resultadosLimitados.length === 0) {
+            resultadosBuscador.innerHTML = `<p class="buscador-modal__vacio">No encontramos nada para "<strong>${textoBusqueda}</strong>".</p>`;
+          } else {
+            resultadosLimitados.forEach(prod => {
+              const tarjetaHTML = `
+                <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
+                  <div class="producto-tarjeta__imagen-caja"><div class="producto-tarjeta__placeholder">${prod.img || 'IMG'}</div></div>
+                  <div class="producto-tarjeta__info">
+                    <span class="producto-tarjeta__marca">${prod.cat || 'General'}</span>
+                    <h3 class="producto-tarjeta__nombre" style="font-size: 0.9rem;">${prod.nombre}</h3>
+                    <div class="producto-tarjeta__precios"><span class="producto-tarjeta__precio-actual">$ ${Number(prod.precio).toLocaleString('es-AR')}</span></div>
+                    <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
+                  </div>
+                </article>
+              `;
+              resultadosBuscador.insertAdjacentHTML('beforeend', tarjetaHTML);
+            });
+          }
         }
       }, 300);
     });
@@ -491,46 +489,77 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================
   window.inventarioProductos = []; 
   
+  const crearHTMLTarjeta = (prod) => {
+    return `
+      <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
+        <div class="producto-tarjeta__imagen-caja">
+          <div class="producto-tarjeta__placeholder">${prod.img || 'IMG'}</div>
+        </div>
+        <div class="producto-tarjeta__info">
+          <span class="producto-tarjeta__marca">${prod.cat || 'General'}</span>
+          <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem;">${prod.nombre}</h3>
+          <div class="producto-tarjeta__precios">
+            <span class="producto-tarjeta__precio-actual">$ ${Number(prod.precio).toLocaleString('es-AR')}</span>
+          </div>
+          <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
+        </div>
+      </article>
+    `;
+  };
+
   const renderizarCatalogo = (filtro) => {
     const grillaCatalogo = document.getElementById('grillaCatalogo');
-    if (!grillaCatalogo || window.inventarioProductos.length === 0) return;
+    if (!grillaCatalogo || !Array.isArray(window.inventarioProductos)) return;
     
     grillaCatalogo.innerHTML = '';
     let productosFiltrados = window.inventarioProductos;
     
-    if (filtro !== 'todos') {
-      productosFiltrados = window.inventarioProductos.filter(prod => prod.cat.toLowerCase() === filtro.toLowerCase());
+    if (filtro && filtro !== 'todos') {
+      productosFiltrados = window.inventarioProductos.filter(prod => 
+        prod.cat && prod.cat.toLowerCase() === filtro.toLowerCase()
+      );
     }
 
     if (productosFiltrados.length === 0) {
-      grillaCatalogo.innerHTML = '<div class="catalogo__vacio">Aún no hay productos en esta categoría.</div>';
+      grillaCatalogo.innerHTML = '<div class="catalogo__vacio" style="grid-column: 1/-1; text-align: center; padding: 2rem;">Aún no hay productos disponibles en esta categoría.</div>';
       return;
     }
 
     productosFiltrados.forEach(prod => {
-      const tarjeta = `
-        <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
-          <div class="producto-tarjeta__imagen-caja"><div class="producto-tarjeta__placeholder">${prod.img}</div></div>
-          <div class="producto-tarjeta__info">
-            <span class="producto-tarjeta__marca">${prod.cat}</span>
-            <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem;">${prod.nombre}</h3>
-            <div class="producto-tarjeta__precios"><span class="producto-tarjeta__precio-actual">$ ${prod.precio.toLocaleString('es-AR')}</span></div>
-            <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
-          </div>
-        </article>
-      `;
-      grillaCatalogo.insertAdjacentHTML('beforeend', tarjeta);
+      grillaCatalogo.insertAdjacentHTML('beforeend', crearHTMLTarjeta(prod));
     });
   };
 
-  // Detecta si estamos adentro de la carpeta /pages/ o en el inicio
+  // Renderiza los primeros productos si existe el carrusel de inicio
+  const renderizarCarruselInicio = () => {
+    const carruselExplorar = document.getElementById('carruselExplorar');
+    if (!carruselExplorar || !Array.isArray(window.inventarioProductos) || window.inventarioProductos.length === 0) return;
+    
+    carruselExplorar.innerHTML = '';
+    const productosDestacados = window.inventarioProductos.slice(0, 10);
+    productosDestacados.forEach(prod => {
+      carruselExplorar.insertAdjacentHTML('beforeend', crearHTMLTarjeta(prod));
+    });
+  };
+
+  // Determinar ruta de PHP según la vista
   const rutaPHP = window.location.pathname.includes('/pages/') ? '../obtener_productos.php' : 'obtener_productos.php';
 
   fetch(rutaPHP)
     .then(respuesta => respuesta.json())
     .then(datosDelServidor => {
+        if (!Array.isArray(datosDelServidor)) {
+            console.error("Respuesta no esperada del servidor:", datosDelServidor);
+            const grillaCatalogo = document.getElementById('grillaCatalogo');
+            if (grillaCatalogo) {
+                grillaCatalogo.innerHTML = `<div class="catalogo__vacio" style="grid-column: 1/-1; color: #ef4444; padding: 2rem; text-align: center;">Error al cargar inventario: ${datosDelServidor.error || 'Servidor no disponible'}</div>`;
+            }
+            return;
+        }
+
         window.inventarioProductos = datosDelServidor;
         
+        // Carga la grilla del catálogo (en productos.html)
         const botonesFiltro = document.querySelectorAll('.catalogo__filtro-btn');
         const urlParams = new URLSearchParams(window.location.search);
         const categoriaUrl = urlParams.get('cat');
@@ -547,6 +576,10 @@ document.addEventListener('DOMContentLoaded', () => {
           renderizarCatalogo('todos');
         }
 
+        // Carga el carrusel si está en la home (index.html)
+        renderizarCarruselInicio();
+
+        // Listeners para los botones de filtrado
         botonesFiltro.forEach(boton => {
           boton.addEventListener('click', (e) => {
             botonesFiltro.forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
@@ -556,7 +589,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     })
     .catch(error => {
-        console.warn("PHP no conectado aún. El buscador y el catálogo estarán vacíos hasta configurar la base de datos.");
+        console.warn("No se pudo cargar obtener_productos.php:", error);
+        const grillaCatalogo = document.getElementById('grillaCatalogo');
+        if (grillaCatalogo) {
+            grillaCatalogo.innerHTML = '<div class="catalogo__vacio" style="grid-column: 1/-1; padding: 2rem; text-align: center;">No se pudo conectar con el catálogo de productos.</div>';
+        }
     });
 
 });
