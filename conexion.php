@@ -1,6 +1,6 @@
 <?php
 // Reemplazá 100.X.X.X por la IP de Tailscale de la máquina de Lau
-$serverName = "100.93.175.113,1433";
+$serverName = "100.93.175.113\\SQLEXPRESS";
 $database = "ComparadorSuplementos";
 $uid = "Diogof";
 $pwd = "Diogo271352992";
