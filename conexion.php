@@ -3,7 +3,7 @@
 $serverName = "100.93.175.113,1433";
 $database = "ComparadorSuplementos";
 $uid = "Diogof";
-$pwd = "Diogoferreyra271352992";
+$pwd = "Diogo271352992";
 
 try {
     // Para ODBC Driver 18 es necesario agregar TrustServerCertificate y especificar el driver
