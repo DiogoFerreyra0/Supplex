@@ -689,7 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ordenPrecio === 'menor') filtrados.sort((a, b) => a.precio - b.precio);
     if (ordenPrecio === 'mayor') filtrados.sort((a, b) => b.precio - a.precio);
 
-    // Actualizar contador visual de variantes
+    // Actualizar contador visual de variantes cargadas
     if (contadorDiv) {
       contadorDiv.textContent = `📦 Mostrando ${filtrados.length} de ${window.inventarioProductos.length} variantes cargadas en la base de datos`;
     }
@@ -734,13 +734,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // Cargar datos del servidor y poblar filtros dinámicamente
+  // Cargar datos del servidor y poblar filtros dinámicamente con control anti-caché
   const rutaPHP = window.location.pathname.includes('/pages/') ? '../obtener_productos.php' : 'obtener_productos.php';
 
   fetch(rutaPHP + '?nocache=' + Date.now())
     .then(res => res.json())
     .then(data => {
-      if (!Array.isArray(data)) return;
+      if (!Array.isArray(data)) {
+        console.error("Error al cargar productos:", data);
+        return;
+      }
       window.inventarioProductos = data;
 
       // Poblar Categorías dinámicas en el aside

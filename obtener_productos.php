@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-header("Cache-Control: no-cache, no-store, must-revalidate"); // Evita que el navegador guarde precios viejos en caché
+header("Cache-Control: no-cache, no-store, must-revalidate"); // Evita caché antigua
 header("Pragma: no-cache");
 header("Expires: 0");
 
@@ -21,25 +21,25 @@ if (isset($datos["aviso"]) || isset($datos["error_python"])) {
     exit;
 }
 
-$productos = [];
+$productos = []; // CORREGIDO: Inicializamos correctamente la variable que luego devolvemos
 
 foreach ($datos as $index => $fila) {
     $f = array_change_key_case($fila, CASE_LOWER);
 
     $id = $f["varianteid"] ?? ($index + 1);
-    $nombreBase = $f["nombre"] ?? $f["nombreproducto"] ?? 'Suplemento';
+    $nombreBase = $f["nombre"] ?? $f["nombreproducto"] ?? $f["producto"] ?? 'Suplemento';
     $marca = $f["marca"] ?? 'Genérica';
     $categoria = $f["categoria"] ?? 'General';
     $presentacion = $f["presentacion"] ?? '';
     $saborColor = $f["saborcolor"] ?? '';
 
-    // Capturamos el PrecioVenta real
+    // Capturamos el PrecioVenta real de la tabla VariantesProducto
     $precioVenta = $f["precioventa"] ?? $f["precio"] ?? 0;
     if (is_string($precioVenta)) {
         $precioVenta = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $precioVenta));
     }
 
-    $stockActual = $f["stockactual"] ?? 10;
+    $stockActual = $f["stockactual"] ?? $f["stock"] ?? 10;
 
     $productos[] = [
         "id" => $id,
