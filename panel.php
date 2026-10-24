@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// 1. EL GUARDIÁN: Si NO estás logeado, te expulsa al login
 if (!isset($_SESSION['admin_logeado']) || $_SESSION['admin_logeado'] !== true) {
     header("Location: login.php");
     exit();
@@ -16,14 +15,12 @@ $carpeta_excel = __DIR__ . "/ventas_excel/";
 if (!file_exists($carpeta_img)) mkdir($carpeta_img, 0777, true);
 if (!file_exists($carpeta_excel)) mkdir($carpeta_excel, 0777, true);
 
-// Metadatos locales (fotos y configuraciones web)
 $meta_web = file_exists($archivo_meta) ? json_decode(file_get_contents($archivo_meta), true) : [];
 if (!is_array($meta_web)) $meta_web = [];
 if (!isset($meta_web['variantes'])) $meta_web['variantes'] = [];
 if (!isset($meta_web['productos_img'])) $meta_web['productos_img'] = [];
 if (!isset($meta_web['eliminados'])) $meta_web['eliminados'] = [];
 
-// Usuario de auditoría asignado en dbo.Usuarios (ID 8 = PAGINA WEB / supplexcorp@gmail.com)
 $id_usuario_auditoria = (int)($_SESSION['admin_usuario_id'] ?? 8);
 
 function enviar_a_lauti($url, $payload) {
@@ -61,33 +58,36 @@ function enviar_a_lauti($url, $payload) {
     return $resultado ? json_decode($resultado, true) : null;
 }
 
-// 2. PROCESAR FORMULARIO CON REDIRECCIÓN (PRG) PARA EVITAR REENVÍOS DE FORMULARIO
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
     $modo = $_POST['accion_form']; 
 
-    // A) CREAR NUEVO PRODUCTO PADRE
+    // A) CREAR O EDITAR PRODUCTO PADRE (Lleva la Descripción/Observaciones)
     if ($modo === 'crear_producto_padre') {
+        $producto_id_padre = (int)($_POST['producto_id_padre'] ?? 0);
         $nombre_padre = trim($_POST['nombre_padre'] ?? '');
         $marca_padre = trim($_POST['marca_padre'] ?? '');
         $categoria_padre = trim($_POST['categoria_padre'] ?? '');
+        $descripcion_padre = trim($_POST['descripcion_padre'] ?? '');
 
         if ($nombre_padre === '' || $marca_padre === '' || $categoria_padre === '') {
-            $_SESSION['flash_mensaje'] = "⚠️ Para crear un Nuevo Producto Padre debés completar el Nombre y elegir Marca y Categoría.";
+            $_SESSION['flash_mensaje'] = "⚠️ Para gestionar un Producto Padre debés completar el Nombre, Marca y Categoría.";
             $_SESSION['flash_tipo'] = "error";
         } else {
             $resp = enviar_a_lauti($url_lauti, [
                 "accion" => "crear_producto_padre",
+                "producto_id" => $producto_id_padre,
                 "nombre" => $nombre_padre,
                 "marca" => $marca_padre,
-                "categoria" => $categoria_padre
+                "categoria" => $categoria_padre,
+                "descripcion" => $descripcion_padre
             ]);
 
             if ($resp && isset($resp['success']) && $resp['success'] === true) {
-                $_SESSION['flash_mensaje'] = "✅ Producto Padre '$nombre_padre' ($marca_padre - $categoria_padre) creado en SQL Server con TipoProducto = 'Producto' y UsuarioId = 8 (ID: {$resp['producto_id']}). Ya podés seleccionarlo en 'Nueva Variante'.";
+                $_SESSION['flash_mensaje'] = "✅ Producto Padre '$nombre_padre' guardado correctamente en SQL Server (ID: {$resp['producto_id']}).";
                 $_SESSION['flash_tipo'] = "ok";
             } else {
-                $err = $resp['error_python'] ?? "No hubo respuesta desde el servidor de Lauti (verificá que api_productos.py esté corriendo).";
-                $_SESSION['flash_mensaje'] = "❌ Error al crear el producto padre: " . $err;
+                $err = $resp['error_python'] ?? "Sin respuesta del servidor de Lauti.";
+                $_SESSION['flash_mensaje'] = "❌ Error en el producto padre: " . $err;
                 $_SESSION['flash_tipo'] = "error";
             }
         }
@@ -95,30 +95,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
         exit();
     }
 
-    // B) CREAR NUEVA VARIANTE O EDITAR VARIANTE
+    // B) CREAR O EDITAR VARIANTE (Sin descripción propia, solo toma la del padre)
     elseif ($modo === 'crear_variante' || $modo === 'editar_variante') {
         $variante_id = (int)($_POST['variante_id'] ?? 0);
         $producto_id = (int)($_POST['producto_id'] ?? 0);
         $nombre = trim($_POST['nombre_oculto'] ?? '');
         $marca = trim($_POST['marca_oculta'] ?? '');
-        $categoria = trim($_POST['categoria_oculta'] ?? '');
         $presentacion = trim($_POST['presentacion'] ?? '');
         $sabor = trim($_POST['sabor'] ?? '');
         $precio = (float)($_POST['precio'] ?? 0);
-        $descripcion = trim($_POST['descripcion'] ?? '');
         $aplicar_img_grupo = isset($_POST['aplicar_img_grupo']);
 
-        // Subida de imagen
         $ruta_imagen_guardada = trim($_POST['imagen_actual'] ?? '');
         if (isset($_FILES['imagen_archivo']) && $_FILES['imagen_archivo']['error'] === UPLOAD_ERR_OK) {
             $tmp_name = $_FILES['imagen_archivo']['tmp_name'];
             $nombre_orig = $_FILES['imagen_archivo']['name'];
             $ext = strtolower(pathinfo($nombre_orig, PATHINFO_EXTENSION));
-            $ext_permitidas = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-
-            if (in_array($ext, $ext_permitidas)) {
-                $nombre_limpio = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($nombre ?: 'producto'));
-                $nombre_archivo = "prod_" . substr($nombre_limpio, 0, 25) . "_" . time() . "." . $ext;
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
+                $nombre_archivo = "prod_" . substr(preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($nombre)), 0, 25) . "_" . time() . "." . $ext;
                 if (move_uploaded_file($tmp_name, $carpeta_img . $nombre_archivo)) {
                     $ruta_imagen_guardada = "img/productos/" . $nombre_archivo;
                 }
@@ -127,7 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
 
         if ($modo === 'crear_variante') {
             if ($producto_id === 0) {
-                $_SESSION['flash_mensaje'] = "⚠️ Debés seleccionar un Producto Padre existente de la lista para asignarle la variante.";
+                $_SESSION['flash_mensaje'] = "⚠️ Debés seleccionar un Producto Padre.";
                 $_SESSION['flash_tipo'] = "error";
             } else {
                 $resp = enviar_a_lauti($url_lauti, [
@@ -135,17 +129,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
                     "producto_id" => $producto_id,
                     "presentacion" => $presentacion,
                     "sabor" => $sabor,
-                    "precio" => $precio,
-                    "descripcion" => $descripcion
+                    "precio" => $precio
                 ]);
 
                 if ($resp && isset($resp['success']) && $resp['success'] === true) {
                     $variante_id = (int)$resp['variante_id'];
-                    $_SESSION['flash_mensaje'] = "✅ Nueva variante de '$nombre' ($presentacion - $sabor) guardada en SQL Server (UsuarioId = 8).";
+                    $_SESSION['flash_mensaje'] = "✅ Variante de '$nombre' ($presentacion - $sabor) creada.";
                     $_SESSION['flash_tipo'] = "ok";
                 } else {
-                    $err = $resp['error_python'] ?? "No hubo respuesta desde el servidor de Lauti.";
-                    $_SESSION['flash_mensaje'] = "❌ Error al crear la variante: " . $err;
+                    $_SESSION['flash_mensaje'] = "❌ Error al crear la variante: " . ($resp['error_python'] ?? "Fallo de conexión");
                     $_SESSION['flash_tipo'] = "error";
                 }
             }
@@ -155,16 +147,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
                 "variante_id" => $variante_id,
                 "presentacion" => $presentacion,
                 "sabor" => $sabor,
-                "precio" => $precio,
-                "descripcion" => $descripcion
+                "precio" => $precio
             ]);
 
             if ($resp && isset($resp['success']) && $resp['success'] === true) {
-                $_SESSION['flash_mensaje'] = "✅ Variante '$nombre' ($presentacion - $sabor) actualizada en SQL Server (UsuarioId = 8).";
+                $_SESSION['flash_mensaje'] = "✅ Variante '$nombre' ($presentacion - $sabor) actualizada.";
                 $_SESSION['flash_tipo'] = "ok";
             } else {
-                $err = $resp['error_python'] ?? "No hubo respuesta desde el servidor de Lauti.";
-                $_SESSION['flash_mensaje'] = "❌ Error al editar la variante: " . $err;
+                $_SESSION['flash_mensaje'] = "❌ Error al editar: " . ($resp['error_python'] ?? "Fallo de conexión");
                 $_SESSION['flash_tipo'] = "error";
             }
         }
@@ -177,7 +167,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
                 "presentacion" => $presentacion,
                 "sabor" => $sabor,
                 "precio" => $precio,
-                "desc" => $descripcion,
                 "img" => $img_final
             ];
 
@@ -193,12 +182,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
     }
 }
 
-// 3. RECUPERAR MENSAJE DE SESIÓN FLASH
 $mensaje = $_SESSION['flash_mensaje'] ?? "";
 $tipo_alerta = $_SESSION['flash_tipo'] ?? "ok";
 unset($_SESSION['flash_mensaje'], $_SESSION['flash_tipo']);
 
-// 4. PROCESAR DESACTIVACIÓN DE VARIANTE (Activa = 0)
 if (isset($_GET['borrar'])) {
     $id_borrar = (int)$_GET['borrar'];
     enviar_a_lauti($url_lauti, ["accion" => "borrar", "variante_id" => $id_borrar]);
@@ -210,7 +197,6 @@ if (isset($_GET['borrar'])) {
     exit();
 }
 
-// 5. CONSULTAR DATOS A LA API DE LAUTI
 $inventario = [];
 $productos_padre = [];
 $marcas_sistema = [];
@@ -263,20 +249,19 @@ if ($json_panel !== FALSE && $json_panel !== null) {
         $cat = trim((string)($f["categoria"] ?? 'General'));
         $pres = trim((string)($f["presentacion"] ?? ''));
         $sabor = trim((string)($f["saborcolor"] ?? ''));
+        $desc = trim((string)($f["observaciones"] ?? ''));
 
         $rawPrecio = $f["precioventa"] ?? $f["precio"] ?? 0;
         $precio = is_numeric($rawPrecio) ? (float)$rawPrecio : (float)preg_replace('/[^0-9.]/', '', str_replace(',', '.', (string)$rawPrecio));
 
         $rawStock = $f["stockactual"] ?? $f["stock"] ?? 0;
         $stock = (int)round((float)str_replace(',', '.', (string)$rawStock));
-        $desc = trim((string)($f["observaciones"] ?? ''));
 
         if (isset($meta_web['variantes'][$id])) {
             $ov = $meta_web['variantes'][$id];
             if (isset($ov['presentacion'])) $pres = $ov['presentacion'];
             if (isset($ov['sabor'])) $sabor = $ov['sabor'];
             if (isset($ov['precio'])) $precio = (float)$ov['precio'];
-            if (!empty($ov['desc'])) $desc = $ov['desc'];
         }
 
         $clave_prod = mb_strtolower($nombre . "|" . $marca, 'UTF-8');
@@ -295,31 +280,9 @@ if ($json_panel !== FALSE && $json_panel !== null) {
             "desc" => $desc,
             "img" => $img
         ];
-
-        if ($prod_id > 0 && !isset($productos_padre_map[$prod_id])) {
-            $productos_padre_map[$prod_id] = [
-                "ProductoId" => $prod_id,
-                "Nombre" => $nombre,
-                "Marca" => $marca,
-                "Categoria" => $cat
-            ];
-        }
     }
 }
 
-if (empty($productos_padre) && !empty($productos_padre_map)) {
-    $productos_padre = array_values($productos_padre_map);
-}
-if (empty($marcas_sistema) && !empty($inventario)) {
-    $marcas_sistema = array_values(array_unique(array_filter(array_column($inventario, 'marca'))));
-    sort($marcas_sistema);
-}
-if (empty($categorias_sistema) && !empty($inventario)) {
-    $categorias_sistema = array_values(array_unique(array_filter(array_column($inventario, 'cat'))));
-    sort($categorias_sistema);
-}
-
-// 6. SINCRONIZAR PRESUPUESTOS Y PEDIDOS
 $ahora = time();
 $registro_pedidos = file_exists($archivo_pedidos) ? json_decode(file_get_contents($archivo_pedidos), true) : [];
 if (!is_array($registro_pedidos)) $registro_pedidos = [];
@@ -335,6 +298,8 @@ if (!empty($pedidos_bd)) {
                 "orderId" => $cod,
                 "nombre" => $p_bd['ClienteNombre'] ?? 'Cliente',
                 "direccion" => $p_bd['ClienteDireccion'] ?? '',
+                "email" => $p_bd['ClienteEmail'] ?? '',
+                "telefono" => $p_bd['ClienteTelefono'] ?? '',
                 "cupon" => $p_bd['CuponAplicado'] ?? '',
                 "subtotal" => (float)($p_bd['Subtotal'] ?? 0),
                 "descuento" => (float)($p_bd['Descuento'] ?? 0),
@@ -393,7 +358,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         }
         * { box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--gris); margin: 0; padding: 20px; color: #27272a; }
-        .contenedor { max-width: 1360px; margin: 0 auto; }
+        .contenedor { max-width: 1400px; margin: 0 auto; }
         
         .panel-header { display: flex; justify-content: space-between; align-items: center; background: var(--oscuro); color: #fff; padding: 18px 28px; border-radius: 12px; margin-bottom: 24px; flex-wrap: wrap; gap: 15px; }
         .panel-header h2 { margin: 0; font-weight: 900; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
@@ -408,7 +373,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         .alerta { background: var(--oscuro); color: var(--primario); padding: 15px 20px; border-radius: 8px; margin-bottom: 24px; font-weight: 700; border-left: 5px solid var(--primario); }
         .alerta--error { color: #fca5a5; border-left-color: var(--alerta); }
 
-        .panel-grilla { display: grid; grid-template-columns: 400px 1fr; gap: 24px; align-items: start; }
+        .panel-grilla { display: grid; grid-template-columns: 420px 1fr; gap: 24px; align-items: start; }
         .caja { background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid var(--borde); margin-bottom: 24px; }
         .caja h3 { margin-top: 0; font-weight: 900; text-transform: uppercase; border-bottom: 2px solid var(--oscuro); padding-bottom: 10px; margin-bottom: 16px; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; }
 
@@ -441,6 +406,8 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         .btn-guardar:hover { background: var(--primario); color: var(--oscuro); }
         .btn-cancelar-edicion { display: none; width: 100%; padding: 10px; margin-top: 8px; background: #e4e4e7; color: #27272a; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.82rem; }
 
+        .buscador-pedidos { width: 100%; padding: 12px 14px; border: 1px solid var(--borde); border-radius: 8px; margin-bottom: 16px; font-size: 0.92rem; }
+        
         .grilla-pedidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
         .tarjeta-pedido { background: #fafafa; border: 1px solid var(--borde); padding: 14px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; }
         .tarjeta-pedido__top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -460,13 +427,13 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         .miniatura-tabla { width: 46px; height: 46px; border-radius: 6px; object-fit: contain; background: #f4f4f5; border: 1px solid var(--borde); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; color: #71717a; }
         .badge-cat { background: #e4e4e7; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 800; }
         .precio-tabla { font-weight: 900; color: var(--oscuro); font-size: 0.95rem; }
-        .acciones-celda { display: flex; gap: 6px; }
+        .acciones-celda { display: flex; gap: 6px; flex-wrap: wrap; }
         .btn-editar { background: var(--oscuro); color: var(--primario); border: none; padding: 6px 10px; border-radius: 4px; font-weight: 800; font-size: 0.78rem; cursor: pointer; }
         .btn-editar:hover { background: var(--primario); color: var(--oscuro); }
         .btn-borrar { color: var(--alerta); text-decoration: none; font-weight: 800; font-size: 0.78rem; padding: 5px 9px; border: 1px solid var(--alerta); border-radius: 4px; }
         .btn-borrar:hover { background: var(--alerta); color: #fff; }
 
-        @media (max-width: 980px) { .panel-grilla { grid-template-columns: 1fr; } }
+        @media (max-width: 1024px) { .panel-grilla { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -500,13 +467,12 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         <div class="caja" style="position: sticky; top: 20px;">
             <h3 id="tituloFormulario">➕ NUEVO PRODUCTO / VARIANTE</h3>
 
+            <!-- CHECK: NUEVA VARIANTE vs NUEVO PRODUCTO PADRE -->
             <div class="selector-tipo-alta" id="selectorTipoAlta">
-                
                 <label class="opcion-check" id="labelCheckPadre">
                     <input type="radio" name="tipo_alta_check" value="padre" id="radioNuevoPadre">
                     Nuevo Producto (Padre)
                 </label>
-
                 <label class="opcion-check opcion-check--activa" id="labelCheckVariante">
                     <input type="radio" name="tipo_alta_check" value="variante" id="radioNuevaVariante" checked>
                     Nueva Variante
@@ -520,8 +486,9 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                 <input type="hidden" name="nombre_oculto" id="inputNombreOculto" value="">
                 <input type="hidden" name="marca_oculta" id="inputMarcaOculta" value="">
                 <input type="hidden" name="categoria_oculta" id="inputCategoriaOculta" value="">
+                <input type="hidden" name="producto_id_padre" id="inputProductoIdPadre" value="0">
 
-                <!-- BLOQUE A: PRODUCTO PADRE -->
+                <!-- BLOQUE A: PRODUCTO PADRE (Incluye la Descripción General) -->
                 <div id="bloqueProductoPadre" style="display: none;">
                     <div class="campo">
                         <label>Nombre del Suplemento (Obligatorio):</label>
@@ -547,8 +514,12 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                             </select>
                         </div>
                     </div>
+                    <div class="campo">
+                        <label>Descripción para la Card Flotante:</label>
+                        <textarea name="descripcion_padre" id="inputDescripcionPadre" rows="3" placeholder="Beneficios, modo de uso, detalles generales del suplemento..."></textarea>
+                    </div>
                     <p style="font-size: 0.78rem; color: #52525b; background: #f4f4f5; padding: 10px; border-radius: 6px; margin-bottom: 14px;">
-                        ℹ️ El <strong>Producto Padre</strong> se guarda en <code>dbo.Productos</code> con <code>TipoProducto = 'Producto'</code> y auditoría <code>UsuarioId = 8</code>.
+                        ℹ️ La descripción general y los detalles se configuran a nivel del <strong>Producto Padre</strong>.
                     </p>
                 </div>
 
@@ -562,7 +533,8 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                                 <option value="<?php echo (int)$pp['ProductoId']; ?>"
                                         data-nombre="<?php echo htmlspecialchars($pp['Nombre']); ?>"
                                         data-marca="<?php echo htmlspecialchars($pp['Marca']); ?>"
-                                        data-cat="<?php echo htmlspecialchars($pp['Categoria']); ?>">
+                                        data-cat="<?php echo htmlspecialchars($pp['Categoria']); ?>"
+                                        data-desc="<?php echo htmlspecialchars($pp['Observaciones'] ?? ''); ?>">
                                     <?php echo htmlspecialchars($pp['Nombre']); ?> (<?php echo htmlspecialchars($pp['Marca']); ?>)
                                 </option>
                             <?php endforeach; ?>
@@ -613,15 +585,10 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                         </div>
                     </div>
 
-                    <div class="campo">
-                        <label>Descripción para la Card Flotante:</label>
-                        <textarea name="descripcion" id="inputDescripcion" rows="2" placeholder="Beneficios, modo de uso, detalles del suplemento..." required></textarea>
-                    </div>
-
                     <div class="caja-foto">
                         <img id="previewImagen" class="preview-img" src="" alt="Vista previa">
                         <label for="inputImagenArchivo" style="display:block; font-weight:800; font-size:0.8rem; margin-bottom:6px; cursor:pointer;">
-                            📷 Subir / Cambiar Imagen del Producto
+                            📷 Subir / Cambiar Imagen de la Variante
                         </label>
                         <input type="file" name="imagen_archivo" id="inputImagenArchivo" accept="image/*" style="font-size: 0.78rem; width: 100%;">
                         <label class="check-grupo">
@@ -642,23 +609,28 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
             <div class="caja">
                 <h3>
                     <span>⏳ Presupuestos Activos (Duración: 25 minutos)</span>
-                    <span style="font-size: 0.75rem; color: #71717a; font-weight: 700;">Estado: PENDIENTE</span>
+                    <span style="font-size: 0.75rem; color: #71717a; font-weight: 700;">ESTADO: PENDIENTE</span>
                 </h3>
                 <p style="font-size: 0.82rem; color: #52525b; margin-top: -8px; margin-bottom: 14px;">
                     Cada pedido iniciado en la web genera un presupuesto en estado <strong>"pendiente"</strong> que viaja al sistema de Lauti. Si no se confirma dentro de los 25 minutos, se elimina automáticamente.
                 </p>
 
+                <input type="text" id="buscadorPresupuestos" class="buscador-pedidos" placeholder="🔍 Buscar presupuestos por nombre, email, teléfono, orden o fecha...">
+
                 <?php if (count($presupuestos_pendientes) > 0): ?>
-                    <div class="grilla-pedidos">
+                    <div class="grilla-pedidos" id="grillaPresupuestos">
                         <?php foreach ($presupuestos_pendientes as $pres): ?>
-                            <div class="tarjeta-pedido" data-expira="<?php echo (int)$pres['segundos_restantes']; ?>">
+                            <div class="tarjeta-pedido fila-presupuesto" data-expira="<?php echo (int)$pres['segundos_restantes']; ?>">
                                 <div class="tarjeta-pedido__top">
                                     <strong>📄 <?php echo htmlspecialchars($pres['orderId']); ?></strong>
                                     <span class="badge-estado badge-estado--pendiente">pendiente</span>
                                 </div>
                                 <div style="font-size: 0.82rem; color: #3f3f46;">
                                     👤 <strong><?php echo htmlspecialchars($pres['nombre']); ?></strong><br>
+                                    ✉️ <?php echo htmlspecialchars($pres['email'] ?? ''); ?><br>
+                                    📞 <?php echo htmlspecialchars($pres['telefono'] ?? ''); ?><br>
                                     📍 <?php echo htmlspecialchars($pres['direccion']); ?><br>
+                                    📅 <?php echo htmlspecialchars($pres['fecha']); ?><br>
                                     💰 Total: <strong>$ <?php echo number_format((float)$pres['total'], 0, ',', '.'); ?></strong>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
@@ -666,34 +638,36 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                                         ⏱️ <?php echo floor($pres['segundos_restantes'] / 60) . "m " . ($pres['segundos_restantes'] % 60) . "s"; ?>
                                     </span>
                                     <?php if (!empty($pres['archivo_csv']) && file_exists($carpeta_excel . $pres['archivo_csv'])): ?>
-                                        <a href="ventas_excel/<?php echo htmlspecialchars($pres['archivo_csv']); ?>" download class="btn-descargar">Descargar Presupuesto</a>
+                                        <a href="ventas_excel/<?php echo htmlspecialchars($pres['archivo_csv']); ?>" download class="btn-descargar">Descargar CSV</a>
                                     <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <p style="color: #71717a; font-size: 0.85rem; margin: 0;">No hay presupuestos pendientes en este momento.</p>
+                    <p style="color: #71717a; font-size: 0.85rem; margin: 0;" id="msjCeroPresupuestos">No hay presupuestos pendientes en este momento.</p>
                 <?php endif; ?>
             </div>
 
-            <!-- RECEPCIONES DE VENTA -->
+            <!-- RECEPCIONES DE VENTA / PEDIDOS CONCRETADOS -->
             <div class="caja">
                 <h3>
-                    <span>✅ Recepciones y Comprobantes de Venta (Pedidos Concretados)</span>
+                    <span>✅ Recepciones de Venta (Pedidos Concretados)</span>
                     <span style="font-size: 0.75rem; color: #166534; font-weight: 700;">Sincronizado con Sistema de Lau</span>
                 </h3>
                 <p style="font-size: 0.82rem; color: #52525b; margin-top: -8px; margin-bottom: 14px;">
                     Cuando Lauti confirma la compra desde su sistema, el presupuesto pasa a esta lista mostrando su estado actual (<strong>"confirmada/en camino"</strong> o <strong>"confirmado/entregado"</strong>).
                 </p>
 
+                <input type="text" id="buscadorVentas" class="buscador-pedidos" placeholder="🔍 Buscar ventas por nombre, email, teléfono, orden o fecha...">
+
                 <?php if (count($ventas_confirmadas) > 0): ?>
-                    <div class="grilla-pedidos">
+                    <div class="grilla-pedidos" id="grillaVentas">
                         <?php foreach ($ventas_confirmadas as $venta): 
                             $est_actual = mb_strtolower(trim($venta['estado']), 'UTF-8');
                             $clase_badge = (strpos($est_actual, 'entregado') !== false) ? 'badge-estado--entregado' : 'badge-estado--camino';
                         ?>
-                            <div class="tarjeta-pedido">
+                            <div class="tarjeta-pedido fila-venta">
                                 <div class="tarjeta-pedido__top">
                                     <strong>🧾 <?php echo htmlspecialchars($venta['orderId']); ?></strong>
                                     <span class="badge-estado <?php echo $clase_badge; ?>">
@@ -702,6 +676,8 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                                 </div>
                                 <div style="font-size: 0.82rem; color: #3f3f46;">
                                     👤 <strong><?php echo htmlspecialchars($venta['nombre']); ?></strong><br>
+                                    ✉️ <?php echo htmlspecialchars($venta['email'] ?? ''); ?><br>
+                                    📞 <?php echo htmlspecialchars($venta['telefono'] ?? ''); ?><br>
                                     📍 <?php echo htmlspecialchars($venta['direccion']); ?><br>
                                     📅 Fecha: <?php echo htmlspecialchars($venta['fecha']); ?><br>
                                     💰 Total Cobrado: <strong>$ <?php echo number_format((float)$venta['total'], 0, ',', '.'); ?></strong>
@@ -715,7 +691,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <p style="color: #71717a; font-size: 0.85rem; margin: 0;">Aún no hay ventas confirmadas desde el sistema de Lauti.</p>
+                    <p style="color: #71717a; font-size: 0.85rem; margin: 0;" id="msjCeroVentas">Aún no hay ventas confirmadas desde el sistema de Lauti.</p>
                 <?php endif; ?>
             </div>
 
@@ -743,7 +719,23 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                             <?php if (count($inventario) > 0): ?>
                                 <?php foreach ($inventario as $prod): 
                                     $tiene_img = !empty($prod['img']) && $prod['img'] !== 'IMG' && $prod['img'] !== 'SUPPLEX';
-                                    $json_prod = htmlspecialchars(json_encode($prod, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
+                                    
+                                    // Búsqueda de la descripción original del padre
+                                    $desc_padre = '';
+                                    if ($prod['producto_id'] > 0 && isset($productos_padre_map[$prod['producto_id']])) {
+                                        // La descripción viene mapeada desde el padre
+                                        foreach ($productos_padre as $pp) {
+                                            if ($pp['ProductoId'] == $prod['producto_id']) {
+                                                $desc_padre = $pp['Observaciones'] ?? '';
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    // Combinamos los datos para JS
+                                    $prod_js = $prod;
+                                    $prod_js['desc_padre'] = $desc_padre;
+                                    
+                                    $json_prod = htmlspecialchars(json_encode($prod_js, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
                                 ?>
                                     <tr class="fila-inventario">
                                         <td>
@@ -767,6 +759,8 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                                         <td>
                                             <div class="acciones-celda">
                                                 <button type="button" class="btn-editar" onclick='cargarParaEditar(<?php echo $json_prod; ?>)'>✏️ Editar / Foto</button>
+                                                <!-- Botón para Editar Padre Rápidamente -->
+                                                <button type="button" class="btn-editar" style="background:#52525b;" onclick='cargarPadreParaEditar(<?php echo $json_prod; ?>)'>⚙️ Padre</button>
                                                 <a href="panel.php?borrar=<?php echo (int)$prod['id']; ?>" class="btn-borrar" onclick="return confirm('¿Seguro que querés desactivar esta variante de la tienda?');">Borrar</a>
                                             </div>
                                         </td>
@@ -810,24 +804,26 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
     const inputNombreOculto = document.getElementById('inputNombreOculto');
     const inputMarcaOculta = document.getElementById('inputMarcaOculta');
     const inputCategoriaOculta = document.getElementById('inputCategoriaOculta');
+    const inputProductoIdPadre = document.getElementById('inputProductoIdPadre');
 
     function actualizarModoAlta() {
         if (radioPadre.checked) {
             labelPadre.classList.add('opcion-check--activa');
             labelVariante.classList.remove('opcion-check--activa');
             accionForm.value = 'crear_producto_padre';
+            inputProductoIdPadre.value = '0';
             bloquePadre.style.display = 'block';
             bloqueVariante.style.display = 'none';
 
             document.getElementById('inputNombrePadre').required = true;
             document.getElementById('selectMarcaPadre').required = true;
             document.getElementById('selectCategoriaPadre').required = true;
+            document.getElementById('inputDescripcionPadre').required = true;
 
             selectProductoPadre.required = false;
             document.getElementById('selectPresentacion').required = false;
             document.getElementById('selectSabor').required = false;
             document.getElementById('inputPrecio').required = false;
-            document.getElementById('inputDescripcion').required = false;
         } else {
             labelVariante.classList.add('opcion-check--activa');
             labelPadre.classList.remove('opcion-check--activa');
@@ -838,6 +834,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
             document.getElementById('inputNombrePadre').required = false;
             document.getElementById('selectMarcaPadre').required = false;
             document.getElementById('selectCategoriaPadre').required = false;
+            document.getElementById('inputDescripcionPadre').required = false;
 
             selectProductoPadre.style.display = 'block';
             selectProductoPadre.required = true;
@@ -845,7 +842,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
             document.getElementById('selectPresentacion').required = true;
             document.getElementById('selectSabor').required = true;
             document.getElementById('inputPrecio').required = true;
-            document.getElementById('inputDescripcion').required = true;
             inputStockBloqueado.value = '0 (Por Movimientos)';
         }
     }
@@ -866,14 +862,15 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         inputCategoriaOculta.value = cat;
     });
 
+    // EDITAR VARIANTE
     function cargarParaEditar(prod) {
         selectorTipoAlta.style.display = 'none';
         bloquePadre.style.display = 'none';
         bloqueVariante.style.display = 'block';
 
-        tituloFormulario.textContent = 'editar';
+        tituloFormulario.textContent = '✏️ editar variante';
         tituloFormulario.style.textTransform = 'lowercase';
-        tituloFormulario.style.fontSize = '1.35rem';
+        tituloFormulario.style.fontSize = '1.25rem';
 
         accionForm.value = 'editar_variante';
         document.getElementById('inputVarianteId').value = prod.id;
@@ -897,8 +894,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         document.getElementById('selectSabor').required = true;
         document.getElementById('inputPrecio').value = prod.precio ?? 0;
         document.getElementById('inputPrecio').required = true;
-        document.getElementById('inputDescripcion').value = prod.desc || '';
-        document.getElementById('inputDescripcion').required = true;
+        
         document.getElementById('inputImagenActual').value = (prod.img && prod.img !== 'IMG') ? prod.img : '';
 
         const preview = document.getElementById('previewImagen');
@@ -909,7 +905,35 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
             preview.style.display = 'none';
         }
 
-        document.getElementById('btnSubmitForm').textContent = 'GUARDAR EN BASE DE DATOS';
+        document.getElementById('btnSubmitForm').textContent = 'GUARDAR VARIANTE';
+        document.getElementById('btnCancelarEdicion').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // EDITAR PRODUCTO PADRE
+    function cargarPadreParaEditar(prod) {
+        selectorTipoAlta.style.display = 'none';
+        bloquePadre.style.display = 'block';
+        bloqueVariante.style.display = 'none';
+
+        tituloFormulario.textContent = '⚙️ editar producto padre';
+        tituloFormulario.style.textTransform = 'lowercase';
+        tituloFormulario.style.fontSize = '1.25rem';
+
+        accionForm.value = 'crear_producto_padre'; 
+        inputProductoIdPadre.value = prod.producto_id || '0';
+
+        document.getElementById('inputNombrePadre').value = prod.nombre || '';
+        document.getElementById('selectMarcaPadre').value = prod.marca || '';
+        document.getElementById('selectCategoriaPadre').value = prod.cat || '';
+        document.getElementById('inputDescripcionPadre').value = prod.desc_padre || '';
+
+        document.getElementById('inputNombrePadre').required = true;
+        document.getElementById('selectMarcaPadre').required = true;
+        document.getElementById('selectCategoriaPadre').required = true;
+        document.getElementById('inputDescripcionPadre').required = true;
+
+        document.getElementById('btnSubmitForm').textContent = 'GUARDAR PRODUCTO PADRE';
         document.getElementById('btnCancelarEdicion').style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -922,9 +946,11 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         tituloFormulario.style.fontSize = '1rem';
 
         document.getElementById('inputVarianteId').value = '0';
+        inputProductoIdPadre.value = '0';
         document.getElementById('inputImagenActual').value = '';
         document.getElementById('previewImagen').style.display = 'none';
         document.getElementById('btnCancelarEdicion').style.display = 'none';
+        document.getElementById('btnSubmitForm').textContent = 'GUARDAR EN BASE DE DATOS';
 
         radioVariante.checked = true;
         actualizarModoAlta();
@@ -939,9 +965,24 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         }
     });
 
+    // BUSCADORES
     document.getElementById('buscadorPanel').addEventListener('input', (e) => {
         const texto = e.target.value.toLowerCase().trim();
         document.querySelectorAll('.fila-inventario').forEach(fila => {
+            fila.style.display = fila.textContent.toLowerCase().includes(texto) ? '' : 'none';
+        });
+    });
+
+    document.getElementById('buscadorPresupuestos').addEventListener('input', (e) => {
+        const texto = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('.fila-presupuesto').forEach(fila => {
+            fila.style.display = fila.textContent.toLowerCase().includes(texto) ? '' : 'none';
+        });
+    });
+
+    document.getElementById('buscadorVentas').addEventListener('input', (e) => {
+        const texto = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('.fila-venta').forEach(fila => {
             fila.style.display = fila.textContent.toLowerCase().includes(texto) ? '' : 'none';
         });
     });

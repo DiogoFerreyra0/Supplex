@@ -193,7 +193,6 @@
         </div>
 
         <div class="carrusel-horizontal" id="carruselMasVendidos">
-          <!-- Si la BD está activa, main.js reemplaza estas tarjetas por los productos reales -->
           <article class="producto-tarjeta tarjeta-sombra_efecto" data-nombre="100% Whey Gold Standard" data-cat="Proteína" data-precio="42500" data-desc="Proteína de suero de leche aislada y concentrada de rápida absorción • 2.27 kg." data-stock="15">
             <div class="producto-tarjeta__imagen-caja">
               <div class="producto-tarjeta__etiquetas">
@@ -676,6 +675,10 @@
         <div class="carrito-modal__campo">
           <input type="text" id="cartDireccion" placeholder="Dirección de Envío" class="carrito-modal__input">
         </div>
+        <div class="carrito-modal__campo" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <input type="email" id="cartEmail" placeholder="Tu Email" class="carrito-modal__input" required>
+          <input type="tel" id="cartTelefono" placeholder="Teléfono" class="carrito-modal__input" required>
+        </div>
         <div class="carrito-modal__campo carrito-modal__campo--cupon">
           <input type="text" id="cartCupon" placeholder="Código de descuento (Ej: GYM)" class="carrito-modal__input" style="text-transform: uppercase;">
           <button type="button" id="btnAplicarCupon" class="carrito-modal__boton-cupon">Aplicar</button>
@@ -853,4 +856,3 @@
   </script>
 </body>
 </html>
-

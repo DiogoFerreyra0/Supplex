@@ -130,12 +130,29 @@
         <p class="carrito-modal__vacio">Tu carrito está vacío.</p>
       </div>
       <div class="carrito-modal__datos">
-        <div class="carrito-modal__campo"><input type="text" id="cartNombre" placeholder="Tu Nombre Completo" class="carrito-modal__input"></div>
-        <div class="carrito-modal__campo"><input type="text" id="cartDireccion" placeholder="Dirección de Envío" class="carrito-modal__input"></div>
+        <div class="carrito-modal__campo">
+          <input type="text" id="cartNombre" placeholder="Tu Nombre Completo" class="carrito-modal__input">
+        </div>
+        <div class="carrito-modal__campo">
+          <input type="text" id="cartDireccion" placeholder="Dirección de Envío" class="carrito-modal__input">
+        </div>
+        <div class="carrito-modal__campo" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <input type="email" id="cartEmail" placeholder="Tu Email" class="carrito-modal__input" required>
+          <input type="tel" id="cartTelefono" placeholder="Teléfono" class="carrito-modal__input" required>
+        </div>
+        <div class="carrito-modal__campo carrito-modal__campo--cupon">
+          <input type="text" id="cartCupon" placeholder="Código de descuento (Ej: GYM)" class="carrito-modal__input" style="text-transform: uppercase;">
+          <button type="button" id="btnAplicarCupon" class="carrito-modal__boton-cupon">Aplicar</button>
+        </div>
+        <p id="msjCupon" class="carrito-modal__msj-cupon"></p>
       </div>
       <div class="carrito-modal__pie">
         <div class="carrito-modal__resumen">
           <div class="carrito-modal__linea"><span>Subtotal:</span> <span id="cartSubtotal">$ 0</span></div>
+          <div class="carrito-modal__linea carrito-modal__linea--descuento" id="lineaDescuento" style="display: none;">
+            <span>Descuento (<span id="cartNombreCupon"></span>):</span> 
+            <span id="cartMontoDescuento">-$ 0</span>
+          </div>
           <div class="carrito-modal__linea carrito-modal__linea--total"><span>Total:</span> <span id="totalCarrito">$ 0</span></div>
         </div>
         <button class="carrito-modal__boton" id="btnEnviarWhatsApp">FINALIZAR COMPRA</button>

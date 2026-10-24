@@ -19,6 +19,8 @@ if (!$datos) {
 $orderId = $datos['orderId'] ?? ('PED-' . rand(10000, 99999));
 $nombre = trim($datos['nombre'] ?? 'Cliente');
 $direccion = trim($datos['direccion'] ?? 'Sin dirección');
+$email = trim($datos['email'] ?? 'Sin email');
+$telefono = trim($datos['telefono'] ?? 'Sin teléfono');
 $cupon = $datos['cupon'] ?? '';
 $subtotal = (float)($datos['subtotal'] ?? 0);
 $descuento = (float)($datos['descuento'] ?? 0);
@@ -26,7 +28,6 @@ $total = (float)($datos['total'] ?? 0);
 $articulos = $datos['articulos'] ?? [];
 $ahora = time();
 
-// 1. Generar el archivo CSV del Presupuesto / Comprobante
 $nombre_csv = "{$orderId}_Supplex.csv";
 $ruta_archivo = $carpeta_excel . $nombre_csv;
 
@@ -55,6 +56,7 @@ if ($archivo) {
     fputcsv($archivo, ["ID Presupuesto:", $orderId, "Fecha:", date("Y-m-d H:i:s", $ahora)], ";");
     fputcsv($archivo, ["Estado Inicial:", "pendiente (Validez 25 minutos)"], ";");
     fputcsv($archivo, ["Cliente:", $nombre, "Dirección:", $direccion], ";");
+    fputcsv($archivo, ["Email:", $email, "Teléfono:", $telefono], ";");
     fputcsv($archivo, [""], ";");
 
     foreach ($lineas_excel as $linea) {
@@ -63,11 +65,9 @@ if ($archivo) {
     fclose($archivo);
 }
 
-// 2. Guardar registro local para control de los 25 minutos y sincronización de estados
 $registro_pedidos = file_exists($archivo_pedidos) ? json_decode(file_get_contents($archivo_pedidos), true) : [];
 if (!is_array($registro_pedidos)) $registro_pedidos = [];
 
-// Purgar presupuestos locales 'pendiente' que hayan superado los 25 minutos (1500 segundos)
 foreach ($registro_pedidos as $cod => $ped) {
     $est = mb_strtolower(trim($ped['estado'] ?? 'pendiente'), 'UTF-8');
     $creado = (int)($ped['timestamp'] ?? 0);
@@ -83,6 +83,8 @@ $registro_pedidos[$orderId] = [
     "orderId" => $orderId,
     "nombre" => $nombre,
     "direccion" => $direccion,
+    "email" => $email,
+    "telefono" => $telefono,
     "cupon" => $cupon,
     "subtotal" => $subtotal,
     "descuento" => $descuento,
@@ -96,12 +98,13 @@ $registro_pedidos[$orderId] = [
 
 file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-// 3. Enviar el presupuesto directamente al sistema de Lauti por Tailscale
 $payload_lauti = [
     "accion" => "crear_presupuesto",
     "orderId" => $orderId,
     "nombre" => $nombre,
     "direccion" => $direccion,
+    "email" => $email,
+    "telefono" => $telefono,
     "cupon" => $cupon,
     "subtotal" => $subtotal,
     "descuento" => $descuento,
@@ -109,21 +112,23 @@ $payload_lauti = [
     "articulos" => $articulos
 ];
 
-$opciones = [
-    'http' => [
-        'header'  => "Content-type: application/json\r\n",
-        'method'  => 'POST',
-        'content' => json_encode($payload_lauti, JSON_UNESCAPED_UNICODE),
-        'timeout' => 6
-    ]
-];
-$contexto = stream_context_create($opciones);
-@file_get_contents($url_lauti, false, $contexto);
+if (function_exists('curl_init')) {
+    $ch = curl_init($url_lauti);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload_lauti, JSON_UNESCAPED_UNICODE));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8']);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_exec($ch);
+    curl_close($ch);
+} else {
+    $opciones = ['http' => ['method' => 'POST', 'content' => json_encode($payload_lauti), 'timeout' => 5]];
+    @file_get_contents($url_lauti, false, stream_context_create($opciones));
+}
 
 echo json_encode([
     "success" => true,
     "orderId" => $orderId,
-    "estado" => "pendiente",
-    "archivo" => "ventas_excel/" . $nombre_csv
+    "estado" => "pendiente"
 ]);
 ?>

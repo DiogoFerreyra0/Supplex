@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderizarCarrito();
 
-  // FINALIZAR COMPRA: ENVÍO AL SERVIDOR Y WSP
+  // FINALIZAR COMPRA: ENVÍO AL SERVIDOR Y WSP CON NUEVOS CAMPOS (EMAIL Y TEL)
   btnEnviarWhatsApp?.addEventListener('click', (e) => {
     e.preventDefault();
     if (carrito.length === 0) {
@@ -267,9 +267,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const nombreCliente = document.getElementById('cartNombre')?.value.trim() || '';
     const direccionCliente = document.getElementById('cartDireccion')?.value.trim() || '';
+    const emailCliente = document.getElementById('cartEmail')?.value.trim() || '';
+    const telCliente = document.getElementById('cartTelefono')?.value.trim() || '';
 
-    if (!nombreCliente || !direccionCliente) {
-      alert("⚠️ Por favor, completá tu Nombre y Dirección de Envío para procesar el pedido.");
+    if (!nombreCliente || !direccionCliente || !emailCliente || !telCliente) {
+      alert("⚠️ Por favor, completá todos tus datos (Nombre, Dirección, Email y Teléfono) para procesar el pedido.");
       return;
     }
 
@@ -281,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let descuentoMonto = subtotal * (descuentoPorcentaje / 100);
     let totalFinal = subtotal - descuentoMonto;
 
-    let msjWsp = `*NUEVO PEDIDO: ${orderId}*\n📅 Fecha: ${fecha}\n👤 Cliente: ${nombreCliente}\n📍 Dirección: ${direccionCliente}\n---------------------------\n*ARTÍCULOS:*\n`;
+    let msjWsp = `*NUEVO PEDIDO: ${orderId}*\n📅 Fecha: ${fecha}\n👤 Cliente: ${nombreCliente}\n📍 Dirección: ${direccionCliente}\n✉️ Email: ${emailCliente}\n📞 Teléfono: ${telCliente}\n---------------------------\n*ARTÍCULOS:*\n`;
     carrito.forEach(item => {
       msjWsp += `🔸 ${item.cantidad}x ${item.nombre} ($ ${((Number(item.precio) || 0) * item.cantidad).toLocaleString('es-AR')})\n`;
     });
@@ -295,6 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
       orderId: orderId,
       nombre: nombreCliente,
       direccion: direccionCliente,
+      email: emailCliente,
+      telefono: telCliente,
       cupon: cuponAplicado,
       subtotal: subtotal,
       descuento: descuentoMonto,
@@ -310,9 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
       body: JSON.stringify(datosPedido)
     })
     .then(respuesta => respuesta.json())
-    .catch(() => {
-      console.warn("Guardando comprobante y abriendo WhatsApp...");
-    })
+    .catch(() => {})
     .finally(() => {
       window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msjWsp)}`, '_blank');
       reiniciarFormularioCarrito();
@@ -323,10 +325,10 @@ document.addEventListener('DOMContentLoaded', () => {
       guardarCarritoLocal();
       cuponAplicado = null;
       descuentoPorcentaje = 0;
-      const inputNom = document.getElementById('cartNombre');
-      const inputDir = document.getElementById('cartDireccion');
-      if (inputNom) inputNom.value = "";
-      if (inputDir) inputDir.value = "";
+      if (document.getElementById('cartNombre')) document.getElementById('cartNombre').value = "";
+      if (document.getElementById('cartDireccion')) document.getElementById('cartDireccion').value = "";
+      if (document.getElementById('cartEmail')) document.getElementById('cartEmail').value = "";
+      if (document.getElementById('cartTelefono')) document.getElementById('cartTelefono').value = "";
       if (inputCupon) inputCupon.value = "";
       if (msjCupon) msjCupon.style.display = "none";
       btnEnviarWhatsApp.textContent = "FINALIZAR COMPRA";
@@ -362,12 +364,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const nombre = botonAgregar.getAttribute('data-nombre') || 'Suplemento Supplex';
       const precioRaw = botonAgregar.getAttribute('data-precio');
       const precio = Number.isFinite(parseFloat(precioRaw)) ? parseFloat(precioRaw) : 0;
+      const idProd = botonAgregar.closest('.producto-tarjeta')?.getAttribute('data-id') || null;
 
       const productoExistente = carrito.find(item => item.nombre === nombre && Number(item.precio) === precio);
       if (productoExistente) {
         productoExistente.cantidad++;
       } else {
-        carrito.push({ nombre, precio, cantidad: 1 });
+        carrito.push({ id: idProd, nombre, precio, cantidad: 1 });
       }
       
       guardarCarritoLocal();
@@ -653,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       window.inventarioProductos = data;
 
-      // 1. Poblar carrusel "Lo Más Vendido" en index.html (priorizando los que tienen precio > 0)
+      // 1. Poblar carrusel "Lo Más Vendido"
       const carruselDestacados = document.getElementById('carruselMasVendidos');
       if (carruselDestacados && data.length > 0) {
         carruselDestacados.innerHTML = '';
@@ -662,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
         carruselDestacados.innerHTML = destacados.map(prod => crearHTMLTarjeta(prod)).join('');
       }
 
-      // 2. Poblar Categorías dinámicas en productos.html
+      // 2. Poblar Categorías dinámicas
       const listaCat = document.getElementById('listaCategoriasBD');
       const categoriasUnicas = [...new Set(data.map(p => p.cat))].filter(Boolean);
       if (listaCat) {
@@ -672,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // 3. Poblar Marcas dinámicas en productos.html
+      // 3. Poblar Marcas dinámicas
       const listaMarca = document.getElementById('listaMarcasBD');
       const marcasUnicas = [...new Set(data.map(p => p.marca))].filter(Boolean);
       if (listaMarca) {
