@@ -355,7 +355,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const productoData = window.inventarioProductos.find(p => p.nombre.trim() === nombreBusqueda || p.nombre.includes(nombreBusqueda));
 
         if (productoData && productoModal) {
-          if (modalProdImg) modalProdImg.textContent = productoData.img || 'IMG';
+          if (modalProdImg) {
+            const tieneFoto = productoData.img && productoData.img.startsWith('http');
+            modalProdImg.innerHTML = tieneFoto 
+              ? `<img src="${productoData.img}" alt="${productoData.nombre}" style="width: 100%; height: 100%; object-fit: contain;">`
+              : `<div class="producto-tarjeta__placeholder">${productoData.img || 'SUPPLEX'}</div>`;
+          }
           if (modalProdCat) modalProdCat.textContent = productoData.cat || 'General';
           if (modalProdTitulo) modalProdTitulo.textContent = productoData.nombre;
           if (modalProdDesc) modalProdDesc.textContent = productoData.desc || "Suplemento deportivo de alta calidad.";
@@ -419,17 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resultadosBuscador.innerHTML = `<p class="buscador-modal__vacio">No encontramos nada para "<strong>${textoBusqueda}</strong>".</p>`;
           } else {
             resultadosLimitados.forEach(prod => {
-              const tarjetaHTML = `
-                <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
-                  <div class="producto-tarjeta__imagen-caja"><div class="producto-tarjeta__placeholder">${prod.img || 'IMG'}</div></div>
-                  <div class="producto-tarjeta__info">
-                    <span class="producto-tarjeta__marca">${prod.cat || 'General'}</span>
-                    <h3 class="producto-tarjeta__nombre" style="font-size: 0.9rem;">${prod.nombre}</h3>
-                    <div class="producto-tarjeta__precios"><span class="producto-tarjeta__precio-actual">$ ${Number(prod.precio).toLocaleString('es-AR')}</span></div>
-                    <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
-                  </div>
-                </article>
-              `;
+              const tarjetaHTML = crearHTMLTarjeta(prod);
               resultadosBuscador.insertAdjacentHTML('beforeend', tarjetaHTML);
             });
           }
@@ -490,10 +485,15 @@ document.addEventListener('DOMContentLoaded', () => {
   window.inventarioProductos = []; 
   
   const crearHTMLTarjeta = (prod) => {
+    const tieneFoto = prod.img && prod.img.startsWith('http');
+    const contenedorImagen = tieneFoto 
+      ? `<img src="${prod.img}" alt="${prod.nombre}" class="producto-tarjeta__img" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;">`
+      : `<div class="producto-tarjeta__placeholder">${prod.img || 'SUPPLEX'}</div>`;
+
     return `
       <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
         <div class="producto-tarjeta__imagen-caja">
-          <div class="producto-tarjeta__placeholder">${prod.img || 'IMG'}</div>
+          ${contenedorImagen}
         </div>
         <div class="producto-tarjeta__info">
           <span class="producto-tarjeta__marca">${prod.cat || 'General'}</span>
@@ -530,18 +530,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // Renderiza los primeros productos si existe el carrusel de inicio
-  const renderizarCarruselInicio = () => {
-    const carruselExplorar = document.getElementById('carruselExplorar');
-    if (!carruselExplorar || !Array.isArray(window.inventarioProductos) || window.inventarioProductos.length === 0) return;
-    
-    carruselExplorar.innerHTML = '';
-    const productosDestacados = window.inventarioProductos.slice(0, 10);
-    productosDestacados.forEach(prod => {
-      carruselExplorar.insertAdjacentHTML('beforeend', crearHTMLTarjeta(prod));
-    });
-  };
-
   // Determinar ruta de PHP según la vista
   const rutaPHP = window.location.pathname.includes('/pages/') ? '../obtener_productos.php' : 'obtener_productos.php';
 
@@ -559,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.inventarioProductos = datosDelServidor;
         
-        // Carga la grilla del catálogo (en productos.html)
+        // 1. Carga la grilla del catálogo (en productos.html si existe)
         const botonesFiltro = document.querySelectorAll('.catalogo__filtro-btn');
         const urlParams = new URLSearchParams(window.location.search);
         const categoriaUrl = urlParams.get('cat');
@@ -576,10 +564,17 @@ document.addEventListener('DOMContentLoaded', () => {
           renderizarCatalogo('todos');
         }
 
-        // Carga el carrusel si está en la home (index.html)
-        renderizarCarruselInicio();
+        // 2. Renderiza productos únicamente en "Más Vendidos" (deja "carruselExplorar" intacto)
+        const carruselDestacados = document.getElementById('carruselMasVendidos');
+        if (carruselDestacados && window.inventarioProductos.length > 0) {
+          carruselDestacados.innerHTML = '';
+          const productosDestacados = window.inventarioProductos.slice(0, 10);
+          productosDestacados.forEach(prod => {
+            carruselDestacados.insertAdjacentHTML('beforeend', crearHTMLTarjeta(prod));
+          });
+        }
 
-        // Listeners para los botones de filtrado
+        // 3. Listeners para los botones de filtrado por categoría
         botonesFiltro.forEach(boton => {
           boton.addEventListener('click', (e) => {
             botonesFiltro.forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
