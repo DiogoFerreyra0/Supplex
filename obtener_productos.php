@@ -27,14 +27,13 @@ foreach ($datos as $index => $fila) {
     $f = array_change_key_case($fila, CASE_LOWER);
 
     $id = $f["varianteid"] ?? $f["id"] ?? ($index + 1);
-    $sku = trim((string)($f["skuinterno"] ?? 'N/D'));
     $nombreBase = trim((string)($f["producto"] ?? $f["nombre"] ?? $f["nombreproducto"] ?? 'Suplemento'));
     $marca = trim((string)($f["marca"] ?? 'Genérica'));
     $categoria = trim((string)($f["categoria"] ?? $f["tipo"] ?? 'General'));
     $presentacion = trim((string)($f["presentacion"] ?? ''));
     $saborColor = trim((string)($f["saborcolor"] ?? ''));
 
-    // Normalizar PrecioVenta (soporta NULL, "1000.00", "1000,00" o números)
+    // Normalizar PrecioVenta
     $rawPrecio = $f["precioventa"] ?? $f["precio"] ?? 0;
     if ($rawPrecio === null || $rawPrecio === '' || strtoupper((string)$rawPrecio) === 'NULL') {
         $precioFinal = 0.0;
@@ -46,7 +45,7 @@ foreach ($datos as $index => $fila) {
         $precioFinal = (float)$limpio;
     }
 
-    // Normalizar StockActual (viene como decimal 0.000 desde SQL Server)
+    // Normalizar StockActual
     $rawStock = $f["stockactual"] ?? $f["stock"] ?? 0;
     if (is_string($rawStock)) {
         $rawStock = str_replace(',', '.', $rawStock);
@@ -55,7 +54,6 @@ foreach ($datos as $index => $fila) {
 
     $productos[] = [
         "id" => (int)$id,
-        "sku" => $sku,
         "nombre" => $nombreBase,
         "marca" => $marca !== '' ? $marca : 'Genérica',
         "cat" => $categoria !== '' ? $categoria : 'General',
@@ -64,7 +62,7 @@ foreach ($datos as $index => $fila) {
         "precio" => $precioFinal,
         "img" => $f["imagenurl"] ?? $f["imagen"] ?? "IMG",
         "stock" => $stockFinal,
-        "desc" => "SKU: $sku | Marca: " . ($marca !== '' ? $marca : 'Genérica') . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor/Color: $saborColor" : "")
+        "desc" => "Marca: " . ($marca !== '' ? $marca : 'Genérica') . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor: $saborColor" : "")
     ];
 }
 

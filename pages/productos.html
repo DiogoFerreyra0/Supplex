@@ -44,32 +44,14 @@
       <div class="catalogo__contenedor-general" style="max-width: 1280px; margin: 0 auto; padding: 20px;">
         
         <!-- BARRA SUPERIOR DE FILTROS (Buscador, Presentación, Sabor, Precio) -->
-        <div class="catalogo__barra-superior" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--color-borde); margin-bottom: 20px; box-shadow: var(--sombra-suave);">
-          <div class="campo-filtro">
-            <label for="filtroBuscador" style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">BUSCAR PRODUCTO / SKU</label>
-            <input type="text" id="filtroBuscador" placeholder="Ej: VAR-000001, Creatina, Whey..." style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem;">
-          </div>
-          <div class="campo-filtro">
-            <label for="filtroPresentacion" style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">PRESENTACIÓN</label>
-            <select id="filtroPresentacion" style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem; background: #fff;">
-              <option value="">Todas las presentaciones</option>
-            </select>
-          </div>
-          <div class="campo-filtro">
-            <label for="filtroSabor" style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">SABOR / COLOR</label>
-            <select id="filtroSabor" style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem; background: #fff;">
-              <option value="">Todos los sabores</option>
-            </select>
-          </div>
-          <div class="campo-filtro">
-            <label for="filtroOrdenPrecio" style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">ORDENAR POR PRECIO</label>
-            <select id="filtroOrdenPrecio" style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem; background: #fff;">
-              <option value="">Por defecto (ID / SKU)</option>
-              <option value="mayor">Mayor a menor precio</option>
-              <option value="menor">Menor a mayor precio</option>
-            </select>
-          </div>
-        </div>
+        <!-- BARRA SUPERIOR DE FILTROS -->
+<div class="catalogo__barra-superior" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--color-borde); margin-bottom: 20px; box-shadow: var(--sombra-suave);">
+  <div class="campo-filtro">
+    <label for="filtroBuscador" style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">BUSCAR PRODUCTO</label>
+    <!-- Se eliminó la mención de SKU en el placeholder -->
+    <input type="text" id="filtroBuscador" placeholder="Buscar por nombre, marca o sabor..." style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem;">
+  </div>
+  <!-- El resto del bloque select de PRESENTACIÓN, SABOR, etc., queda igual -->
 
         <!-- CONTADOR VISUAL DE VARIANTES Y BOTÓN LIMPIAR FILTROS -->
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">

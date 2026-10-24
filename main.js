@@ -246,7 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Inicializar vista del contador al cargar la página
   renderizarCarrito();
 
   // FINALIZAR COMPRA: ENVÍO AL SERVIDOR Y WSP
@@ -329,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =========================================
-  // 5. EVENTOS GLOBALES (BOTÓN AL CARRITO vs CARD FLOTANTE DE INFO)
+  // 5. EVENTOS GLOBALES (AGREGAR AL CARRITO / CARD FLOTANTE)
   // =========================================
   const productoModal = document.getElementById('productoModal');
   const modalProdImg = document.getElementById('modalProdImg');
@@ -345,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnCerrarFondoProducto')?.addEventListener('click', cerrarVistaRapida);
 
   document.addEventListener('click', (e) => {
-    // A) Si presionó el botón "AL CARRITO" (en la tarjeta, buscador o dentro del modal)
+    // A) Botón "AL CARRITO"
     const botonAgregar = e.target.closest('.js-agregar-carrito');
     if (botonAgregar) {
       e.preventDefault();
@@ -378,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return; 
     }
 
-    // B) Si presionó cualquier otra parte de la tarjeta del producto, abre la Card Flotante
+    // B) Abrir Card Flotante
     const clicEnTarjeta = e.target.closest('.producto-tarjeta, .combo-tarjeta');
     const clicEnFavorito = e.target.closest('.producto-tarjeta__favorito');
 
@@ -407,7 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tieneFoto = imgMostrar && imgMostrar.startsWith('http');
         modalProdImg.innerHTML = tieneFoto 
           ? `<img src="${imgMostrar}" alt="${nombreMostrar}" style="width: 100%; height: 100%; object-fit: contain;">`
-          : `<div class="producto-tarjeta__placeholder">${imgMostrar || 'SUPPLEX'}</div>`;
+          : `<div class="producto-tarjeta__placeholder">SUPPLEX</div>`;
       }
       if (modalProdCat) modalProdCat.textContent = catMostrar;
       if (modalProdTitulo) modalProdTitulo.textContent = nombreMostrar;
@@ -469,7 +468,6 @@ document.addEventListener('DOMContentLoaded', () => {
             (prod.nombre && prod.nombre.toLowerCase().includes(textoBusqueda)) || 
             (prod.marca && prod.marca.toLowerCase().includes(textoBusqueda)) ||
             (prod.cat && prod.cat.toLowerCase().includes(textoBusqueda)) ||
-            (prod.sku && prod.sku.toLowerCase().includes(textoBusqueda)) ||
             (prod.sabor && prod.sabor.toLowerCase().includes(textoBusqueda)) ||
             (prod.presentacion && prod.presentacion.toLowerCase().includes(textoBusqueda))
           );
@@ -555,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tieneFoto = prod.img && prod.img.startsWith('http');
     const imgHTML = tieneFoto 
       ? `<img src="${escaparAtributo(prod.img)}" alt="${escaparAtributo(prod.nombre)}" class="producto-tarjeta__img" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;">`
-      : `<div class="producto-tarjeta__placeholder">${prod.sku || 'SUPPLEX'}</div>`;
+      : `<div class="producto-tarjeta__placeholder">SUPPLEX</div>`;
 
     const nombreCarrito = armarNombreCompleto(prod);
     const precioNum = Number(prod.precio) || 0;
@@ -577,7 +575,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="producto-tarjeta__marca" style="font-size: 0.75rem; font-weight: 700; color: #71717a; text-transform: uppercase;">${prod.cat || 'General'} | ${prod.marca || 'Genérica'}</span>
           <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem; font-weight: 800; margin: 4px 0 4px;">${prod.nombre}</h3>
           <p style="font-size: 0.82rem; font-weight: 700; color: #27272a; margin-bottom: 4px;">${prod.presentacion || 'Estándar'} ${prod.sabor ? '• ' + prod.sabor : ''}</p>
-          <p style="font-size: 0.75rem; color: #71717a; margin-bottom: 12px;">SKU: ${prod.sku || 'N/D'}</p>
           <div class="producto-tarjeta__precios" style="margin-top: auto; margin-bottom: 12px;">
             <span class="producto-tarjeta__precio-actual" style="font-size: 1.15rem; font-weight: 900;">$ ${precioNum.toLocaleString('es-AR')}</span>
           </div>
@@ -606,7 +603,6 @@ document.addEventListener('DOMContentLoaded', () => {
         (prod.nombre && prod.nombre.toLowerCase().includes(textoBusq)) || 
         (prod.marca && prod.marca.toLowerCase().includes(textoBusq)) || 
         (prod.cat && prod.cat.toLowerCase().includes(textoBusq)) ||
-        (prod.sku && prod.sku.toLowerCase().includes(textoBusq)) ||
         (prod.presentacion && prod.presentacion.toLowerCase().includes(textoBusq)) ||
         (prod.sabor && prod.sabor.toLowerCase().includes(textoBusq));
 
@@ -648,7 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       window.inventarioProductos = data;
 
-      // 1. Poblar carrusel "Lo Más Vendido" en index.html (priorizando los que tienen precio > 0)
+      // 1. Poblar carrusel "Lo Más Vendido" en index.html
       const carruselDestacados = document.getElementById('carruselMasVendidos');
       if (carruselDestacados && data.length > 0) {
         carruselDestacados.innerHTML = '';
@@ -690,7 +686,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saboresUnicos.forEach(s => selectSabor.insertAdjacentHTML('beforeend', `<option value="${escaparAtributo(s)}">${s}</option>`));
       }
 
-      // 5. Verificar si viene una categoría por URL (?cat=Proteína desde index.html)
       const urlParams = new URLSearchParams(window.location.search);
       const catUrl = urlParams.get('cat');
       if (catUrl) {
@@ -704,13 +699,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       renderizarCatalogoDinamico();
 
-      // 6. Listeners de filtros superiores
+      // Listeners
       document.getElementById('filtroBuscador')?.addEventListener('input', renderizarCatalogoDinamico);
       document.getElementById('filtroPresentacion')?.addEventListener('change', renderizarCatalogoDinamico);
       document.getElementById('filtroSabor')?.addEventListener('change', renderizarCatalogoDinamico);
       document.getElementById('filtroOrdenPrecio')?.addEventListener('change', renderizarCatalogoDinamico);
 
-      // 7. Botón Limpiar Filtros
       document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => {
         categoriaSeleccionada = 'todos';
         marcaSeleccionada = 'todas';
@@ -732,7 +726,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarCatalogoDinamico();
       });
 
-      // 8. Listeners para Categorías y Marcas en la barra lateral
       document.querySelectorAll('#listaCategoriasBD button').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('#listaCategoriasBD button').forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
