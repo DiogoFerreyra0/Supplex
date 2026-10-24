@@ -16,23 +16,44 @@ $carpeta_excel = __DIR__ . "/ventas_excel/";
 if (!file_exists($carpeta_img)) mkdir($carpeta_img, 0777, true);
 if (!file_exists($carpeta_excel)) mkdir($carpeta_excel, 0777, true);
 
-// Cargar metadatos locales (imágenes y descripciones web)
+// Metadatos locales (fotos y configuraciones web)
 $meta_web = file_exists($archivo_meta) ? json_decode(file_get_contents($archivo_meta), true) : [];
 if (!is_array($meta_web)) $meta_web = [];
 if (!isset($meta_web['variantes'])) $meta_web['variantes'] = [];
 if (!isset($meta_web['productos_img'])) $meta_web['productos_img'] = [];
 if (!isset($meta_web['eliminados'])) $meta_web['eliminados'] = [];
 
-$mensaje = "";
-$tipo_alerta = "ok";
+// Usuario de auditoría asignado en dbo.Usuarios (ID 8 = PAGINA WEB / supplexcorp@gmail.com)
+$id_usuario_auditoria = (int)($_SESSION['admin_usuario_id'] ?? 8);
 
 function enviar_a_lauti($url, $payload) {
+    global $id_usuario_auditoria;
+    $payload['usuario_id'] = $id_usuario_auditoria;
+    $json_data = json_encode($payload, JSON_UNESCAPED_UNICODE);
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8']);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        $res = curl_exec($ch);
+        curl_close($ch);
+        if ($res) {
+            $dec = json_decode($res, true);
+            if (is_array($dec)) return $dec;
+        }
+    }
+
     $opciones = [
         'http' => [
-            'header'  => "Content-type: application/json\r\n",
+            'header'  => "Content-type: application/json; charset=utf-8\r\n",
             'method'  => 'POST',
-            'content' => json_encode($payload, JSON_UNESCAPED_UNICODE),
-            'timeout' => 8
+            'content' => $json_data,
+            'timeout' => 20,
+            'ignore_errors' => true
         ]
     ];
     $contexto = stream_context_create($opciones);
@@ -40,19 +61,19 @@ function enviar_a_lauti($url, $payload) {
     return $resultado ? json_decode($resultado, true) : null;
 }
 
-// 2. PROCESAR FORMULARIO (NUEVO PRODUCTO PADRE / NUEVA VARIANTE / EDITAR VARIANTE)
+// 2. PROCESAR FORMULARIO CON REDIRECCIÓN (PRG) PARA EVITAR REENVÍOS DE FORMULARIO
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
-    $modo = $_POST['accion_form']; // 'crear_producto_padre', 'crear_variante' o 'editar_variante'
+    $modo = $_POST['accion_form']; 
 
-    // A) CREAR NUEVO PRODUCTO PADRE (Solo Nombre obligatorio + Marca y Categoría existentes)
+    // A) CREAR NUEVO PRODUCTO PADRE
     if ($modo === 'crear_producto_padre') {
         $nombre_padre = trim($_POST['nombre_padre'] ?? '');
         $marca_padre = trim($_POST['marca_padre'] ?? '');
         $categoria_padre = trim($_POST['categoria_padre'] ?? '');
 
         if ($nombre_padre === '' || $marca_padre === '' || $categoria_padre === '') {
-            $mensaje = "⚠️ Para crear un Nuevo Producto Padre debés completar el Nombre y elegir Marca y Categoría.";
-            $tipo_alerta = "error";
+            $_SESSION['flash_mensaje'] = "⚠️ Para crear un Nuevo Producto Padre debés completar el Nombre y elegir Marca y Categoría.";
+            $_SESSION['flash_tipo'] = "error";
         } else {
             $resp = enviar_a_lauti($url_lauti, [
                 "accion" => "crear_producto_padre",
@@ -61,16 +82,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
                 "categoria" => $categoria_padre
             ]);
 
-            if ($resp && !empty($resp['success'])) {
-                $mensaje = "✅ Producto Padre '$nombre_padre' ($marca_padre - $categoria_padre) creado en la base de datos de Lauti (ID: {$resp['producto_id']}). Ahora ya podés seleccionarlo para crearle variantes.";
+            if ($resp && isset($resp['success']) && $resp['success'] === true) {
+                $_SESSION['flash_mensaje'] = "✅ Producto Padre '$nombre_padre' ($marca_padre - $categoria_padre) creado en SQL Server con TipoProducto = 'Producto' y UsuarioId = 8 (ID: {$resp['producto_id']}). Ya podés seleccionarlo en 'Nueva Variante'.";
+                $_SESSION['flash_tipo'] = "ok";
             } else {
-                $mensaje = "❌ Error al conectar con la base de datos de Lauti para crear el producto padre. Verificá que api_productos.py esté corriendo.";
-                $tipo_alerta = "error";
+                $err = $resp['error_python'] ?? "No hubo respuesta desde el servidor de Lauti (verificá que api_productos.py esté corriendo).";
+                $_SESSION['flash_mensaje'] = "❌ Error al crear el producto padre: " . $err;
+                $_SESSION['flash_tipo'] = "error";
             }
         }
+        header("Location: panel.php");
+        exit();
     }
 
-    // B) CREAR NUEVA VARIANTE O EDITAR VARIANTE EXISTENTE
+    // B) CREAR NUEVA VARIANTE O EDITAR VARIANTE
     elseif ($modo === 'crear_variante' || $modo === 'editar_variante') {
         $variante_id = (int)($_POST['variante_id'] ?? 0);
         $producto_id = (int)($_POST['producto_id'] ?? 0);
@@ -92,7 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
             $ext_permitidas = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 
             if (in_array($ext, $ext_permitidas)) {
-                $nombre_limpio = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($nombre ?: 'suplemento'));
+                $nombre_limpio = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($nombre ?: 'producto'));
                 $nombre_archivo = "prod_" . substr($nombre_limpio, 0, 25) . "_" . time() . "." . $ext;
                 if (move_uploaded_file($tmp_name, $carpeta_img . $nombre_archivo)) {
                     $ruta_imagen_guardada = "img/productos/" . $nombre_archivo;
@@ -101,20 +126,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
         }
 
         if ($modo === 'crear_variante') {
-            $resp = enviar_a_lauti($url_lauti, [
-                "accion" => "crear_variante",
-                "producto_id" => $producto_id,
-                "presentacion" => $presentacion,
-                "sabor" => $sabor,
-                "precio" => $precio,
-                "descripcion" => $descripcion
-            ]);
-            if ($resp && isset($resp['variante_id'])) {
-                $variante_id = (int)$resp['variante_id'];
-                $mensaje = "✅ Nueva variante de '$nombre' ($presentacion - $sabor) creada con éxito en la base de Lauti.";
+            if ($producto_id === 0) {
+                $_SESSION['flash_mensaje'] = "⚠️ Debés seleccionar un Producto Padre existente de la lista para asignarle la variante.";
+                $_SESSION['flash_tipo'] = "error";
             } else {
-                $mensaje = "❌ No se pudo crear la variante en la base de Lauti.";
-                $tipo_alerta = "error";
+                $resp = enviar_a_lauti($url_lauti, [
+                    "accion" => "crear_variante",
+                    "producto_id" => $producto_id,
+                    "presentacion" => $presentacion,
+                    "sabor" => $sabor,
+                    "precio" => $precio,
+                    "descripcion" => $descripcion
+                ]);
+
+                if ($resp && isset($resp['success']) && $resp['success'] === true) {
+                    $variante_id = (int)$resp['variante_id'];
+                    $_SESSION['flash_mensaje'] = "✅ Nueva variante de '$nombre' ($presentacion - $sabor) guardada en SQL Server (UsuarioId = 8).";
+                    $_SESSION['flash_tipo'] = "ok";
+                } else {
+                    $err = $resp['error_python'] ?? "No hubo respuesta desde el servidor de Lauti.";
+                    $_SESSION['flash_mensaje'] = "❌ Error al crear la variante: " . $err;
+                    $_SESSION['flash_tipo'] = "error";
+                }
             }
         } else {
             $resp = enviar_a_lauti($url_lauti, [
@@ -125,10 +158,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
                 "precio" => $precio,
                 "descripcion" => $descripcion
             ]);
-            $mensaje = "✅ Variante '$nombre' ($presentacion - $sabor) actualizada correctamente.";
+
+            if ($resp && isset($resp['success']) && $resp['success'] === true) {
+                $_SESSION['flash_mensaje'] = "✅ Variante '$nombre' ($presentacion - $sabor) actualizada en SQL Server (UsuarioId = 8).";
+                $_SESSION['flash_tipo'] = "ok";
+            } else {
+                $err = $resp['error_python'] ?? "No hubo respuesta desde el servidor de Lauti.";
+                $_SESSION['flash_mensaje'] = "❌ Error al editar la variante: " . $err;
+                $_SESSION['flash_tipo'] = "error";
+            }
         }
 
-        if ($variante_id > 0) {
+        if ($variante_id > 0 && ($_SESSION['flash_tipo'] ?? '') !== 'error') {
             $img_previa = $meta_web['variantes'][$variante_id]['img'] ?? '';
             $img_final = $ruta_imagen_guardada !== '' ? $ruta_imagen_guardada : $img_previa;
 
@@ -146,33 +187,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
             }
             file_put_contents($archivo_meta, json_encode($meta_web, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         }
+
+        header("Location: panel.php");
+        exit();
     }
 }
 
-// 3. PROCESAR DESACTIVACIÓN DE VARIANTE (Activa = 0)
+// 3. RECUPERAR MENSAJE DE SESIÓN FLASH
+$mensaje = $_SESSION['flash_mensaje'] ?? "";
+$tipo_alerta = $_SESSION['flash_tipo'] ?? "ok";
+unset($_SESSION['flash_mensaje'], $_SESSION['flash_tipo']);
+
+// 4. PROCESAR DESACTIVACIÓN DE VARIANTE (Activa = 0)
 if (isset($_GET['borrar'])) {
     $id_borrar = (int)$_GET['borrar'];
     enviar_a_lauti($url_lauti, ["accion" => "borrar", "variante_id" => $id_borrar]);
     $meta_web['eliminados'][$id_borrar] = true;
     file_put_contents($archivo_meta, json_encode($meta_web, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    header("Location: panel.php?msj=borrado");
+    $_SESSION['flash_mensaje'] = "🗑️ Variante desactivada (Activa = 0) y retirada del catálogo web.";
+    $_SESSION['flash_tipo'] = "ok";
+    header("Location: panel.php");
     exit();
 }
 
-if (isset($_GET['msj']) && $_GET['msj'] == 'borrado') {
-    $mensaje = "🗑️ Variante desactivada (Activa = 0) y ocultada de la tienda.";
-}
-
-// 4. CONSULTAR DATOS A LA API DE LAUTI (Catálogo, Productos Padre, Marcas, Categorías y Pedidos)
+// 5. CONSULTAR DATOS A LA API DE LAUTI
 $inventario = [];
 $productos_padre = [];
 $marcas_sistema = [];
 $categorias_sistema = [];
+$presentaciones_sistema = [];
+$sabores_sistema = [];
 $pedidos_bd = [];
 $conexion_bd_ok = false;
+$productos_padre_map = [];
 
-$json_panel = @file_get_contents($url_lauti . "/?recurso=panel");
-if ($json_panel !== FALSE) {
+if (function_exists('curl_init')) {
+    $ch_get = curl_init($url_lauti . "/?recurso=panel");
+    curl_setopt($ch_get, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch_get, CURLOPT_CONNECTTIMEOUT, 8);
+    curl_setopt($ch_get, CURLOPT_TIMEOUT, 15);
+    $json_panel = curl_exec($ch_get);
+    curl_close($ch_get);
+} else {
+    $ctx_get = stream_context_create(['http' => ['timeout' => 15, 'ignore_errors' => true]]);
+    $json_panel = @file_get_contents($url_lauti . "/?recurso=panel", false, $ctx_get);
+}
+
+if ($json_panel !== FALSE && $json_panel !== null) {
     $data_panel = json_decode($json_panel, true);
     if (is_array($data_panel) && isset($data_panel['variantes'])) {
         $conexion_bd_ok = true;
@@ -180,9 +241,10 @@ if ($json_panel !== FALSE) {
         $productos_padre = $data_panel['productos_padre'] ?? [];
         $marcas_sistema = $data_panel['marcas'] ?? [];
         $categorias_sistema = $data_panel['categorias'] ?? [];
+        $presentaciones_sistema = $data_panel['presentaciones'] ?? [];
+        $sabores_sistema = $data_panel['sabores'] ?? [];
         $pedidos_bd = $data_panel['pedidos'] ?? [];
     } elseif (is_array($data_panel) && !isset($data_panel['error_python'])) {
-        // Fallback si Lauti aún no reinició el script con ?recurso=panel
         $conexion_bd_ok = true;
         $datos_bd = $data_panel;
     } else {
@@ -196,7 +258,7 @@ if ($json_panel !== FALSE) {
 
         if (isset($meta_web['eliminados'][$id])) continue;
 
-        $nombre = trim((string)($f["producto"] ?? $f["nombre"] ?? 'Suplemento'));
+        $nombre = trim((string)($f["producto"] ?? $f["nombre"] ?? 'Producto'));
         $marca = trim((string)($f["marca"] ?? 'Genérica'));
         $cat = trim((string)($f["categoria"] ?? 'General'));
         $pres = trim((string)($f["presentacion"] ?? ''));
@@ -245,7 +307,6 @@ if ($json_panel !== FALSE) {
     }
 }
 
-// Si la consulta de padres vino vacía, reconstruimos desde las variantes
 if (empty($productos_padre) && !empty($productos_padre_map)) {
     $productos_padre = array_values($productos_padre_map);
 }
@@ -258,17 +319,14 @@ if (empty($categorias_sistema) && !empty($inventario)) {
     sort($categorias_sistema);
 }
 
-// 5. SINCRONIZAR PRESUPUESTOS (VIGENCIA 25 MIN) Y COMPROBANTES DE VENTA CONFIRMADOS
+// 6. SINCRONIZAR PRESUPUESTOS Y PEDIDOS
 $ahora = time();
 $registro_pedidos = file_exists($archivo_pedidos) ? json_decode(file_get_contents($archivo_pedidos), true) : [];
 if (!is_array($registro_pedidos)) $registro_pedidos = [];
 
-// Actualizar estados locales con los estados manejados por Lauti en SQL Server
 if (!empty($pedidos_bd)) {
-    $codigos_en_bd = [];
     foreach ($pedidos_bd as $p_bd) {
         $cod = $p_bd['CodigoPedido'];
-        $codigos_en_bd[$cod] = true;
         $estado_lau = mb_strtolower(trim($p_bd['Estado'] ?? 'pendiente'), 'UTF-8');
         $seg_transcurridos = (int)($p_bd['SegundosTranscurridos'] ?? 0);
 
@@ -294,7 +352,6 @@ if (!empty($pedidos_bd)) {
     }
 }
 
-// Eliminar presupuestos en estado 'pendiente' que superen los 25 minutos (1500 segundos)
 $presupuestos_pendientes = [];
 $ventas_confirmadas = [];
 
@@ -304,7 +361,6 @@ foreach ($registro_pedidos as $cod => $ped) {
 
     if ($est === 'pendiente') {
         if ($segundos >= 1500) {
-            // Expiró a los 25 minutos: borramos el CSV y el registro
             if (!empty($ped['archivo_csv']) && file_exists($carpeta_excel . $ped['archivo_csv'])) {
                 @unlink($carpeta_excel . $ped['archivo_csv']);
             }
@@ -314,7 +370,6 @@ foreach ($registro_pedidos as $cod => $ped) {
             $presupuestos_pendientes[$cod] = $ped;
         }
     } else {
-        // Estado 'confirmada/en camino' o 'confirmado/entregado' manejado desde el sistema de Lau
         $ventas_confirmadas[$cod] = $ped;
     }
 }
@@ -345,6 +400,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         .panel-header h2 span { color: var(--primario); }
         .estado-bd { font-size: 0.78rem; padding: 5px 12px; border-radius: 20px; font-weight: 700; background: #27272a; color: #a3e635; }
         .header-acciones { display: flex; gap: 12px; align-items: center; }
+        .usuario-sesion { font-size: 0.8rem; color: #a1a1aa; font-weight: 700; }
         .btn-ver-web { color: #fff; text-decoration: none; font-size: 0.88rem; border: 1px solid #52525b; padding: 9px 16px; border-radius: 6px; font-weight: 700; transition: 0.2s; }
         .btn-ver-web:hover { background: #fff; color: var(--oscuro); }
         .btn-salir { background: var(--alerta); color: white; padding: 9px 18px; text-decoration: none; border-radius: 6px; font-weight: 800; font-size: 0.88rem; }
@@ -356,7 +412,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         .caja { background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid var(--borde); margin-bottom: 24px; }
         .caja h3 { margin-top: 0; font-weight: 900; text-transform: uppercase; border-bottom: 2px solid var(--oscuro); padding-bottom: 10px; margin-bottom: 16px; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; }
 
-        /* Selector Check Nuevo Producto vs Nueva Variante */
         .selector-tipo-alta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f4f4f5; padding: 6px; border-radius: 8px; margin-bottom: 18px; border: 1px solid var(--borde); }
         .opcion-check { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 800; cursor: pointer; color: #52525b; transition: 0.2s; text-align: center; }
         .opcion-check input { accent-color: var(--oscuro); cursor: pointer; }
@@ -368,7 +423,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         .campo input[type="text"], .campo input[type="number"], .campo select, .campo textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 8px; font-family: inherit; font-size: 0.9rem; background: #fafafa; color: #111; }
         .campo input:focus, .campo select:focus, .campo textarea:focus { outline: none; border-color: var(--oscuro); background: #fff; }
 
-        /* Estilo gris bloqueado idéntico a la imagen de referencia */
         .input-bloqueado {
             background-color: var(--gris-bloqueado) !important;
             color: #52525b !important;
@@ -387,7 +441,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         .btn-guardar:hover { background: var(--primario); color: var(--oscuro); }
         .btn-cancelar-edicion { display: none; width: 100%; padding: 10px; margin-top: 8px; background: #e4e4e7; color: #27272a; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.82rem; }
 
-        /* Tarjetas de Presupuestos y Comprobantes de Venta */
         .grilla-pedidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
         .tarjeta-pedido { background: #fafafa; border: 1px solid var(--borde); padding: 14px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; }
         .tarjeta-pedido__top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -428,6 +481,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
             </span>
         </h2>
         <div class="header-acciones">
+            <span class="usuario-sesion">👤 <?php echo htmlspecialchars($_SESSION['admin_nombre'] ?? 'PAGINA WEB'); ?> (ID: <?php echo $id_usuario_auditoria; ?>)</span>
             <a href="index.html" target="_blank" class="btn-ver-web">Ver Inicio ↗</a>
             <a href="pages/productos.html" target="_blank" class="btn-ver-web">Ver Catálogo ↗</a>
             <a href="logout.php" class="btn-salir">Cerrar Sesión</a>
@@ -442,16 +496,17 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
 
     <div class="panel-grilla">
         
-        <!-- ================= COLUMNA IZQUIERDA: FORMULARIO INTELIGENTE ================= -->
+        <!-- ================= COLUMNA IZQUIERDA: FORMULARIO ================= -->
         <div class="caja" style="position: sticky; top: 20px;">
             <h3 id="tituloFormulario">➕ NUEVO PRODUCTO / VARIANTE</h3>
 
-            <!-- CHECK DIFERENCIADOR: NUEVA VARIANTE vs NUEVO PRODUCTO PADRE -->
             <div class="selector-tipo-alta" id="selectorTipoAlta">
+                
                 <label class="opcion-check" id="labelCheckPadre">
                     <input type="radio" name="tipo_alta_check" value="padre" id="radioNuevoPadre">
                     Nuevo Producto (Padre)
                 </label>
+
                 <label class="opcion-check opcion-check--activa" id="labelCheckVariante">
                     <input type="radio" name="tipo_alta_check" value="variante" id="radioNuevaVariante" checked>
                     Nueva Variante
@@ -466,7 +521,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                 <input type="hidden" name="marca_oculta" id="inputMarcaOculta" value="">
                 <input type="hidden" name="categoria_oculta" id="inputCategoriaOculta" value="">
 
-                <!-- BLOQUE A: CAMPOS PARA NUEVO PRODUCTO PADRE -->
+                <!-- BLOQUE A: PRODUCTO PADRE -->
                 <div id="bloqueProductoPadre" style="display: none;">
                     <div class="campo">
                         <label>Nombre del Suplemento (Obligatorio):</label>
@@ -493,15 +548,14 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                         </div>
                     </div>
                     <p style="font-size: 0.78rem; color: #52525b; background: #f4f4f5; padding: 10px; border-radius: 6px; margin-bottom: 14px;">
-                        ℹ️ El <strong>Producto Padre</strong> registra el suplemento base en <code>dbo.Productos</code> con su marca y categoría. Luego podrás crearle todas sus variantes de peso y sabor.
+                        ℹ️ El <strong>Producto Padre</strong> se guarda en <code>dbo.Productos</code> con <code>TipoProducto = 'Producto'</code> y auditoría <code>UsuarioId = 8</code>.
                     </p>
                 </div>
 
-                <!-- BLOQUE B: CAMPOS PARA NUEVA VARIANTE Y MODO EDITAR -->
+                <!-- BLOQUE B: NUEVA VARIANTE / EDITAR (CON SELECTS DINÁMICOS) -->
                 <div id="bloqueVariante">
                     <div class="campo">
                         <label>Nombre del Suplemento:</label>
-                        <!-- En modo "Nueva Variante" se elige el producto padre de la lista -->
                         <select name="producto_id" id="selectProductoPadre" required>
                             <option value="">Seleccionar producto padre...</option>
                             <?php foreach ($productos_padre as $pp): ?>
@@ -513,7 +567,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <!-- En modo "editar" se muestra bloqueado en gris tal como en la imagen -->
                         <input type="text" id="inputNombreBloqueado" class="input-bloqueado" style="display: none;" readonly tabindex="-1">
                     </div>
 
@@ -531,11 +584,21 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                     <div class="campo-doble">
                         <div class="campo">
                             <label>Presentación (Peso/Tamaño):</label>
-                            <input type="text" name="presentacion" id="inputPresentacion" placeholder="Ej: 250 g, 2 lb" required>
+                            <select name="presentacion" id="selectPresentacion" required>
+                                <option value="">Seleccionar presentación...</option>
+                                <?php foreach ($presentaciones_sistema as $p): ?>
+                                    <option value="<?php echo htmlspecialchars($p); ?>"><?php echo htmlspecialchars($p); ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="campo">
                             <label>Sabor / Color:</label>
-                            <input type="text" name="sabor" id="inputSabor" placeholder="Ej: Chocolate, Sin sabor" required>
+                            <select name="sabor" id="selectSabor" required>
+                                <option value="">Seleccionar sabor...</option>
+                                <?php foreach ($sabores_sistema as $s): ?>
+                                    <option value="<?php echo htmlspecialchars($s); ?>"><?php echo htmlspecialchars($s); ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
 
@@ -546,7 +609,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                         </div>
                         <div class="campo">
                             <label>Stock Disponible:</label>
-                            <!-- Siempre bloqueado en gris porque responde a MovimientosStock -->
                             <input type="text" id="inputStockBloqueado" class="input-bloqueado" value="0 (Por Movimientos)" readonly tabindex="-1">
                         </div>
                     </div>
@@ -574,10 +636,9 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
             </form>
         </div>
 
-        <!-- ================= COLUMNA DERECHA: PRESUPUESTOS, RECEPCIONES DE VENTA E INVENTARIO ================= -->
+        <!-- ================= COLUMNA DERECHA ================= -->
         <div>
-            
-            <!-- 1. SECCIÓN PRESUPUESTOS (DURACIÓN 25 MINUTOS - ESTADO: "pendiente") -->
+            <!-- PRESUPUESTOS ACTIVOS -->
             <div class="caja">
                 <h3>
                     <span>⏳ Presupuestos Activos (Duración: 25 minutos)</span>
@@ -616,14 +677,14 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                 <?php endif; ?>
             </div>
 
-            <!-- 2. SECCIÓN RECEPCIONES DE VENTA / COMPROBANTES DE VENTA CONCRETADOS -->
+            <!-- RECEPCIONES DE VENTA -->
             <div class="caja">
                 <h3>
                     <span>✅ Recepciones y Comprobantes de Venta (Pedidos Concretados)</span>
                     <span style="font-size: 0.75rem; color: #166534; font-weight: 700;">Sincronizado con Sistema de Lau</span>
                 </h3>
                 <p style="font-size: 0.82rem; color: #52525b; margin-top: -8px; margin-bottom: 14px;">
-                    Cuando Lauti confirma la compra desde su sistema, el presupuesto pasa a esta lista de ventas concretadas mostrando su estado actual (<strong>"confirmada/en camino"</strong> o <strong>"confirmado/entregado"</strong>).
+                    Cuando Lauti confirma la compra desde su sistema, el presupuesto pasa a esta lista mostrando su estado actual (<strong>"confirmada/en camino"</strong> o <strong>"confirmado/entregado"</strong>).
                 </p>
 
                 <?php if (count($ventas_confirmadas) > 0): ?>
@@ -658,7 +719,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                 <?php endif; ?>
             </div>
 
-            <!-- 3. SECCIÓN TABLA DE INVENTARIO -->
+            <!-- TABLA DE INVENTARIO -->
             <div class="caja">
                 <h3>
                     <span>📦 Inventario Sincronizado (<?php echo count($inventario); ?> variantes)</span>
@@ -674,7 +735,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                                 <th>Producto / Variante</th>
                                 <th>Categoría</th>
                                 <th>Precio</th>
-                                <th>Stock (Movimientos)</th>
+                                <th>Stock (Lauti)</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -714,7 +775,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                             <?php else: ?>
                                 <tr>
                                     <td colspan="6" style="text-align: center; padding: 30px; color: #71717a;">
-                                        No hay productos cargados.
+                                        No hay productos cargados en la base de datos de Lauti.
                                     </td>
                                 </tr>
                             <?php endif; ?>
@@ -750,7 +811,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
     const inputMarcaOculta = document.getElementById('inputMarcaOculta');
     const inputCategoriaOculta = document.getElementById('inputCategoriaOculta');
 
-    // Cambiar entre "Nueva Variante" y "Nuevo Producto (Padre)"
     function actualizarModoAlta() {
         if (radioPadre.checked) {
             labelPadre.classList.add('opcion-check--activa');
@@ -759,15 +819,13 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
             bloquePadre.style.display = 'block';
             bloqueVariante.style.display = 'none';
 
-            // Obligatorios de Producto Padre
             document.getElementById('inputNombrePadre').required = true;
             document.getElementById('selectMarcaPadre').required = true;
             document.getElementById('selectCategoriaPadre').required = true;
 
-            // Desactivar required de Variante
             selectProductoPadre.required = false;
-            document.getElementById('inputPresentacion').required = false;
-            document.getElementById('inputSabor').required = false;
+            document.getElementById('selectPresentacion').required = false;
+            document.getElementById('selectSabor').required = false;
             document.getElementById('inputPrecio').required = false;
             document.getElementById('inputDescripcion').required = false;
         } else {
@@ -784,8 +842,8 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
             selectProductoPadre.style.display = 'block';
             selectProductoPadre.required = true;
             inputNombreBloqueado.style.display = 'none';
-            document.getElementById('inputPresentacion').required = true;
-            document.getElementById('inputSabor').required = true;
+            document.getElementById('selectPresentacion').required = true;
+            document.getElementById('selectSabor').required = true;
             document.getElementById('inputPrecio').required = true;
             document.getElementById('inputDescripcion').required = true;
             inputStockBloqueado.value = '0 (Por Movimientos)';
@@ -795,7 +853,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
     radioVariante.addEventListener('change', actualizarModoAlta);
     radioPadre.addEventListener('change', actualizarModoAlta);
 
-    // Al seleccionar un Producto Padre en "Nueva Variante", autocompletar Marca y Categoría bloqueadas
     selectProductoPadre.addEventListener('change', (e) => {
         const opt = e.target.options[e.target.selectedIndex];
         const nom = opt.getAttribute('data-nombre') || '';
@@ -809,7 +866,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         inputCategoriaOculta.value = cat;
     });
 
-    // Modo "editar" idéntico a la imagen de referencia (Nombre, Marca, Categoría y Stock en gris bloqueado)
     function cargarParaEditar(prod) {
         selectorTipoAlta.style.display = 'none';
         bloquePadre.style.display = 'none';
@@ -822,7 +878,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         accionForm.value = 'editar_variante';
         document.getElementById('inputVarianteId').value = prod.id;
 
-        // Ocultar el select de padres y mostrar el input gris bloqueado con el nombre del suplemento
         selectProductoPadre.style.display = 'none';
         selectProductoPadre.required = false;
         inputNombreBloqueado.style.display = 'block';
@@ -836,14 +891,13 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         inputMarcaOculta.value = prod.marca || '';
         inputCategoriaOculta.value = prod.cat || '';
 
-        // Campos editables obligatorios
-        document.getElementById('inputPresentacion').value = prod.presentacion || '';
-        document.getElementById('inputPresentacion').required = true;
-        document.getElementById('inputSabor').value = prod.sabor || '';
-        document.getElementById('inputSabor').required = true;
+        document.getElementById('selectPresentacion').value = prod.presentacion || '';
+        document.getElementById('selectPresentacion').required = true;
+        document.getElementById('selectSabor').value = prod.sabor || '';
+        document.getElementById('selectSabor').required = true;
         document.getElementById('inputPrecio').value = prod.precio ?? 0;
         document.getElementById('inputPrecio').required = true;
-        document.getElementById('inputDescripcion').value = prod.desc || 'Suplemento deportivo de calidad garantizada.';
+        document.getElementById('inputDescripcion').value = prod.desc || '';
         document.getElementById('inputDescripcion').required = true;
         document.getElementById('inputImagenActual').value = (prod.img && prod.img !== 'IMG') ? prod.img : '';
 
@@ -860,7 +914,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Volver al modo Nuevo Producto / Variante
     document.getElementById('btnCancelarEdicion').addEventListener('click', () => {
         document.getElementById('formProducto').reset();
         selectorTipoAlta.style.display = 'grid';
@@ -877,7 +930,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         actualizarModoAlta();
     });
 
-    // Vista previa de imagen seleccionada
     document.getElementById('inputImagenArchivo').addEventListener('change', (e) => {
         const file = e.target.files[0];
         const preview = document.getElementById('previewImagen');
@@ -887,7 +939,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         }
     });
 
-    // Buscador de la tabla de inventario
     document.getElementById('buscadorPanel').addEventListener('input', (e) => {
         const texto = e.target.value.toLowerCase().trim();
         document.querySelectorAll('.fila-inventario').forEach(fila => {
@@ -895,12 +946,10 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         });
     });
 
-    // Cuenta regresiva en tiempo real para los Presupuestos (25 minutos)
     setInterval(() => {
         document.querySelectorAll('.js-timer-presupuesto').forEach(el => {
             let seg = parseInt(el.getAttribute('data-segundos'), 10);
             if (seg <= 1) {
-                // Al llegar a 0 se recarga el panel para purgar el presupuesto vencido
                 window.location.reload();
             } else {
                 seg--;
