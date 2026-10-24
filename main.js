@@ -161,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const renderizarCarrito = () => {
+    if (!listaCarrito) return;
     let cantidadTotal = 0;
     let subtotal = 0;
     listaCarrito.innerHTML = '';
@@ -300,13 +301,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =========================================
-  // 5. EVENTOS GLOBALES (AGREGAR AL CARRITO / VISTA RÁPIDA)
+  // 5. EVENTOS GLOBALES (BOTÓN AL CARRITO vs CARD FLOTANTE DE INFO)
   // =========================================
   const productoModal = document.getElementById('productoModal');
   const modalProdImg = document.getElementById('modalProdImg');
   const modalProdCat = document.getElementById('modalProdCat');
   const modalProdTitulo = document.getElementById('modalProdTitulo');
   const modalProdDesc = document.getElementById('modalProdDesc');
+  const modalProdStock = document.getElementById('modalProdStock');
   const modalProdPrecio = document.getElementById('modalProdPrecio');
   const modalProdBtn = document.getElementById('modalProdBtn');
 
@@ -315,10 +317,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnCerrarFondoProducto')?.addEventListener('click', cerrarVistaRapida);
 
   document.addEventListener('click', (e) => {
+    // A) Si presionó el botón "AL CARRITO" (en la tarjeta o dentro del modal)
     const botonAgregar = e.target.closest('.js-agregar-carrito');
     if (botonAgregar) {
       e.preventDefault();
-      const nombre = botonAgregar.getAttribute('data-nombre');
+      e.stopPropagation();
+
+      const nombre = botonAgregar.getAttribute('data-nombre') || 'Suplemento Supplex';
       const precio = parseFloat(botonAgregar.getAttribute('data-precio')) || 0;
 
       const productoExistente = carrito.find(item => item.nombre === nombre);
@@ -339,39 +344,80 @@ document.addEventListener('DOMContentLoaded', () => {
         botonAgregar.textContent = textoOriginal;
         botonAgregar.style.backgroundColor = "";
         botonAgregar.style.color = "";
-      }, 1500);
+      }, 1200);
       return; 
     }
 
+    // B) Si presionó cualquier otra parte de la tarjeta del producto, abre la Card Flotante
     const clicEnTarjeta = e.target.closest('.producto-tarjeta, .combo-tarjeta');
     const clicEnFavorito = e.target.closest('.producto-tarjeta__favorito');
 
-    if (clicEnTarjeta && !clicEnFavorito) {
+    if (clicEnTarjeta && !clicEnFavorito && productoModal) {
       e.preventDefault();
-      const elementoNombre = clicEnTarjeta.querySelector('.producto-tarjeta__nombre, .combo-tarjeta__nombre');
-      
-      if (elementoNombre && Array.isArray(window.inventarioProductos)) {
-        const nombreBusqueda = elementoNombre.textContent.trim();
-        const productoData = window.inventarioProductos.find(p => p.nombre.trim() === nombreBusqueda || p.nombre.includes(nombreBusqueda));
 
-        if (productoData && productoModal) {
-          if (modalProdImg) {
-            const tieneFoto = productoData.img && productoData.img.startsWith('http');
-            modalProdImg.innerHTML = tieneFoto 
-              ? `<img src="${productoData.img}" alt="${productoData.nombre}" style="width: 100%; height: 100%; object-fit: contain;">`
-              : `<div class="producto-tarjeta__placeholder">${productoData.img || 'SUPPLEX'}</div>`;
-          }
-          if (modalProdCat) modalProdCat.textContent = productoData.cat || 'General';
-          if (modalProdTitulo) modalProdTitulo.textContent = productoData.nombre;
-          if (modalProdDesc) modalProdDesc.textContent = productoData.desc || "Suplemento deportivo de alta calidad.";
-          if (modalProdPrecio) modalProdPrecio.textContent = `$ ${Number(productoData.precio).toLocaleString('es-AR')}`;
-          if (modalProdBtn) {
-            modalProdBtn.setAttribute('data-nombre', productoData.nombre);
-            modalProdBtn.setAttribute('data-precio', productoData.precio);
-          }
-          productoModal.classList.add('producto-modal--activo');
+      // 1. Buscamos primero por data-id en el inventario traído de la BD
+      const idTarjeta = clicEnTarjeta.getAttribute('data-id');
+      const elementoNombre = clicEnTarjeta.querySelector('.producto-tarjeta__nombre, .combo-tarjeta__nombre');
+      const nombreBusqueda = elementoNombre ? elementoNombre.textContent.trim() : '';
+
+      let productoData = null;
+
+      if (Array.isArray(window.inventarioProductos) && window.inventarioProductos.length > 0) {
+        if (idTarjeta !== null && idTarjeta !== '') {
+          productoData = window.inventarioProductos.find(p => String(p.id) === String(idTarjeta));
+        }
+        if (!productoData && nombreBusqueda) {
+          productoData = window.inventarioProductos.find(p => 
+            p.nombre.trim().toLowerCase() === nombreBusqueda.toLowerCase() ||
+            p.nombre.toLowerCase().includes(nombreBusqueda.toLowerCase())
+          );
         }
       }
+
+      // 2. Si no está en el array (o es una card fija del HTML), leemos los atributos data-* de la tarjeta
+      if (!productoData) {
+        const btnTarjeta = clicEnTarjeta.querySelector('.js-agregar-carrito');
+        productoData = {
+          nombre: clicEnTarjeta.getAttribute('data-nombre') || nombreBusqueda || 'Suplemento Deportivo',
+          cat: clicEnTarjeta.getAttribute('data-cat') || clicEnTarjeta.querySelector('.producto-tarjeta__marca, .combo-tarjeta__etiqueta')?.textContent || 'General',
+          desc: clicEnTarjeta.getAttribute('data-desc') || clicEnTarjeta.querySelector('.combo-tarjeta__desc, .producto-tarjeta__variante')?.textContent || 'Suplemento deportivo de alta calidad para potenciar tu entrenamiento.',
+          precio: parseFloat(clicEnTarjeta.getAttribute('data-precio') || btnTarjeta?.getAttribute('data-precio')) || 0,
+          img: clicEnTarjeta.getAttribute('data-img') || 'SUPPLEX',
+          stock: parseInt(clicEnTarjeta.getAttribute('data-stock')) || 10
+        };
+      }
+
+      // 3. Rellenamos la Card Flotante (#productoModal) con todos los datos del producto
+      if (modalProdImg) {
+        const tieneFoto = productoData.img && productoData.img.startsWith('http');
+        modalProdImg.innerHTML = tieneFoto 
+          ? `<img src="${productoData.img}" alt="${productoData.nombre}" style="width: 100%; height: 100%; object-fit: contain;">`
+          : `<div class="producto-tarjeta__placeholder">${productoData.img || 'SUPPLEX'}</div>`;
+      }
+      if (modalProdCat) modalProdCat.textContent = productoData.cat || 'General';
+      if (modalProdTitulo) modalProdTitulo.textContent = productoData.nombre;
+      if (modalProdDesc) {
+        modalProdDesc.textContent = (productoData.desc && productoData.desc.trim() !== '') 
+          ? productoData.desc 
+          : "Suplemento deportivo de alta calidad seleccionado para maximizar tu rendimiento y recuperación.";
+      }
+      if (modalProdStock) {
+        const stockCant = productoData.stock ?? 10;
+        modalProdStock.textContent = stockCant > 0 
+          ? `✔ Stock disponible (${stockCant} unidades)` 
+          : `✖ Sin stock disponible en este momento`;
+        modalProdStock.style.color = stockCant > 0 ? '#22c55e' : '#ef4444';
+      }
+      if (modalProdPrecio) {
+        modalProdPrecio.textContent = `$ ${Number(productoData.precio || 0).toLocaleString('es-AR')}`;
+      }
+      if (modalProdBtn) {
+        modalProdBtn.setAttribute('data-nombre', productoData.nombre);
+        modalProdBtn.setAttribute('data-precio', productoData.precio || 0);
+      }
+
+      // 4. Mostramos el modal flotante
+      productoModal.classList.add('producto-modal--activo');
     }
   });
 
@@ -414,7 +460,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (Array.isArray(window.inventarioProductos)) {
           let resultados = window.inventarioProductos.filter(producto => 
             producto.nombre.toLowerCase().includes(textoBusqueda) || 
-            (producto.cat && producto.cat.toLowerCase().includes(textoBusqueda))
+            (producto.cat && producto.cat.toLowerCase().includes(textoBusqueda)) ||
+            (producto.desc && producto.desc.toLowerCase().includes(textoBusqueda))
           );
 
           const resultadosLimitados = resultados.slice(0, 12);
@@ -484,24 +531,37 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================
   window.inventarioProductos = []; 
   
+  const escaparAtributo = (texto) => String(texto ?? '').replace(/"/g, '&quot;');
+
   const crearHTMLTarjeta = (prod) => {
     const tieneFoto = prod.img && prod.img.startsWith('http');
     const contenedorImagen = tieneFoto 
-      ? `<img src="${prod.img}" alt="${prod.nombre}" class="producto-tarjeta__img" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;">`
+      ? `<img src="${escaparAtributo(prod.img)}" alt="${escaparAtributo(prod.nombre)}" class="producto-tarjeta__img" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;">`
       : `<div class="producto-tarjeta__placeholder">${prod.img || 'SUPPLEX'}</div>`;
 
+    const descCorta = prod.desc ? `<p class="producto-tarjeta__variante" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${prod.desc}</p>` : '';
+
     return `
-      <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde);">
+      <article class="producto-tarjeta tarjeta-sombra_efecto" 
+               style="border: 1px solid var(--color-borde);"
+               data-id="${escaparAtributo(prod.id)}"
+               data-nombre="${escaparAtributo(prod.nombre)}"
+               data-cat="${escaparAtributo(prod.cat || 'General')}"
+               data-desc="${escaparAtributo(prod.desc || '')}"
+               data-precio="${Number(prod.precio) || 0}"
+               data-stock="${Number(prod.stock) || 10}"
+               data-img="${escaparAtributo(prod.img || 'SUPPLEX')}">
         <div class="producto-tarjeta__imagen-caja">
           ${contenedorImagen}
         </div>
         <div class="producto-tarjeta__info">
           <span class="producto-tarjeta__marca">${prod.cat || 'General'}</span>
           <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem;">${prod.nombre}</h3>
+          ${descCorta}
           <div class="producto-tarjeta__precios">
-            <span class="producto-tarjeta__precio-actual">$ ${Number(prod.precio).toLocaleString('es-AR')}</span>
+            <span class="producto-tarjeta__precio-actual">$ ${Number(prod.precio || 0).toLocaleString('es-AR')}</span>
           </div>
-          <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre}" data-precio="${prod.precio}">AL CARRITO</button>
+          <button type="button" class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${escaparAtributo(prod.nombre)}" data-precio="${Number(prod.precio) || 0}">AL CARRITO</button>
         </div>
       </article>
     `;
@@ -516,7 +576,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (filtro && filtro !== 'todos') {
       productosFiltrados = window.inventarioProductos.filter(prod => 
-        prod.cat && prod.cat.toLowerCase() === filtro.toLowerCase()
+        (prod.cat && prod.cat.toLowerCase().includes(filtro.toLowerCase())) ||
+        (prod.nombre && prod.nombre.toLowerCase().includes(filtro.toLowerCase()))
       );
     }
 

@@ -110,7 +110,7 @@
       </div>
     </section>
 
-    <!-- ================= SECCIÓN DESCUBRIR ================= -->
+    <!-- ================= SECCIÓN DESCUBRIR (CARDS EXPLICATIVAS) ================= -->
     <section class="descubrir" id="categorias">
       <div class="descubrir__contenedor">
         <div class="descubrir__encabezado">
@@ -178,6 +178,7 @@
       </div>
     </section>
 
+    <!-- ================= SECCIÓN LO MÁS VENDIDO (SE CARGA DESDE LA BD) ================= -->
     <section class="mas-vendidos">
       <div class="mas-vendidos__contenedor">
         <div class="mas-vendidos__encabezado">
@@ -192,7 +193,8 @@
         </div>
 
         <div class="carrusel-horizontal" id="carruselMasVendidos">
-          <article class="producto-tarjeta tarjeta-sombra_efecto">
+          <!-- Si la BD está activa, main.js reemplaza estas tarjetas por los productos reales -->
+          <article class="producto-tarjeta tarjeta-sombra_efecto" data-nombre="100% Whey Gold Standard" data-cat="Proteína" data-precio="42500" data-desc="Proteína de suero de leche aislada y concentrada de rápida absorción • 2.27 kg." data-stock="15">
             <div class="producto-tarjeta__imagen-caja">
               <div class="producto-tarjeta__etiquetas">
                 <span class="etiqueta etiqueta--negra">MÁS VENDIDO</span>
@@ -209,11 +211,11 @@
                 <span class="producto-tarjeta__precio-actual">$ 42.500</span>
                 <span class="producto-tarjeta__precio-viejo">$ 56.000</span>
               </div>
-              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="100% Whey Gold Standard - Optimum Nutrition" data-precio="42500">AGREGAR AL CARRITO</button>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="100% Whey Gold Standard - Optimum Nutrition" data-precio="42500">AL CARRITO</button>
             </div>
           </article>
 
-          <article class="producto-tarjeta tarjeta-sombra_efecto">
+          <article class="producto-tarjeta tarjeta-sombra_efecto" data-nombre="Creatine Monohydrate" data-cat="Creatina" data-precio="18900" data-desc="Creatina monohidrato micronizada 100% pura para fuerza y potencia • 500 g." data-stock="20">
             <div class="producto-tarjeta__imagen-caja">
               <div class="producto-tarjeta__etiquetas">
                 <span class="etiqueta etiqueta--verde">OFERTA</span>
@@ -230,46 +232,7 @@
                 <span class="producto-tarjeta__precio-actual">$ 18.900</span>
                 <span class="producto-tarjeta__precio-viejo">$ 22.000</span>
               </div>
-              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="Creatine Monohydrate - Dymatize" data-precio="18900">AGREGAR AL CARRITO</button>
-            </div>
-          </article>
-
-          <article class="producto-tarjeta tarjeta-sombra_efecto">
-            <div class="producto-tarjeta__imagen-caja">
-              <div class="producto-tarjeta__etiquetas">
-                <span class="etiqueta etiqueta--negra">NUEVO</span>
-              </div>
-              <button class="producto-tarjeta__favorito icono_efecto" aria-label="Favoritos">♡</button>
-              <div class="producto-tarjeta__placeholder">IMG 3</div>
-            </div>
-            <div class="producto-tarjeta__info">
-              <span class="producto-tarjeta__marca">CELLUCOR</span>
-              <h3 class="producto-tarjeta__nombre">Pre-Workout C4 Original</h3>
-              <p class="producto-tarjeta__variante">Pre-entreno • 390 g</p>
-              <div class="producto-tarjeta__precios">
-                <span class="producto-tarjeta__precio-actual">$ 31.200</span>
-              </div>
-              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="Pre-Workout C4 Original - Cellucor" data-precio="31200">AGREGAR AL CARRITO</button>
-            </div>
-          </article>
-
-          <article class="producto-tarjeta tarjeta-sombra_efecto">
-            <div class="producto-tarjeta__imagen-caja">
-              <div class="producto-tarjeta__etiquetas">
-                <span class="etiqueta etiqueta--roja">-17%</span>
-              </div>
-              <button class="producto-tarjeta__favorito icono_efecto" aria-label="Favoritos">♡</button>
-              <div class="producto-tarjeta__placeholder">IMG 4</div>
-            </div>
-            <div class="producto-tarjeta__info">
-              <span class="producto-tarjeta__marca">MUSCLETECH</span>
-              <h3 class="producto-tarjeta__nombre">BCAA 2:1:1 Instantized</h3>
-              <p class="producto-tarjeta__variante">Aminoácidos • 400 g</p>
-              <div class="producto-tarjeta__precios">
-                <span class="producto-tarjeta__precio-actual">$ 22.400</span>
-                <span class="producto-tarjeta__precio-viejo">$ 27.000</span>
-              </div>
-              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="BCAA 2:1:1 Instantized - Muscletech" data-precio="22400">AGREGAR AL CARRITO</button>
+              <button class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="Creatine Monohydrate - Dymatize" data-precio="18900">AL CARRITO</button>
             </div>
           </article>
         </div>
@@ -290,7 +253,7 @@
         </div>
 
         <div class="carrusel-horizontal" id="carruselCombos">
-          <article class="combo-tarjeta tarjeta_efecto">
+          <article class="combo-tarjeta tarjeta_efecto" data-nombre="Combo Volumen Extremo" data-cat="Combo" data-precio="68900" data-desc="Proteína Whey + Creatina + Shaker. Ideal para maximizar tu ganancia muscular." data-stock="10">
             <div class="combo-tarjeta__imagen-caja">
               <span class="combo-tarjeta__etiqueta">COMBO</span>
               <div class="combo-tarjeta__placeholder">IMG COMBO 1</div>
@@ -306,7 +269,7 @@
             </div>
           </article>
 
-          <article class="combo-tarjeta tarjeta_efecto">
+          <article class="combo-tarjeta tarjeta_efecto" data-nombre="Combo Definición Total" data-cat="Combo" data-precio="52000" data-desc="Quemador de grasa + BCAA + Omega 3. Mantén la masa mientras defines." data-stock="10">
             <div class="combo-tarjeta__imagen-caja">
               <span class="combo-tarjeta__etiqueta">COMBO</span>
               <div class="combo-tarjeta__placeholder">IMG COMBO 2</div>
@@ -322,7 +285,7 @@
             </div>
           </article>
 
-          <article class="combo-tarjeta tarjeta_efecto">
+          <article class="combo-tarjeta tarjeta_efecto" data-nombre="Combo Rendimiento Runner" data-cat="Combo" data-precio="45500" data-desc="Geles energéticos + Electrolitos + Magnesio. Energía para cada kilómetro." data-stock="10">
             <div class="combo-tarjeta__imagen-caja">
               <span class="combo-tarjeta__etiqueta">COMBO</span>
               <div class="combo-tarjeta__placeholder">IMG COMBO 3</div>
@@ -337,7 +300,7 @@
             </div>
           </article>
 
-          <article class="combo-tarjeta tarjeta_efecto">
+          <article class="combo-tarjeta tarjeta_efecto" data-nombre="Combo Fuerza y Potencia" data-cat="Combo" data-precio="71000" data-desc="Pre-entreno + Creatina + Aminoácidos. Supera tus límites en cada serie." data-stock="10">
             <div class="combo-tarjeta__imagen-caja">
               <span class="combo-tarjeta__etiqueta">COMBO</span>
               <div class="combo-tarjeta__placeholder">IMG COMBO 4</div>
@@ -656,14 +619,12 @@
         <h2 class="legal-modal__titulo">Información Legal</h2>
         <p class="legal-modal__subtitulo">Transparencia, seguridad y condiciones de uso de SUPPLEX.</p>
 
-        <!-- Pestañas de navegación legal -->
         <div class="legal-modal__tabs">
           <button type="button" class="legal-modal__tab legal-modal__tab--activo" data-target="tab-terminos">Términos y Condiciones</button>
           <button type="button" class="legal-modal__tab" data-target="tab-privacidad">Política de Privacidad</button>
           <button type="button" class="legal-modal__tab" data-target="tab-cookies">Política de Cookies</button>
         </div>
 
-        <!-- Contenido: Términos y Condiciones -->
         <div class="legal-modal__seccion legal-modal__seccion--activa" id="tab-terminos">
           <h3>1. Condiciones Generales de Uso</h3>
           <p>Al acceder y realizar pedidos a través del sitio web de <strong>SUPPLEX</strong>, el usuario acepta estar sujeto a los presentes Términos y Condiciones. Todos nuestros suplementos deportivos comercializados son 100% originales y cuentan con aprobación de las autoridades sanitarias correspondientes.</p>
@@ -673,7 +634,6 @@
           <p>Realizamos envíos a todo el país dentro de las 24 a 48 hs hábiles posteriores a la acreditación del pago. Por razones de seguridad bromatológica, solo se aceptan cambios o devoluciones de productos que conserven su precinto de seguridad original intacto.</p>
         </div>
 
-        <!-- Contenido: Política de Privacidad -->
         <div class="legal-modal__seccion" id="tab-privacidad">
           <h3>1. Protección de Datos Personales</h3>
           <p>En <strong>SUPPLEX</strong> protegemos tu información conforme a la Ley N° 25.326 de Protección de Datos Personales. Los datos solicitados en el carrito (nombre, teléfono, dirección de entrega y correo electrónico) se utilizan exclusivamente para procesar y despachar tus pedidos.</p>
@@ -681,7 +641,6 @@
           <p>No vendemos, alquilamos ni compartimos tu información personal con terceros ajenos a la operatoria logística de entrega. Podés solicitar la actualización o eliminación de tus datos en cualquier momento escribiéndonos a <strong>info@supplex.com</strong>.</p>
         </div>
 
-        <!-- Contenido: Política de Cookies -->
         <div class="legal-modal__seccion" id="tab-cookies">
           <h3>1. ¿Qué son las Cookies?</h3>
           <p>Las cookies son pequeños archivos que se almacenan en tu navegador para recordar tus preferencias, mantener los suplementos guardados en tu carrito de compras y analizar el rendimiento del sitio.</p>
@@ -696,7 +655,7 @@
     </div>
   </div>
 
-  <!-- --- CARRITO MODAL (ACTUALIZADO V2.0) --- -->
+  <!-- --- CARRITO MODAL --- -->
   <div class="carrito-modal" id="carritoModal">
     <div class="carrito-modal__fondo" id="carritoFondo"></div>
     <div class="carrito-modal__panel">
@@ -756,7 +715,7 @@
     </div>
   </div>
 
-  <!-- --- MODAL VISTA RÁPIDA DE PRODUCTO --- -->
+  <!-- --- CARD FLOTANTE / MODAL DE INFORMACIÓN DEL PRODUCTO --- -->
   <div class="producto-modal" id="productoModal">
     <div class="producto-modal__fondo" id="btnCerrarFondoProducto"></div>
     <div class="producto-modal__panel">
@@ -769,6 +728,7 @@
           <span class="producto-modal__categoria" id="modalProdCat">Categoría</span>
           <h3 class="producto-modal__titulo" id="modalProdTitulo">Nombre del Producto</h3>
           <p class="producto-modal__descripcion" id="modalProdDesc">Descripción detallada del producto...</p>
+          <p id="modalProdStock" style="font-size: 0.85rem; font-weight: 700; color: #22c55e; margin-bottom: 12px;">✔ Stock disponible</p>
           <div class="producto-modal__precio" id="modalProdPrecio">$ 0</div>
           
           <button class="producto-modal__boton boton-oscuro_efecto js-agregar-carrito" id="modalProdBtn" data-nombre="" data-precio="">
@@ -840,7 +800,6 @@
       const tabsLegal = document.querySelectorAll('.legal-modal__tab');
       const seccionesLegal = document.querySelectorAll('.legal-modal__seccion');
 
-      // Mostrar card flotante si aún no fue aceptada en esta sesión
       if (cookiesFlotante && !localStorage.getItem('supplex_cookies_ok')) {
         setTimeout(() => {
           cookiesFlotante.classList.add('cookies-flotante--activo');
@@ -857,7 +816,6 @@
         cookiesFlotante?.classList.remove('cookies-flotante--activo');
       });
 
-      // Cambiar de pestaña dentro del modal legal
       const activarTabLegal = (nombreTab) => {
         const targetId = `tab-${nombreTab}`;
         tabsLegal.forEach(tab => {
@@ -875,7 +833,6 @@
         });
       });
 
-      // Abrir modal legal desde el footer o desde la card flotante
       document.querySelectorAll('.js-abrir-legal').forEach(enlace => {
         enlace.addEventListener('click', (e) => {
           e.preventDefault();
