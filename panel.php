@@ -20,6 +20,7 @@ if (!is_array($meta_web)) $meta_web = [];
 if (!isset($meta_web['variantes'])) $meta_web['variantes'] = [];
 if (!isset($meta_web['productos_img'])) $meta_web['productos_img'] = [];
 if (!isset($meta_web['eliminados'])) $meta_web['eliminados'] = [];
+if (!isset($meta_web['mas_vendidos'])) $meta_web['mas_vendidos'] = [];
 
 $id_usuario_auditoria = (int)($_SESSION['admin_usuario_id'] ?? 8);
 
@@ -58,11 +59,24 @@ function enviar_a_lauti($url, $payload) {
     return $resultado ? json_decode($resultado, true) : null;
 }
 
+// PROCESAR FORMULARIOS CON PATRÓN PRG
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
     $modo = $_POST['accion_form']; 
 
-    // A) CREAR O EDITAR PRODUCTO PADRE (Lleva la Descripción/Observaciones)
-    if ($modo === 'crear_producto_padre') {
+    // GESTIÓN: MOSTRAR PRODUCTOS EN LA WEB (LO MÁS VENDIDO)
+    if ($modo === 'guardar_mas_vendidos') {
+        $seleccionados = $_POST['destacados_ids'] ?? [];
+        $meta_web['mas_vendidos'] = array_map('intval', (array)$seleccionados);
+        file_put_contents($archivo_meta, json_encode($meta_web, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        $_SESSION['flash_mensaje'] = "⭐ Lista de productos 'Lo Más Vendido' actualizada con éxito (" . count($meta_web['mas_vendidos']) . " seleccionados).";
+        $_SESSION['flash_tipo'] = "ok";
+        header("Location: panel.php#seccionMasVendidos");
+        exit();
+    }
+
+    // A) CREAR O EDITAR PRODUCTO PADRE
+    elseif ($modo === 'crear_producto_padre') {
         $producto_id_padre = (int)($_POST['producto_id_padre'] ?? 0);
         $nombre_padre = trim($_POST['nombre_padre'] ?? '');
         $marca_padre = trim($_POST['marca_padre'] ?? '');
@@ -95,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion_form'])) {
         exit();
     }
 
-    // B) CREAR O EDITAR VARIANTE (Sin descripción propia, solo toma la del padre)
+    // B) CREAR O EDITAR VARIANTE
     elseif ($modo === 'crear_variante' || $modo === 'editar_variante') {
         $variante_id = (int)($_POST['variante_id'] ?? 0);
         $producto_id = (int)($_POST['producto_id'] ?? 0);
@@ -340,6 +354,7 @@ foreach ($registro_pedidos as $cod => $ped) {
 }
 
 file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+$seleccionados_mas_vendidos = (array)($meta_web['mas_vendidos'] ?? []);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -364,7 +379,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         .panel-header h2 { margin: 0; font-weight: 900; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
         .panel-header h2 span { color: var(--primario); }
         .estado-bd { font-size: 0.78rem; padding: 5px 12px; border-radius: 20px; font-weight: 700; background: #27272a; color: #a3e635; }
-        .header-acciones { display: flex; gap: 12px; align-items: center; }
+        .header-acciones { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
         .usuario-sesion { font-size: 0.8rem; color: #a1a1aa; font-weight: 700; }
         .btn-ver-web { color: #fff; text-decoration: none; font-size: 0.88rem; border: 1px solid #52525b; padding: 9px 16px; border-radius: 6px; font-weight: 700; transition: 0.2s; }
         .btn-ver-web:hover { background: #fff; color: var(--oscuro); }
@@ -433,6 +448,11 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         .btn-borrar { color: var(--alerta); text-decoration: none; font-weight: 800; font-size: 0.78rem; padding: 5px 9px; border: 1px solid var(--alerta); border-radius: 4px; }
         .btn-borrar:hover { background: var(--alerta); color: #fff; }
 
+        /* Estilo para selección de Más Vendidos */
+        .fila-seleccionable { cursor: pointer; transition: background 0.15s; }
+        .fila-seleccionable:hover { background: #f8fafc; }
+        .check-destacado { width: 18px; height: 18px; accent-color: var(--primario); cursor: pointer; }
+
         @media (max-width: 1024px) { .panel-grilla { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -449,6 +469,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
         </h2>
         <div class="header-acciones">
             <span class="usuario-sesion">👤 <?php echo htmlspecialchars($_SESSION['admin_nombre'] ?? 'PAGINA WEB'); ?> (ID: <?php echo $id_usuario_auditoria; ?>)</span>
+            <a href="#seccionMasVendidos" class="btn-ver-web" style="background: var(--primario); color: var(--oscuro); border-color: var(--primario);">⭐ Lo Más Vendido Web</a>
             <a href="index.html" target="_blank" class="btn-ver-web">Ver Inicio ↗</a>
             <a href="pages/productos.html" target="_blank" class="btn-ver-web">Ver Catálogo ↗</a>
             <a href="logout.php" class="btn-salir">Cerrar Sesión</a>
@@ -605,6 +626,87 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
 
         <!-- ================= COLUMNA DERECHA ================= -->
         <div>
+
+            <!-- NUEVA SECCIÓN: MOSTRAR PRODUCTOS EN LA WEB (LO MÁS VENDIDO) -->
+            <div class="caja" id="seccionMasVendidos" style="border: 2px solid var(--oscuro);">
+                <h3>
+                    <span>⭐ MOSTRAR PRODUCTOS EN LA WEB (LO MÁS VENDIDO)</span>
+                    <span style="font-size: 0.75rem; color: #4d7c0f; font-weight: 800; background: #ecfccb; padding: 4px 10px; border-radius: 20px;">
+                        Portada index.html
+                    </span>
+                </h3>
+                <p style="font-size: 0.82rem; color: #52525b; margin-top: -8px; margin-bottom: 14px;">
+                    Marcá con un tilde los productos que querés que se muestren en el carrusel principal de <strong>"LO MÁS VENDIDO"</strong> en la web. Solo son elegibles las variantes con <strong>precio válido mayor a $0</strong>.
+                </p>
+
+                <form action="panel.php" method="POST">
+                    <input type="hidden" name="accion_form" value="guardar_mas_vendidos">
+
+                    <input type="text" id="buscadorMasVendidos" class="buscador-tabla" placeholder="🔍 Filtrar lista para seleccionar más vendidos...">
+
+                    <div class="tabla-scroll" style="max-height: 380px; margin-bottom: 16px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px; text-align: center;">Mostrar</th>
+                                    <th>Foto</th>
+                                    <th>Producto / Variante</th>
+                                    <th>Categoría</th>
+                                    <th>Precio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php 
+                                $productos_validos_con_precio = array_filter($inventario, function($p) {
+                                    return (float)$p['precio'] > 0;
+                                });
+                                ?>
+                                <?php if (count($productos_validos_con_precio) > 0): ?>
+                                    <?php foreach ($productos_validos_con_precio as $pv): 
+                                        $id_v = (int)$pv['id'];
+                                        $esta_marcado = in_array($id_v, $seleccionados_mas_vendidos, true);
+                                        $tiene_img = !empty($pv['img']) && $pv['img'] !== 'IMG' && $pv['img'] !== 'SUPPLEX';
+                                    ?>
+                                        <tr class="fila-seleccionable fila-item-mas-vendidos">
+                                            <td style="text-align: center;">
+                                                <input type="checkbox" name="destacados_ids[]" value="<?php echo $id_v; ?>" class="check-destacado" <?php echo $esta_marcado ? 'checked' : ''; ?>>
+                                            </td>
+                                            <td>
+                                                <?php if ($tiene_img): ?>
+                                                    <img src="<?php echo htmlspecialchars($pv['img']); ?>" class="miniatura-tabla" alt="Foto">
+                                                <?php else: ?>
+                                                    <div class="miniatura-tabla">SIN FOTO</div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <strong><?php echo htmlspecialchars($pv['nombre']); ?></strong><br>
+                                                <span style="font-size: 0.78rem; color: #52525b;">
+                                                    <?php echo htmlspecialchars($pv['marca']); ?> • 
+                                                    <?php echo htmlspecialchars($pv['presentacion'] ?: 'Estándar'); ?>
+                                                    <?php echo $pv['sabor'] ? " (" . htmlspecialchars($pv['sabor']) . ")" : ""; ?>
+                                                </span>
+                                            </td>
+                                            <td><span class="badge-cat"><?php echo htmlspecialchars($pv['cat']); ?></span></td>
+                                            <td class="precio-tabla">$ <?php echo number_format((float)$pv['precio'], 0, ',', '.'); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; padding: 20px; color: #71717a;">
+                                            No hay productos con precio mayor a $0 cargados para mostrar.
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button type="submit" class="btn-guardar" style="background: var(--primario); color: var(--oscuro);">
+                        ACTUALIZAR LO MÁS VENDIDO EN LA WEB
+                    </button>
+                </form>
+            </div>
+
             <!-- PRESUPUESTOS ACTIVOS -->
             <div class="caja">
                 <h3>
@@ -720,10 +822,8 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                                 <?php foreach ($inventario as $prod): 
                                     $tiene_img = !empty($prod['img']) && $prod['img'] !== 'IMG' && $prod['img'] !== 'SUPPLEX';
                                     
-                                    // Búsqueda de la descripción original del padre
                                     $desc_padre = '';
                                     if ($prod['producto_id'] > 0 && isset($productos_padre_map[$prod['producto_id']])) {
-                                        // La descripción viene mapeada desde el padre
                                         foreach ($productos_padre as $pp) {
                                             if ($pp['ProductoId'] == $prod['producto_id']) {
                                                 $desc_padre = $pp['Observaciones'] ?? '';
@@ -731,7 +831,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                                             }
                                         }
                                     }
-                                    // Combinamos los datos para JS
                                     $prod_js = $prod;
                                     $prod_js['desc_padre'] = $desc_padre;
                                     
@@ -750,7 +849,7 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                                             <span style="font-size: 0.78rem; color: #52525b;">
                                                 <?php echo htmlspecialchars($prod['marca']); ?> • 
                                                 <?php echo htmlspecialchars($prod['presentacion'] ?: 'Estándar'); ?>
-                                                <?php echo $prod['sabor'] ? " (" . htmlspecialchars($prod['sabor']) . ")" : ""; ?>
+                                                <?php echo $pv['sabor'] ? " (" . htmlspecialchars($prod['sabor']) . ")" : ""; ?>
                                             </span>
                                         </td>
                                         <td><span class="badge-cat"><?php echo htmlspecialchars($prod['cat']); ?></span></td>
@@ -759,7 +858,6 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
                                         <td>
                                             <div class="acciones-celda">
                                                 <button type="button" class="btn-editar" onclick='cargarParaEditar(<?php echo $json_prod; ?>)'>✏️ Editar / Foto</button>
-                                                <!-- Botón para Editar Padre Rápidamente -->
                                                 <button type="button" class="btn-editar" style="background:#52525b;" onclick='cargarPadreParaEditar(<?php echo $json_prod; ?>)'>⚙️ Padre</button>
                                                 <a href="panel.php?borrar=<?php echo (int)$prod['id']; ?>" class="btn-borrar" onclick="return confirm('¿Seguro que querés desactivar esta variante de la tienda?');">Borrar</a>
                                             </div>
@@ -969,6 +1067,13 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
     document.getElementById('buscadorPanel').addEventListener('input', (e) => {
         const texto = e.target.value.toLowerCase().trim();
         document.querySelectorAll('.fila-inventario').forEach(fila => {
+            fila.style.display = fila.textContent.toLowerCase().includes(texto) ? '' : 'none';
+        });
+    });
+
+    document.getElementById('buscadorMasVendidos').addEventListener('input', (e) => {
+        const texto = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('.fila-item-mas-vendidos').forEach(fila => {
             fila.style.display = fila.textContent.toLowerCase().includes(texto) ? '' : 'none';
         });
     });

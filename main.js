@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 4. SISTEMA DE CARRITO (CON LOCALSTORAGE, CUPONES Y WSP)
+  // 4. SISTEMA DE CARRITO (CON CONTACTO, LOCALSTORAGE, CUPONES Y WSP)
   // =========================================
   const numeroWhatsApp = "5491100000000"; 
   let carrito = [];
@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderizarCarrito();
 
-  // FINALIZAR COMPRA: ENVÍO AL SERVIDOR Y WSP CON NUEVOS CAMPOS (EMAIL Y TEL)
+  // FINALIZAR COMPRA: ENVÍO AL SERVIDOR Y WHATSAPP (CAPTURA NOMBRE, DIRECCIÓN, EMAIL Y TELÉFONO)
   btnEnviarWhatsApp?.addEventListener('click', (e) => {
     e.preventDefault();
     if (carrito.length === 0) {
@@ -645,27 +645,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fetch(rutaPHP + '?nocache=' + Date.now())
     .then(res => res.json())
-    .then(data => {
-      if (!Array.isArray(data)) {
+    .then(dataResponse => {
+      // Compatibilidad si la respuesta es directa o con clave 'productos'
+      const data = Array.isArray(dataResponse) ? dataResponse : (dataResponse?.productos || []);
+      const destacadosIds = Array.isArray(dataResponse?.destacados_ids) ? dataResponse.destacados_ids.map(Number) : [];
+
+      if (!Array.isArray(data) || data.length === 0) {
         const grilla = document.getElementById('grillaCatalogo');
         if (grilla) {
-          grilla.innerHTML = `<div style="grid-column: 1/-1; color: #ef4444; padding: 2rem; text-align: center; background: #fff; border-radius: 12px;">Error al cargar inventario: ${data?.error || data?.error_python || 'Servidor no disponible'}</div>`;
+          grilla.innerHTML = `<div style="grid-column: 1/-1; color: #ef4444; padding: 2rem; text-align: center; background: #fff; border-radius: 12px;">Error al cargar inventario: ${dataResponse?.error || dataResponse?.error_python || 'Servidor no disponible'}</div>`;
         }
         return;
       }
 
       window.inventarioProductos = data;
 
-      // 1. Poblar carrusel "Lo Más Vendido"
+      // 1. Poblar carrusel "Lo Más Vendido" en index.html con prioridad en seleccionados de panel.php
       const carruselDestacados = document.getElementById('carruselMasVendidos');
-      if (carruselDestacados && data.length > 0) {
+      if (carruselDestacados) {
         carruselDestacados.innerHTML = '';
-        const conPrecio = data.filter(p => Number(p.precio) > 0);
-        const destacados = (conPrecio.length > 0 ? conPrecio : data).slice(0, 10);
-        carruselDestacados.innerHTML = destacados.map(prod => crearHTMLTarjeta(prod)).join('');
+        
+        let seleccionados = [];
+        if (destacadosIds.length > 0) {
+          // Filtra los seleccionados en el panel que tengan precio válido > 0
+          seleccionados = data.filter(p => destacadosIds.includes(Number(p.id)) && Number(p.precio) > 0);
+        }
+
+        // Si no hay ninguno seleccionado manualmente en el panel, toma los primeros con precio > 0 por defecto
+        if (seleccionados.length === 0) {
+          const conPrecio = data.filter(p => Number(p.precio) > 0);
+          seleccionados = (conPrecio.length > 0 ? conPrecio : data).slice(0, 10);
+        }
+
+        carruselDestacados.innerHTML = seleccionados.map(prod => crearHTMLTarjeta(prod)).join('');
       }
 
-      // 2. Poblar Categorías dinámicas
+      // 2. Poblar Categorías dinámicas en productos.html
       const listaCat = document.getElementById('listaCategoriasBD');
       const categoriasUnicas = [...new Set(data.map(p => p.cat))].filter(Boolean);
       if (listaCat) {
@@ -675,7 +690,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // 3. Poblar Marcas dinámicas
+      // 3. Poblar Marcas dinámicas en productos.html
       const listaMarca = document.getElementById('listaMarcasBD');
       const marcasUnicas = [...new Set(data.map(p => p.marca))].filter(Boolean);
       if (listaMarca) {
