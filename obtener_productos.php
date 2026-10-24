@@ -1,7 +1,9 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
+header("Cache-Control: no-cache, no-store, must-revalidate"); // Evita que el navegador guarde precios viejos en caché
+header("Pragma: no-cache");
+header("Expires: 0");
 
-// Consultamos al servidor Python de Lauti por su IP de Tailscale
 $url_lauti = "http://100.93.175.113:8000";
 $json_lauti = @file_get_contents($url_lauti);
 
@@ -22,18 +24,17 @@ if (isset($datos["aviso"]) || isset($datos["error_python"])) {
 $productos = [];
 
 foreach ($datos as $index => $fila) {
-    // Convertimos todas las claves de la fila a minúsculas para un manejo 100% seguro
     $f = array_change_key_case($fila, CASE_LOWER);
 
     $id = $f["varianteid"] ?? ($index + 1);
-    $nombreBase = $f["nombre"] ?? 'Suplemento';
+    $nombreBase = $f["nombre"] ?? $f["nombreproducto"] ?? 'Suplemento';
     $marca = $f["marca"] ?? 'Genérica';
     $categoria = $f["categoria"] ?? 'General';
     $presentacion = $f["presentacion"] ?? '';
     $saborColor = $f["saborcolor"] ?? '';
 
-    // Capturamos el PrecioVenta real directamente de la base de datos
-    $precioVenta = $f["precioventa"] ?? 0;
+    // Capturamos el PrecioVenta real
+    $precioVenta = $f["precioventa"] ?? $f["precio"] ?? 0;
     if (is_string($precioVenta)) {
         $precioVenta = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $precioVenta));
     }
@@ -42,7 +43,7 @@ foreach ($datos as $index => $fila) {
 
     $productos[] = [
         "id" => $id,
-        "nombre" => $nombreBase,
+        "nombre" => trim($nombreBase),
         "marca" => trim($marca),
         "cat" => trim($categoria),
         "presentacion" => trim($presentacion),
@@ -51,7 +52,7 @@ foreach ($datos as $index => $fila) {
         "precio" => (float)$precioVenta,
         "img" => $f["imagenurl"] ?? "IMG",
         "stock" => (int)$stockActual,
-        "desc" => "SKU: " . ($f["skuinterno"] ?? 'N/D') . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor: $saborColor" : "")
+        "desc" => "SKU: " . ($f["skuinterno"] ?? 'N/D') . " | Marca: " . trim($marca) . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor: $saborColor" : "")
     ];
 }
 

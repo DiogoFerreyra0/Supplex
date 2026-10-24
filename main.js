@@ -655,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // =========================================
-  // GESTIÓN DE CATÁLOGO Y FILTROS DINÁMICOS
+  // GESTIÓN DE CATÁLOGO Y FILTROS DINÁMICOS (BD)
   // =========================================
   window.inventarioProductos = [];
   let categoriaSeleccionada = 'todos';
@@ -663,6 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const renderizarCatalogoDinamico = () => {
     const grilla = document.getElementById('grillaCatalogo');
+    const contadorDiv = document.getElementById('contadorVariantes');
     if (!grilla) return;
 
     const textoBusq = document.getElementById('filtroBuscador')?.value.toLowerCase().trim() || '';
@@ -686,7 +687,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (ordenPrecio === 'menor') filtrados.sort((a, b) => a.precio - b.precio);
-    if (ordenPrecio === 'mayor') filtrados.sort((a, b) => b.precio - b.precio);
+    if (ordenPrecio === 'mayor') filtrados.sort((a, b) => b.precio - a.precio);
+
+    // Actualizar contador visual de variantes
+    if (contadorDiv) {
+      contadorDiv.textContent = `📦 Mostrando ${filtrados.length} de ${window.inventarioProductos.length} variantes cargadas en la base de datos`;
+    }
 
     grilla.innerHTML = '';
     if (filtrados.length === 0) {
@@ -714,7 +720,8 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="producto-tarjeta__info" style="padding: 16px; display: flex; flex-direction: column; flex-grow: 1;">
             <span class="producto-tarjeta__marca" style="font-size: 0.75rem; font-weight: 700; color: #71717a; text-transform: uppercase;">${prod.cat} | ${prod.marca}</span>
-            <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem; font-weight: 800; margin: 4px 0 8px;">${prod.nombre} - ${prod.presentacion}</h3>
+            <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem; font-weight: 800; margin: 4px 0 4px;">${prod.nombre}</h3>
+            <p style="font-size: 0.85rem; font-weight: 700; color: #27272a; margin-bottom: 4px;">${prod.presentacion}</p>
             <p style="font-size: 0.8rem; color: #52525b; margin-bottom: 12px;">Sabor: ${prod.sabor || 'N/D'}</p>
             <div class="producto-tarjeta__precios" style="margin-top: auto; margin-bottom: 12px;">
               <span class="producto-tarjeta__precio-actual" style="font-size: 1.15rem; font-weight: 900;">$ ${Number(prod.precio).toLocaleString('es-AR')}</span>
@@ -730,13 +737,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Cargar datos del servidor y poblar filtros dinámicamente
   const rutaPHP = window.location.pathname.includes('/pages/') ? '../obtener_productos.php' : 'obtener_productos.php';
 
-  fetch(rutaPHP)
+  fetch(rutaPHP + '?nocache=' + Date.now())
     .then(res => res.json())
     .then(data => {
       if (!Array.isArray(data)) return;
       window.inventarioProductos = data;
 
-      // Poblar Categorías dinámicas
+      // Poblar Categorías dinámicas en el aside
       const listaCat = document.getElementById('listaCategoriasBD');
       const categoriasUnicas = [...new Set(data.map(p => p.cat))].filter(Boolean);
       if (listaCat) {
@@ -745,7 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // Poblar Marcas dinámicas
+      // Poblar Marcas dinámicas en el aside
       const listaMarca = document.getElementById('listaMarcasBD');
       const marcasUnicas = [...new Set(data.map(p => p.marca))].filter(Boolean);
       if (listaMarca) {
@@ -765,13 +772,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       renderizarCatalogoDinamico();
 
-      // Listeners de filtros
+      // Listeners de filtros superiores
       document.getElementById('filtroBuscador')?.addEventListener('input', renderizarCatalogoDinamico);
       document.getElementById('filtroPresentacion')?.addEventListener('change', renderizarCatalogoDinamico);
       document.getElementById('filtroSabor')?.addEventListener('change', renderizarCatalogoDinamico);
       document.getElementById('filtroOrdenPrecio')?.addEventListener('change', renderizarCatalogoDinamico);
 
-      // Clic en categorías
+      // Clic en categorías (barra lateral)
       document.querySelectorAll('#listaCategoriasBD button').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('#listaCategoriasBD button').forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
@@ -781,7 +788,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      // Clic en marcas
+      // Clic en marcas (barra lateral)
       document.querySelectorAll('#listaMarcasBD button').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('#listaMarcasBD button').forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
