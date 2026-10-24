@@ -22,19 +22,25 @@ if (isset($datos["aviso"]) || isset($datos["error_python"])) {
 $productos = [];
 
 foreach ($datos as $index => $fila) {
-    // Convertimos todas las claves de la fila a minúsculas para leer sin importar mayúsculas
+    // Convertimos todas las claves a minúsculas para estandarizar la lectura
     $f = array_change_key_case($fila, CASE_LOWER);
 
-    $id = $f["id"] ?? $f["id_producto"] ?? $f["idproducto"] ?? ($index + 1);
-    $nombreBase = $f["nombre"] ?? $f["producto"] ?? $f["nombre_producto"] ?? 'Suplemento';
-    $marca = $f["marca"] ?? $f["brand"] ?? $f["laboratorio"] ?? '';
-    
-    $nombreCompleto = ($marca !== '') ? "$nombreBase - $marca" : $nombreBase;
-    $categoria = $f["tipo"] ?? $f["categoria"] ?? $f["rubro"] ?? ($marca !== '' ? $marca : 'General');
-    $descripcion = $f["descripcion"] ?? $f["detalle"] ?? $f["presentacion"] ?? $f["peso"] ?? '';
+    $id = $f["varianteid"] ?? $f["id"] ?? ($index + 1);
+    $nombreProducto = $f["producto"] ?? $f["nombre"] ?? 'Suplemento';
+    $presentacion = $f["presentacion"] ?? '';
+    $saborColor = $f["saborcolor"] ?? '';
 
-    // Limpiar el precio por si viene como texto o con signo '$'
-    $precioBruto = $f["precio"] ?? $f["precio_unitario"] ?? $f["precio_final"] ?? $f["valor"] ?? 0;
+    // Armamos un nombre comercial claro (Ej: "Creatina Monohidrato - 500g - Frutos Rojos")
+    $nombreCompleto = $nombreProducto;
+    if ($presentacion !== '') {
+        $nombreCompleto .= " - " . $presentacion;
+    }
+    if ($saborColor !== '') {
+        $nombreCompleto .= " (" . $saborColor . ")";
+    }
+
+    // Limpiar el precio de venta por si viene formateado
+    $precioBruto = $f["precioventa"] ?? $f["precio"] ?? 0;
     if (is_string($precioBruto)) {
         $precioBruto = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $precioBruto));
     }
@@ -42,11 +48,11 @@ foreach ($datos as $index => $fila) {
     $productos[] = [
         "id" => $id,
         "nombre" => $nombreCompleto,
-        "cat" => $categoria,
-        "desc" => $descripcion !== '' ? $descripcion : "Suplemento $nombreCompleto ($categoria) de calidad garantizada.",
+        "cat" => $f["categoria"] ?? $f["tipo"] ?? 'General',
+        "desc" => "SKU: " . ($f["skuinterno"] ?? 'N/D') . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor/Color: $saborColor" : ""),
         "precio" => (float)$precioBruto,
-        "img" => $f["imagen_url"] ?? $f["imagen"] ?? $f["foto"] ?? $f["url_imagen"] ?? "IMG",
-        "stock" => (int)($f["stock"] ?? $f["cantidad"] ?? 10)
+        "img" => $f["imagenurl"] ?? $f["imagen"] ?? $f["foto"] ?? "IMG",
+        "stock" => (int)($f["stockactual"] ?? $f["stock"] ?? 10)
     ];
 }
 
