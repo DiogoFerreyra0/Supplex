@@ -8,11 +8,9 @@
 </head>
 <body>
     
-  <!-- ENCABEZADO IGUAL AL INDEX, PERO CON RUTAS AJUSTADAS (../) -->
   <header class="encabezado">
     <div class="encabezado__principal" id="encabezadoPrincipal">
       <div class="encabezado__contenedor">
-        
         <a href="../index.html" class="encabezado__logo">
           <span class="encabezado__icono-logo">★</span>
           <span class="encabezado__texto-logo">SUPPLEX</span>
@@ -34,41 +32,72 @@
             🛒 <span class="encabezado__contador-carrito">0</span>
           </button>
         </div>
-
       </div>
     </div>
   </header>
 
   <main>
-    <!-- ================= SECCIÓN CATÁLOGO ================= -->
     <section class="catalogo">
-      <div class="catalogo__contenedor">
+      <div class="catalogo__contenedor-general" style="max-width: 1280px; margin: 0 auto; padding: 20px;">
         
-        <!-- BARRA LATERAL DE FILTROS -->
-        <aside class="catalogo__filtros">
-          <h3 class="catalogo__filtros-titulo">CATEGORÍAS</h3>
-          <ul class="catalogo__lista">
-            <li><button class="catalogo__filtro-btn catalogo__filtro-btn--activo" data-filtro="todos">Todos los productos</button></li>
-            <li><button class="catalogo__filtro-btn" data-filtro="Proteína">Proteínas</button></li>
-            <li><button class="catalogo__filtro-btn" data-filtro="Creatina">Creatinas</button></li>
-            <li><button class="catalogo__filtro-btn" data-filtro="Pre-entreno">Pre-entrenos</button></li>
-            <li><button class="catalogo__filtro-btn" data-filtro="Aminoácidos">Aminoácidos</button></li>
-            <li><button class="catalogo__filtro-btn" data-filtro="Vitaminas">Vitaminas & Salud</button></li>
-            <li><button class="catalogo__filtro-btn" data-filtro="Combo">Combos Armados</button></li>
-          </ul>
-        </aside>
-
-        <!-- GRILLA DONDE MAIN.JS INYECTARÁ LOS PRODUCTOS -->
-        <div id="grillaCatalogo">
-            <!-- El contenido se llena automáticamente desde obtener_productos.php -->
+        <!-- BARRA SUPERIOR DE FILTROS (Buscador, Presentación, Sabor, Precio) -->
+        <div class="catalogo__barra-superior" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--color-borde); margin-bottom: 30px; box-shadow: var(--sombra-suave);">
+          <div class="campo-filtro">
+            <label style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">BUSCAR PRODUCTO</label>
+            <input type="text" id="filtroBuscador" placeholder="Ej: Creatina, Whey..." style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem;">
+          </div>
+          <div class="campo-filtro">
+            <label style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">PRESENTACIÓN</label>
+            <select id="filtroPresentacion" style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem; background: #fff;">
+              <option value="">Todas las presentaciones</option>
+            </select>
+          </div>
+          <div class="campo-filtro">
+            <label style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">SABOR / COLOR</label>
+            <select id="filtroSabor" style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem; background: #fff;">
+              <option value="">Todos los sabores</option>
+            </select>
+          </div>
+          <div class="campo-filtro">
+            <label style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">ORDENAR POR PRECIO</label>
+            <select id="filtroOrdenPrecio" style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem; background: #fff;">
+              <option value="">Por defecto</option>
+              <option value="menor">Menor a mayor precio</option>
+              <option value="mayor">Mayor a menor precio</option>
+            </select>
+          </div>
         </div>
 
+        <div class="catalogo__contenedor" style="display: grid; grid-template-columns: 250px 1fr; gap: 32px; align-items: start;">
+          
+          <!-- BARRA LATERAL (Categorías y Marcas dinámicas de la Base de Datos) -->
+          <aside class="catalogo__filtros" style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="caja-filtro" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--color-borde); box-shadow: var(--sombra-suave);">
+              <h3 class="catalogo__filtros-titulo" style="font-size: 0.95rem; font-weight: 900; text-transform: uppercase; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 2px solid var(--color-oscuro);">CATEGORÍAS</h3>
+              <ul class="catalogo__lista" id="listaCategoriasBD" style="display: flex; flex-direction: column; gap: 6px;">
+                <li><button class="catalogo__filtro-btn catalogo__filtro-btn--activo" data-cat="todos">Todos los productos</button></li>
+              </ul>
+            </div>
+
+            <div class="caja-filtro" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--color-borde); box-shadow: var(--sombra-suave);">
+              <h3 class="catalogo__filtros-titulo" style="font-size: 0.95rem; font-weight: 900; text-transform: uppercase; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 2px solid var(--color-oscuro);">MARCAS</h3>
+              <ul class="catalogo__lista" id="listaMarcasBD" style="display: flex; flex-direction: column; gap: 6px;">
+                <li><button class="catalogo__filtro-btn catalogo__filtro-btn--activo" data-marca="todas">Todas las marcas</button></li>
+              </ul>
+            </div>
+          </aside>
+
+          <!-- GRILLA DE PRODUCTOS -->
+          <div id="grillaCatalogo">
+              <p style="text-align: center; padding: 40px; color: #71717a;">Cargando catálogo desde la base de datos...</p>
+          </div>
+
+        </div>
       </div>
     </section>
   </main>
-</main>
 
-  <!-- ================= PIE DE PÁGINA ================= -->
+  <!-- PIE DE PÁGINA Y MODALES -->
   <footer class="pie-pagina">
     <div class="pie-pagina__contenedor">
       
@@ -125,122 +154,9 @@
       <div class="pie-pagina__abajo">
         <p>© 2026 SUPPLEX. Todos los derechos reservados.</p>
       </div>
-
     </div>
   </footer>
 
-  <!-- Botón de WhatsApp Flotante -->
-  <a href="https://wa.me/5491100000000" target="_blank" class="whatsapp-flotante icono_efecto" aria-label="Escribinos por WhatsApp">💬</a> 
-
-  <!-- --- CARD FLOTANTE DE COOKIES Y LEGALES --- -->
-  <aside class="cookies-flotante" id="cookiesFlotante" aria-label="Aviso de privacidad y cookies">
-    <div class="cookies-flotante__cabecera">
-      <span class="cookies-flotante__icono">🍪</span>
-      <h4 class="cookies-flotante__titulo">Privacidad y Cookies</h4>
-      <button class="cookies-flotante__cerrar" id="btnCerrarCookiesBanner" aria-label="Cerrar aviso">&times;</button>
-    </div>
-    <p class="cookies-flotante__texto">
-      Utilizamos cookies propias y de terceros para mejorar tu experiencia de compra. Al continuar navegando, aceptás nuestros 
-      <a href="#" class="cookies-flotante__enlace js-abrir-legal" data-tab="terminos">Términos y Condiciones</a>, 
-      <a href="#" class="cookies-flotante__enlace js-abrir-legal" data-tab="privacidad">Política de Privacidad</a> y 
-      <a href="#" class="cookies-flotante__enlace js-abrir-legal" data-tab="cookies">Política de Cookies</a>.
-    </p>
-    <div class="cookies-flotante__acciones">
-      <button type="button" class="cookies-flotante__boton cookies-flotante__boton--primario boton_efecto" id="btnAceptarCookies">ACEPTAR TODO</button>
-      <button type="button" class="cookies-flotante__boton cookies-flotante__boton--secundario js-abrir-legal" data-tab="terminos">VER POLÍTICAS</button>
-    </div>
-  </aside>
-
-  <!-- --- MODAL DE LEGALES (TÉRMINOS, PRIVACIDAD Y COOKIES) --- -->
-  <div class="legal-modal" id="legalModal">
-    <div class="legal-modal__fondo" id="btnCerrarFondoLegal"></div>
-    <div class="legal-modal__panel">
-      <button class="legal-modal__cerrar" id="btnCerrarLegal" aria-label="Cerrar legales">&times;</button>
-      
-      <div class="legal-modal__contenido">
-        <h2 class="legal-modal__titulo">Información Legal</h2>
-        <p class="legal-modal__subtitulo">Transparencia, seguridad y condiciones de uso de SUPPLEX.</p>
-
-        <div class="legal-modal__tabs">
-          <button type="button" class="legal-modal__tab legal-modal__tab--activo" data-target="tab-terminos">Términos y Condiciones</button>
-          <button type="button" class="legal-modal__tab" data-target="tab-privacidad">Política de Privacidad</button>
-          <button type="button" class="legal-modal__tab" data-target="tab-cookies">Política de Cookies</button>
-        </div>
-
-        <div class="legal-modal__seccion legal-modal__seccion--activa" id="tab-terminos">
-          <h3>1. Condiciones Generales de Uso</h3>
-          <p>Al acceder y realizar pedidos a través del sitio web de <strong>SUPPLEX</strong>, el usuario acepta estar sujeto a los presentes Términos y Condiciones. Todos nuestros suplementos deportivos comercializados son 100% originales y cuentan con aprobación de las autoridades sanitarias correspondientes.</p>
-          <h3>2. Precios, Stock y Pedidos</h3>
-          <p>Los precios publicados están expresados en Pesos Argentinos (ARS). Las compras finalizadas mediante nuestro carrito web se confirman y coordinan vía WhatsApp, quedando sujetas a disponibilidad de stock al momento de procesar el pedido.</p>
-          <h3>3. Envíos y Devoluciones</h3>
-          <p>Realizamos envíos a todo el país dentro de las 24 a 48 hs hábiles posteriores a la acreditación del pago. Por razones de seguridad bromatológica, solo se aceptan cambios o devoluciones de productos que conserven su precinto de seguridad original intacto.</p>
-        </div>
-
-        <div class="legal-modal__seccion" id="tab-privacidad">
-          <h3>1. Protección de Datos Personales</h3>
-          <p>En <strong>SUPPLEX</strong> protegemos tu información conforme a la Ley N° 25.326 de Protección de Datos Personales. Los datos solicitados en el carrito (nombre, teléfono, dirección de entrega y correo electrónico) se utilizan exclusivamente para procesar y despachar tus pedidos.</p>
-          <h3>2. Confidencialidad</h3>
-          <p>No vendemos, alquilamos ni compartimos tu información personal con terceros ajenos a la operatoria logística de entrega. Podés solicitar la actualización o eliminación de tus datos en cualquier momento escribiéndonos a <strong>info@supplex.com</strong>.</p>
-        </div>
-
-        <div class="legal-modal__seccion" id="tab-cookies">
-          <h3>1. ¿Qué son las Cookies?</h3>
-          <p>Las cookies son pequeños archivos que se almacenan en tu navegador para recordar tus preferencias, mantener los suplementos guardados en tu carrito de compras y analizar el rendimiento del sitio.</p>
-          <h3>2. Tipos de Cookies que utilizamos</h3>
-          <p>Utilizamos <strong>cookies técnicas esenciales</strong> para el funcionamiento del carrito, la calculadora nutricional y la preferencia de avisos legales, así como cookies analíticas anónimas para mejorar nuestro catálogo.</p>
-        </div>
-
-        <div class="legal-modal__pie">
-          <button type="button" class="legal-modal__boton boton-oscuro_efecto" id="btnEntendidoLegal">ENTENDIDO Y ACEPTAR</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- --- MODAL DE PREGUNTAS FRECUENTES --- -->
-  <div class="faq-modal" id="faqModal">
-    <div class="faq-modal__fondo" id="btnCerrarFondoFaq"></div>
-    <div class="faq-modal__panel">
-      <button class="faq-modal__cerrar" id="btnCerrarFaq" aria-label="Cerrar FAQ">&times;</button>
-      
-      <div class="faq-modal__contenido">
-        <h2 class="faq-modal__titulo">Preguntas Frecuentes</h2>
-        <p class="faq-modal__subtitulo">Resolvemos tus dudas más comunes de forma rápida.</p>
-
-        <div class="faq__acordeon">
-          <div class="faq__item">
-            <button class="faq__pregunta">¿Hacen envíos a todo el país? <span class="faq__icono">+</span></button>
-            <div class="faq__respuesta">
-              <p>Sí, realizamos envíos a toda la Argentina. Despachamos dentro de las 24/48 hs hábiles luego de confirmado el pago mediante correo y servicios de mensajería privada.</p>
-            </div>
-          </div>
-
-          <div class="faq__item">
-            <button class="faq__pregunta">¿Cuáles son los medios de pago aceptados? <span class="faq__icono">+</span></button>
-            <div class="faq__respuesta">
-              <p>Aceptamos tarjetas de crédito, débito, Mercado Pago y transferencias bancarias (estas últimas con un descuento especial aplicado al total).</p>
-            </div>
-          </div>
-
-          <div class="faq__item">
-            <button class="faq__pregunta">¿Cómo sé qué suplemento es el indicado para mí? <span class="faq__icono">+</span></button>
-            <div class="faq__respuesta">
-              <p>Depende de tu objetivo. Si buscás ganar masa muscular, recomendamos Proteína + Creatina. Podés usar nuestra "Calculadora de Calorías" en la web o contactarnos por WhatsApp para asesoramiento personalizado.</p>
-            </div>
-          </div>
-
-          <div class="faq__item">
-            <button class="faq__pregunta">¿Tienen local a la calle para retirar? <span class="faq__icono">+</span></button>
-            <div class="faq__respuesta">
-              <p>Actualmente somos una tienda 100% online. Sin embargo, podés coordinar con nosotros por WhatsApp para retirar tu pedido en nuestros puntos de entrega habilitados sin costo.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ENLACE AL JS -->
   <script src="../main.js"></script>
 
   <!-- Lógica de la Card Flotante de Cookies y Modal Legal -->

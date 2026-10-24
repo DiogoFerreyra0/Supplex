@@ -653,3 +653,141 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
+
+// =========================================
+  // GESTIÓN DE CATÁLOGO Y FILTROS DINÁMICOS
+  // =========================================
+  window.inventarioProductos = [];
+  let categoriaSeleccionada = 'todos';
+  let marcaSeleccionada = 'todas';
+
+  const renderizarCatalogoDinamico = () => {
+    const grilla = document.getElementById('grillaCatalogo');
+    if (!grilla) return;
+
+    const textoBusq = document.getElementById('filtroBuscador')?.value.toLowerCase().trim() || '';
+    const presentacionFiltro = document.getElementById('filtroPresentacion')?.value || '';
+    const saborFiltro = document.getElementById('filtroSabor')?.value || '';
+    const ordenPrecio = document.getElementById('filtroOrdenPrecio')?.value || '';
+
+    let filtrados = window.inventarioProductos.filter(prod => {
+      const matchCat = (categoriaSeleccionada === 'todos' || prod.cat.toLowerCase() === categoriaSeleccionada.toLowerCase());
+      const matchMarca = (marcaSeleccionada === 'todas' || prod.marca.toLowerCase() === marcaSeleccionada.toLowerCase());
+      const matchPres = (presentacionFiltro === '' || prod.presentacion === presentacionFiltro);
+      const matchSabor = (saborFiltro === '' || prod.sabor === saborFiltro);
+      const matchTexto = textoBusq === '' || 
+        prod.nombre.toLowerCase().includes(textoBusq) || 
+        prod.marca.toLowerCase().includes(textoBusq) || 
+        prod.cat.toLowerCase().includes(textoBusq) ||
+        prod.presentacion.toLowerCase().includes(textoBusq) ||
+        prod.sabor.toLowerCase().includes(textoBusq);
+
+      return matchCat && matchMarca && matchPres && matchSabor && matchTexto;
+    });
+
+    if (ordenPrecio === 'menor') filtrados.sort((a, b) => a.precio - b.precio);
+    if (ordenPrecio === 'mayor') filtrados.sort((a, b) => b.precio - b.precio);
+
+    grilla.innerHTML = '';
+    if (filtrados.length === 0) {
+      grilla.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: #fff; border-radius: 12px;">No se encontraron productos con estos filtros.</div>';
+      return;
+    }
+
+    filtrados.forEach(prod => {
+      const tieneFoto = prod.img && prod.img.startsWith('http');
+      const imgHTML = tieneFoto 
+        ? `<img src="${prod.img}" alt="${prod.nombre}" style="width: 100%; height: 100%; object-fit: contain;">`
+        : `<div class="producto-tarjeta__placeholder">SUPPLEX</div>`;
+
+      const tarjeta = `
+        <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde); background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;"
+                 data-id="${prod.id}"
+                 data-nombre="${prod.nombre} - ${prod.presentacion} (${prod.sabor})"
+                 data-cat="${prod.cat}"
+                 data-desc="${prod.desc}"
+                 data-precio="${prod.precio}"
+                 data-stock="${prod.stock}"
+                 data-img="${prod.img}">
+          <div class="producto-tarjeta__imagen-caja" style="height: 200px; background: #f4f4f5; display: flex; align-items: center; justify-content: center; position: relative;">
+            ${imgHTML}
+          </div>
+          <div class="producto-tarjeta__info" style="padding: 16px; display: flex; flex-direction: column; flex-grow: 1;">
+            <span class="producto-tarjeta__marca" style="font-size: 0.75rem; font-weight: 700; color: #71717a; text-transform: uppercase;">${prod.cat} | ${prod.marca}</span>
+            <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem; font-weight: 800; margin: 4px 0 8px;">${prod.nombre} - ${prod.presentacion}</h3>
+            <p style="font-size: 0.8rem; color: #52525b; margin-bottom: 12px;">Sabor: ${prod.sabor || 'N/D'}</p>
+            <div class="producto-tarjeta__precios" style="margin-top: auto; margin-bottom: 12px;">
+              <span class="producto-tarjeta__precio-actual" style="font-size: 1.15rem; font-weight: 900;">$ ${Number(prod.precio).toLocaleString('es-AR')}</span>
+            </div>
+            <button type="button" class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre} - ${prod.presentacion}" data-precio="${prod.precio}" style="width: 100%; padding: 10px; background: #111; color: #fff; border: none; border-radius: 6px; font-weight: 800; cursor: pointer;">AL CARRITO</button>
+          </div>
+        </article>
+      `;
+      grilla.insertAdjacentHTML('beforeend', tarjeta);
+    });
+  };
+
+  // Cargar datos del servidor y poblar filtros dinámicamente
+  const rutaPHP = window.location.pathname.includes('/pages/') ? '../obtener_productos.php' : 'obtener_productos.php';
+
+  fetch(rutaPHP)
+    .then(res => res.json())
+    .then(data => {
+      if (!Array.isArray(data)) return;
+      window.inventarioProductos = data;
+
+      // Poblar Categorías dinámicas
+      const listaCat = document.getElementById('listaCategoriasBD');
+      const categoriasUnicas = [...new Set(data.map(p => p.cat))].filter(Boolean);
+      if (listaCat) {
+        categoriasUnicas.forEach(cat => {
+          listaCat.insertAdjacentHTML('beforeend', `<li><button class="catalogo__filtro-btn" data-cat="${cat}">${cat}</button></li>`);
+        });
+      }
+
+      // Poblar Marcas dinámicas
+      const listaMarca = document.getElementById('listaMarcasBD');
+      const marcasUnicas = [...new Set(data.map(p => p.marca))].filter(Boolean);
+      if (listaMarca) {
+        marcasUnicas.forEach(marca => {
+          listaMarca.insertAdjacentHTML('beforeend', `<li><button class="catalogo__filtro-btn" data-marca="${marca}">${marca}</button></li>`);
+        });
+      }
+
+      // Poblar Selects de Presentación y Sabor
+      const selectPres = document.getElementById('filtroPresentacion');
+      const presUnicas = [...new Set(data.map(p => p.presentacion))].filter(Boolean);
+      presUnicas.forEach(p => selectPres?.insertAdjacentHTML('beforeend', `<option value="${p}">${p}</option>`));
+
+      const selectSabor = document.getElementById('filtroSabor');
+      const saboresUnicos = [...new Set(data.map(p => p.sabor))].filter(Boolean);
+      saboresUnicos.forEach(s => selectSabor?.insertAdjacentHTML('beforeend', `<option value="${s}">${s}</option>`));
+
+      renderizarCatalogoDinamico();
+
+      // Listeners de filtros
+      document.getElementById('filtroBuscador')?.addEventListener('input', renderizarCatalogoDinamico);
+      document.getElementById('filtroPresentacion')?.addEventListener('change', renderizarCatalogoDinamico);
+      document.getElementById('filtroSabor')?.addEventListener('change', renderizarCatalogoDinamico);
+      document.getElementById('filtroOrdenPrecio')?.addEventListener('change', renderizarCatalogoDinamico);
+
+      // Clic en categorías
+      document.querySelectorAll('#listaCategoriasBD button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('#listaCategoriasBD button').forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
+          e.target.classList.add('catalogo__filtro-btn--activo');
+          categoriaSeleccionada = e.target.getAttribute('data-cat');
+          renderizarCatalogoDinamico();
+        });
+      });
+
+      // Clic en marcas
+      document.querySelectorAll('#listaMarcasBD button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('#listaMarcasBD button').forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
+          e.target.classList.add('catalogo__filtro-btn--activo');
+          marcaSeleccionada = e.target.getAttribute('data-marca');
+          renderizarCatalogoDinamico();
+        });
+      });
+    });

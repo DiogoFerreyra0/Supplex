@@ -22,45 +22,36 @@ if (isset($datos["aviso"]) || isset($datos["error_python"])) {
 $productos = [];
 
 foreach ($datos as $index => $fila) {
-    // Convertimos todas las claves de la fila a minúsculas para un manejo seguro
+    // Convertimos todas las claves de la fila a minúsculas para un manejo 100% seguro
     $f = array_change_key_case($fila, CASE_LOWER);
 
     $id = $f["varianteid"] ?? ($index + 1);
-    $nombreBase = $f["nombreproducto"] ?? $f["nombre"] ?? 'Suplemento';
-    $marca = $f["marca"] ?? '';
+    $nombreBase = $f["nombre"] ?? 'Suplemento';
+    $marca = $f["marca"] ?? 'Genérica';
+    $categoria = $f["categoria"] ?? 'General';
     $presentacion = $f["presentacion"] ?? '';
     $saborColor = $f["saborcolor"] ?? '';
-    $categoria = $f["categoria"] ?? 'General';
 
-    // Armamos el nombre comercial completo (Ej: "Creatina Xtrenght - 250 g (Chocolate)")
-    $nombreCompleto = $nombreBase;
-    if ($marca !== '') {
-        $nombreCompleto = "$nombreBase ($marca)";
-    }
-    if ($presentacion !== '') {
-        $nombreCompleto .= " - " . $presentacion;
-    }
-    if ($saborColor !== '') {
-        $nombreCompleto .= " - " . $saborColor;
-    }
-
-    // Obtenemos el PrecioVenta real de la base de datos de Lauti
+    // Capturamos el PrecioVenta real directamente de la base de datos
     $precioVenta = $f["precioventa"] ?? 0;
     if (is_string($precioVenta)) {
         $precioVenta = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $precioVenta));
     }
 
-    // Stock actual calculado desde MovimientosStock
     $stockActual = $f["stockactual"] ?? 10;
 
     $productos[] = [
         "id" => $id,
-        "nombre" => $nombreCompleto,
-        "cat" => $categoria,
-        "desc" => "SKU: " . ($f["skuinterno"] ?? 'N/D') . " | Marca: " . ($marca !== '' ? $marca : 'Genérica') . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor/Color: $saborColor" : ""),
+        "nombre" => $nombreBase,
+        "marca" => trim($marca),
+        "cat" => trim($categoria),
+        "presentacion" => trim($presentacion),
+        "sabor" => trim($saborColor),
+        "sku" => $f["skuinterno"] ?? 'N/D',
         "precio" => (float)$precioVenta,
         "img" => $f["imagenurl"] ?? "IMG",
-        "stock" => (int)$stockActual
+        "stock" => (int)$stockActual,
+        "desc" => "SKU: " . ($f["skuinterno"] ?? 'N/D') . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor: $saborColor" : "")
     ];
 }
 
