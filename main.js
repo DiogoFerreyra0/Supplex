@@ -108,10 +108,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 4. SISTEMA DE CARRITO (INTEGRACIÓN BD + WSP)
+  // 4. SISTEMA DE CARRITO (CON LOCALSTORAGE, CUPONES Y WSP)
   // =========================================
   const numeroWhatsApp = "5491100000000"; 
   let carrito = [];
+  try {
+    const guardado = localStorage.getItem('supplex_carrito');
+    if (guardado) carrito = JSON.parse(guardado);
+  } catch (err) {
+    carrito = [];
+  }
+
   let cuponAplicado = null;
   let descuentoPorcentaje = 0;
   const cuponesValidos = { "GYM": 15, "SUPPLEX10": 10 };
@@ -131,6 +138,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAplicarCupon = document.getElementById('btnAplicarCupon');
   const msjCupon = document.getElementById('msjCupon');
 
+  const guardarCarritoLocal = () => {
+    try {
+      localStorage.setItem('supplex_carrito', JSON.stringify(carrito));
+    } catch (e) {}
+  };
+
   const abrirCarrito = (e) => {
     if (e) e.preventDefault();
     carritoModal?.classList.add('carrito-modal--activo');
@@ -147,28 +160,39 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cuponesValidos[codigo]) {
       cuponAplicado = codigo;
       descuentoPorcentaje = cuponesValidos[codigo];
-      msjCupon.textContent = `¡Cupón ${codigo} aplicado!`;
-      msjCupon.style.color = "#25d366";
-      msjCupon.style.display = "block";
+      if (msjCupon) {
+        msjCupon.textContent = `¡Cupón ${codigo} (${descuentoPorcentaje}% OFF) aplicado!`;
+        msjCupon.style.color = "#25d366";
+        msjCupon.style.display = "block";
+      }
     } else {
       cuponAplicado = null;
       descuentoPorcentaje = 0;
-      msjCupon.textContent = "Cupón inválido.";
-      msjCupon.style.color = "red";
-      msjCupon.style.display = "block";
+      if (msjCupon) {
+        msjCupon.textContent = "Cupón inválido.";
+        msjCupon.style.color = "red";
+        msjCupon.style.display = "block";
+      }
     }
     renderizarCarrito();
   });
 
   const renderizarCarrito = () => {
-    if (!listaCarrito) return;
     let cantidadTotal = 0;
     let subtotal = 0;
+
+    carrito.forEach(item => {
+      cantidadTotal += item.cantidad;
+      subtotal += (Number(item.precio) || 0) * item.cantidad;
+    });
+
+    if (contadorCarrito) contadorCarrito.textContent = String(cantidadTotal);
+    if (!listaCarrito) return;
+
     listaCarrito.innerHTML = '';
 
     if (carrito.length === 0) {
       listaCarrito.innerHTML = '<p class="carrito-modal__vacio">Tu carrito está vacío.</p>';
-      if (contadorCarrito) contadorCarrito.textContent = "0";
       if (cartSubtotal) cartSubtotal.textContent = "$ 0";
       if (lineaDescuento) lineaDescuento.style.display = "none";
       if (totalCarrito) totalCarrito.textContent = "$ 0";
@@ -176,9 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     carrito.forEach((item, index) => {
-      cantidadTotal += item.cantidad;
-      let totalItem = item.precio * item.cantidad;
-      subtotal += totalItem;
+      let totalItem = (Number(item.precio) || 0) * item.cantidad;
 
       const divItem = document.createElement('div');
       divItem.classList.add('carrito-item');
@@ -187,15 +209,13 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="carrito-item__cant">${item.cantidad}x</span>
           <div style="display: flex; flex-direction: column;">
             <span class="carrito-item__nombre">${item.nombre}</span>
-            <span class="carrito-item__precio">$${totalItem.toLocaleString('es-AR')}</span>
+            <span class="carrito-item__precio">$ ${totalItem.toLocaleString('es-AR')}</span>
           </div>
         </div>
-        <button class="carrito-item__eliminar" onclick="eliminarDelCarrito(${index})">×</button>
+        <button type="button" class="carrito-item__eliminar" onclick="window.eliminarDelCarrito(${index})">×</button>
       `;
       listaCarrito.appendChild(divItem);
     });
-
-    if (contadorCarrito) contadorCarrito.textContent = cantidadTotal;
 
     let descuentoMonto = subtotal * (descuentoPorcentaje / 100);
     let totalF = subtotal - descuentoMonto;
@@ -205,8 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (descuentoMonto > 0 && lineaDescuento) {
       lineaDescuento.style.display = "flex";
-      cartNombreCupon.textContent = cuponAplicado;
-      cartMontoDescuento.textContent = `-$ ${descuentoMonto.toLocaleString('es-AR')}`;
+      if (cartNombreCupon) cartNombreCupon.textContent = cuponAplicado;
+      if (cartMontoDescuento) cartMontoDescuento.textContent = `-$ ${descuentoMonto.toLocaleString('es-AR')}`;
     } else if (lineaDescuento) {
       lineaDescuento.style.display = "none";
     }
@@ -214,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.eliminarDelCarrito = (index) => {
     carrito.splice(index, 1);
+    guardarCarritoLocal();
     renderizarCarrito();
     animarContador();
   };
@@ -225,13 +246,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // Inicializar vista del contador al cargar la página
+  renderizarCarrito();
+
   // FINALIZAR COMPRA: ENVÍO AL SERVIDOR Y WSP
   btnEnviarWhatsApp?.addEventListener('click', (e) => {
     e.preventDefault();
-    if (carrito.length === 0) return;
+    if (carrito.length === 0) {
+      alert("⚠️ Tu carrito está vacío. Agregá al menos un producto.");
+      return;
+    }
 
-    const nombreCliente = document.getElementById('cartNombre').value.trim();
-    const direccionCliente = document.getElementById('cartDireccion').value.trim();
+    const nombreCliente = document.getElementById('cartNombre')?.value.trim() || '';
+    const direccionCliente = document.getElementById('cartDireccion')?.value.trim() || '';
 
     if (!nombreCliente || !direccionCliente) {
       alert("⚠️ Por favor, completá tu Nombre y Dirección de Envío para procesar el pedido.");
@@ -239,20 +266,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const orderId = "PED-" + Math.floor(Math.random() * 90000 + 10000); 
-    const fecha = new Date().toLocaleDateString();
+    const fecha = new Date().toLocaleDateString('es-AR');
     
     let subtotal = 0;
-    carrito.forEach(item => subtotal += (item.precio * item.cantidad));
+    carrito.forEach(item => subtotal += ((Number(item.precio) || 0) * item.cantidad));
     let descuentoMonto = subtotal * (descuentoPorcentaje / 100);
     let totalFinal = subtotal - descuentoMonto;
 
     let msjWsp = `*NUEVO PEDIDO: ${orderId}*\n📅 Fecha: ${fecha}\n👤 Cliente: ${nombreCliente}\n📍 Dirección: ${direccionCliente}\n---------------------------\n*ARTÍCULOS:*\n`;
     carrito.forEach(item => {
-      msjWsp += `🔸 ${item.cantidad}x ${item.nombre} ($${(item.precio * item.cantidad).toLocaleString('es-AR')})\n`;
+      msjWsp += `🔸 ${item.cantidad}x ${item.nombre} ($ ${((Number(item.precio) || 0) * item.cantidad).toLocaleString('es-AR')})\n`;
     });
-    msjWsp += `---------------------------\nSubtotal: $${subtotal.toLocaleString('es-AR')}\n`;
-    if (descuentoMonto > 0) msjWsp += `Descuento (${cuponAplicado}): -$${descuentoMonto.toLocaleString('es-AR')}\n`;
-    msjWsp += `*TOTAL A PAGAR: $${totalFinal.toLocaleString('es-AR')}*\n\nPor favor, confirmame los métodos de pago. ¡Gracias!`;
+    msjWsp += `---------------------------\nSubtotal: $ ${subtotal.toLocaleString('es-AR')}\n`;
+    if (descuentoMonto > 0) msjWsp += `Descuento (${cuponAplicado}): -$ ${descuentoMonto.toLocaleString('es-AR')}\n`;
+    msjWsp += `*TOTAL A PAGAR: $ ${totalFinal.toLocaleString('es-AR')}*\n\nPor favor, confirmame los métodos de pago. ¡Gracias!`;
 
     btnEnviarWhatsApp.textContent = "PROCESANDO...";
 
@@ -275,28 +302,29 @@ document.addEventListener('DOMContentLoaded', () => {
       body: JSON.stringify(datosPedido)
     })
     .then(respuesta => respuesta.json())
-    .then(() => {
-        window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msjWsp)}`, '_blank');
-        reiniciarFormularioCarrito();
-    })
     .catch(() => {
-        console.warn("Base de datos de pedidos no disponible aún. Abriendo WhatsApp directamente.");
-        window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msjWsp)}`, '_blank');
-        reiniciarFormularioCarrito();
+      console.warn("Guardando comprobante y abriendo WhatsApp...");
+    })
+    .finally(() => {
+      window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msjWsp)}`, '_blank');
+      reiniciarFormularioCarrito();
     });
 
     function reiniciarFormularioCarrito() {
-        carrito = [];
-        cuponAplicado = null;
-        descuentoPorcentaje = 0;
-        document.getElementById('cartNombre').value = "";
-        document.getElementById('cartDireccion').value = "";
-        if (inputCupon) inputCupon.value = "";
-        if (msjCupon) msjCupon.style.display = "none";
-        btnEnviarWhatsApp.textContent = "FINALIZAR COMPRA";
-        cerrarCarrito();
-        renderizarCarrito();
-        animarContador();
+      carrito = [];
+      guardarCarritoLocal();
+      cuponAplicado = null;
+      descuentoPorcentaje = 0;
+      const inputNom = document.getElementById('cartNombre');
+      const inputDir = document.getElementById('cartDireccion');
+      if (inputNom) inputNom.value = "";
+      if (inputDir) inputDir.value = "";
+      if (inputCupon) inputCupon.value = "";
+      if (msjCupon) msjCupon.style.display = "none";
+      btnEnviarWhatsApp.textContent = "FINALIZAR COMPRA";
+      cerrarCarrito();
+      renderizarCarrito();
+      animarContador();
     }
   });
 
@@ -317,22 +345,24 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnCerrarFondoProducto')?.addEventListener('click', cerrarVistaRapida);
 
   document.addEventListener('click', (e) => {
-    // A) Si presionó el botón "AL CARRITO" (en la tarjeta o dentro del modal)
+    // A) Si presionó el botón "AL CARRITO" (en la tarjeta, buscador o dentro del modal)
     const botonAgregar = e.target.closest('.js-agregar-carrito');
     if (botonAgregar) {
       e.preventDefault();
       e.stopPropagation();
 
       const nombre = botonAgregar.getAttribute('data-nombre') || 'Suplemento Supplex';
-      const precio = parseFloat(botonAgregar.getAttribute('data-precio')) || 0;
+      const precioRaw = botonAgregar.getAttribute('data-precio');
+      const precio = Number.isFinite(parseFloat(precioRaw)) ? parseFloat(precioRaw) : 0;
 
-      const productoExistente = carrito.find(item => item.nombre === nombre);
+      const productoExistente = carrito.find(item => item.nombre === nombre && Number(item.precio) === precio);
       if (productoExistente) {
         productoExistente.cantidad++;
       } else {
         carrito.push({ nombre, precio, cantidad: 1 });
       }
       
+      guardarCarritoLocal();
       renderizarCarrito();
       animarContador();
 
@@ -355,74 +385,51 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clicEnTarjeta && !clicEnFavorito && productoModal) {
       e.preventDefault();
 
-      // 1. Buscamos primero por data-id en el inventario traído de la BD
       const idTarjeta = clicEnTarjeta.getAttribute('data-id');
+      const btnTarjeta = clicEnTarjeta.querySelector('.js-agregar-carrito');
       const elementoNombre = clicEnTarjeta.querySelector('.producto-tarjeta__nombre, .combo-tarjeta__nombre');
       const nombreBusqueda = elementoNombre ? elementoNombre.textContent.trim() : '';
 
       let productoData = null;
 
-      if (Array.isArray(window.inventarioProductos) && window.inventarioProductos.length > 0) {
-        if (idTarjeta !== null && idTarjeta !== '') {
-          productoData = window.inventarioProductos.find(p => String(p.id) === String(idTarjeta));
-        }
-        if (!productoData && nombreBusqueda) {
-          productoData = window.inventarioProductos.find(p => 
-            p.nombre.trim().toLowerCase() === nombreBusqueda.toLowerCase() ||
-            p.nombre.toLowerCase().includes(nombreBusqueda.toLowerCase())
-          );
-        }
+      if (Array.isArray(window.inventarioProductos) && window.inventarioProductos.length > 0 && idTarjeta) {
+        productoData = window.inventarioProductos.find(p => String(p.id) === String(idTarjeta));
       }
 
-      // 2. Si no está en el array (o es una card fija del HTML), leemos los atributos data-* de la tarjeta
-      if (!productoData) {
-        const btnTarjeta = clicEnTarjeta.querySelector('.js-agregar-carrito');
-        productoData = {
-          nombre: clicEnTarjeta.getAttribute('data-nombre') || nombreBusqueda || 'Suplemento Deportivo',
-          cat: clicEnTarjeta.getAttribute('data-cat') || clicEnTarjeta.querySelector('.producto-tarjeta__marca, .combo-tarjeta__etiqueta')?.textContent || 'General',
-          desc: clicEnTarjeta.getAttribute('data-desc') || clicEnTarjeta.querySelector('.combo-tarjeta__desc, .producto-tarjeta__variante')?.textContent || 'Suplemento deportivo de alta calidad para potenciar tu entrenamiento.',
-          precio: parseFloat(clicEnTarjeta.getAttribute('data-precio') || btnTarjeta?.getAttribute('data-precio')) || 0,
-          img: clicEnTarjeta.getAttribute('data-img') || 'SUPPLEX',
-          stock: parseInt(clicEnTarjeta.getAttribute('data-stock')) || 10
-        };
-      }
+      const nombreMostrar = clicEnTarjeta.getAttribute('data-nombre') || (productoData ? armarNombreCompleto(productoData) : nombreBusqueda) || 'Suplemento Deportivo';
+      const catMostrar = clicEnTarjeta.getAttribute('data-cat') || (productoData ? `${productoData.cat} | ${productoData.marca}` : 'General');
+      const descMostrar = clicEnTarjeta.getAttribute('data-desc') || (productoData ? productoData.desc : 'Suplemento deportivo de alta calidad.');
+      const precioMostrar = parseFloat(clicEnTarjeta.getAttribute('data-precio') ?? productoData?.precio ?? btnTarjeta?.getAttribute('data-precio') ?? 0) || 0;
+      const stockMostrar = parseInt(clicEnTarjeta.getAttribute('data-stock') ?? productoData?.stock ?? 0, 10);
+      const imgMostrar = clicEnTarjeta.getAttribute('data-img') || productoData?.img || 'SUPPLEX';
 
-      // 3. Rellenamos la Card Flotante (#productoModal) con todos los datos del producto
       if (modalProdImg) {
-        const tieneFoto = productoData.img && productoData.img.startsWith('http');
+        const tieneFoto = imgMostrar && imgMostrar.startsWith('http');
         modalProdImg.innerHTML = tieneFoto 
-          ? `<img src="${productoData.img}" alt="${productoData.nombre}" style="width: 100%; height: 100%; object-fit: contain;">`
-          : `<div class="producto-tarjeta__placeholder">${productoData.img || 'SUPPLEX'}</div>`;
+          ? `<img src="${imgMostrar}" alt="${nombreMostrar}" style="width: 100%; height: 100%; object-fit: contain;">`
+          : `<div class="producto-tarjeta__placeholder">${imgMostrar || 'SUPPLEX'}</div>`;
       }
-      if (modalProdCat) modalProdCat.textContent = productoData.cat || 'General';
-      if (modalProdTitulo) modalProdTitulo.textContent = productoData.nombre;
-      if (modalProdDesc) {
-        modalProdDesc.textContent = (productoData.desc && productoData.desc.trim() !== '') 
-          ? productoData.desc 
-          : "Suplemento deportivo de alta calidad seleccionado para maximizar tu rendimiento y recuperación.";
-      }
+      if (modalProdCat) modalProdCat.textContent = catMostrar;
+      if (modalProdTitulo) modalProdTitulo.textContent = nombreMostrar;
+      if (modalProdDesc) modalProdDesc.textContent = descMostrar;
       if (modalProdStock) {
-        const stockCant = productoData.stock ?? 10;
-        modalProdStock.textContent = stockCant > 0 
-          ? `✔ Stock disponible (${stockCant} unidades)` 
-          : `✖ Sin stock disponible en este momento`;
-        modalProdStock.style.color = stockCant > 0 ? '#22c55e' : '#ef4444';
+        modalProdStock.textContent = `✔ Stock registrado en sistema: ${Number.isNaN(stockMostrar) ? 0 : stockMostrar} unidades`;
+        modalProdStock.style.color = '#22c55e';
       }
       if (modalProdPrecio) {
-        modalProdPrecio.textContent = `$ ${Number(productoData.precio || 0).toLocaleString('es-AR')}`;
+        modalProdPrecio.textContent = `$ ${Number(precioMostrar).toLocaleString('es-AR')}`;
       }
       if (modalProdBtn) {
-        modalProdBtn.setAttribute('data-nombre', productoData.nombre);
-        modalProdBtn.setAttribute('data-precio', productoData.precio || 0);
+        modalProdBtn.setAttribute('data-nombre', nombreMostrar);
+        modalProdBtn.setAttribute('data-precio', String(precioMostrar));
       }
 
-      // 4. Mostramos el modal flotante
       productoModal.classList.add('producto-modal--activo');
     }
   });
 
   // =========================================
-  // 6. BUSCADOR EN TIEMPO REAL
+  // 6. BUSCADOR A PANTALLA COMPLETA (LUPA DEL HEADER)
   // =========================================
   const buscadorModal = document.getElementById('buscadorModal');
   const inputBuscador = document.getElementById('inputBuscador');
@@ -448,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let temporizadorBuscador;
   if (inputBuscador && resultadosBuscador) {
-    inputBuscador.addEventListener('keyup', (e) => {
+    inputBuscador.addEventListener('input', (e) => {
       clearTimeout(temporizadorBuscador);
       temporizadorBuscador = setTimeout(() => {
         const textoBusqueda = e.target.value.toLowerCase().trim();
@@ -458,25 +465,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (Array.isArray(window.inventarioProductos)) {
-          let resultados = window.inventarioProductos.filter(producto => 
-            producto.nombre.toLowerCase().includes(textoBusqueda) || 
-            (producto.cat && producto.cat.toLowerCase().includes(textoBusqueda)) ||
-            (producto.desc && producto.desc.toLowerCase().includes(textoBusqueda))
+          let resultados = window.inventarioProductos.filter(prod => 
+            (prod.nombre && prod.nombre.toLowerCase().includes(textoBusqueda)) || 
+            (prod.marca && prod.marca.toLowerCase().includes(textoBusqueda)) ||
+            (prod.cat && prod.cat.toLowerCase().includes(textoBusqueda)) ||
+            (prod.sku && prod.sku.toLowerCase().includes(textoBusqueda)) ||
+            (prod.sabor && prod.sabor.toLowerCase().includes(textoBusqueda)) ||
+            (prod.presentacion && prod.presentacion.toLowerCase().includes(textoBusqueda))
           );
 
-          const resultadosLimitados = resultados.slice(0, 12);
+          const resultadosLimitados = resultados.slice(0, 16);
           resultadosBuscador.innerHTML = '';
 
           if (resultadosLimitados.length === 0) {
             resultadosBuscador.innerHTML = `<p class="buscador-modal__vacio">No encontramos nada para "<strong>${textoBusqueda}</strong>".</p>`;
           } else {
             resultadosLimitados.forEach(prod => {
-              const tarjetaHTML = crearHTMLTarjeta(prod);
-              resultadosBuscador.insertAdjacentHTML('beforeend', tarjetaHTML);
+              resultadosBuscador.insertAdjacentHTML('beforeend', crearHTMLTarjeta(prod));
             });
           }
         }
-      }, 300);
+      }, 200);
     });
   }
 
@@ -527,139 +536,56 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =========================================
-  // 8. OBTENER PRODUCTOS DEL BACKEND PHP
-  // =========================================
-  window.inventarioProductos = []; 
-  
-  const escaparAtributo = (texto) => String(texto ?? '').replace(/"/g, '&quot;');
-
-  const crearHTMLTarjeta = (prod) => {
-    const tieneFoto = prod.img && prod.img.startsWith('http');
-    const contenedorImagen = tieneFoto 
-      ? `<img src="${escaparAtributo(prod.img)}" alt="${escaparAtributo(prod.nombre)}" class="producto-tarjeta__img" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;">`
-      : `<div class="producto-tarjeta__placeholder">${prod.img || 'SUPPLEX'}</div>`;
-
-    const descCorta = prod.desc ? `<p class="producto-tarjeta__variante" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${prod.desc}</p>` : '';
-
-    return `
-      <article class="producto-tarjeta tarjeta-sombra_efecto" 
-               style="border: 1px solid var(--color-borde);"
-               data-id="${escaparAtributo(prod.id)}"
-               data-nombre="${escaparAtributo(prod.nombre)}"
-               data-cat="${escaparAtributo(prod.cat || 'General')}"
-               data-desc="${escaparAtributo(prod.desc || '')}"
-               data-precio="${Number(prod.precio) || 0}"
-               data-stock="${Number(prod.stock) || 10}"
-               data-img="${escaparAtributo(prod.img || 'SUPPLEX')}">
-        <div class="producto-tarjeta__imagen-caja">
-          ${contenedorImagen}
-        </div>
-        <div class="producto-tarjeta__info">
-          <span class="producto-tarjeta__marca">${prod.cat || 'General'}</span>
-          <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem;">${prod.nombre}</h3>
-          ${descCorta}
-          <div class="producto-tarjeta__precios">
-            <span class="producto-tarjeta__precio-actual">$ ${Number(prod.precio || 0).toLocaleString('es-AR')}</span>
-          </div>
-          <button type="button" class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${escaparAtributo(prod.nombre)}" data-precio="${Number(prod.precio) || 0}">AL CARRITO</button>
-        </div>
-      </article>
-    `;
-  };
-
-  const renderizarCatalogo = (filtro) => {
-    const grillaCatalogo = document.getElementById('grillaCatalogo');
-    if (!grillaCatalogo || !Array.isArray(window.inventarioProductos)) return;
-    
-    grillaCatalogo.innerHTML = '';
-    let productosFiltrados = window.inventarioProductos;
-    
-    if (filtro && filtro !== 'todos') {
-      productosFiltrados = window.inventarioProductos.filter(prod => 
-        (prod.cat && prod.cat.toLowerCase().includes(filtro.toLowerCase())) ||
-        (prod.nombre && prod.nombre.toLowerCase().includes(filtro.toLowerCase()))
-      );
-    }
-
-    if (productosFiltrados.length === 0) {
-      grillaCatalogo.innerHTML = '<div class="catalogo__vacio" style="grid-column: 1/-1; text-align: center; padding: 2rem;">Aún no hay productos disponibles en esta categoría.</div>';
-      return;
-    }
-
-    productosFiltrados.forEach(prod => {
-      grillaCatalogo.insertAdjacentHTML('beforeend', crearHTMLTarjeta(prod));
-    });
-  };
-
-  // Determinar ruta de PHP según la vista
-  const rutaPHP = window.location.pathname.includes('/pages/') ? '../obtener_productos.php' : 'obtener_productos.php';
-
-  fetch(rutaPHP)
-    .then(respuesta => respuesta.json())
-    .then(datosDelServidor => {
-        if (!Array.isArray(datosDelServidor)) {
-            console.error("Respuesta no esperada del servidor:", datosDelServidor);
-            const grillaCatalogo = document.getElementById('grillaCatalogo');
-            if (grillaCatalogo) {
-                grillaCatalogo.innerHTML = `<div class="catalogo__vacio" style="grid-column: 1/-1; color: #ef4444; padding: 2rem; text-align: center;">Error al cargar inventario: ${datosDelServidor.error || 'Servidor no disponible'}</div>`;
-            }
-            return;
-        }
-
-        window.inventarioProductos = datosDelServidor;
-        
-        // 1. Carga la grilla del catálogo (en productos.html si existe)
-        const botonesFiltro = document.querySelectorAll('.catalogo__filtro-btn');
-        const urlParams = new URLSearchParams(window.location.search);
-        const categoriaUrl = urlParams.get('cat');
-
-        if (categoriaUrl) {
-          renderizarCatalogo(categoriaUrl);
-          botonesFiltro.forEach(b => {
-            b.classList.remove('catalogo__filtro-btn--activo');
-            if (b.getAttribute('data-filtro')?.toLowerCase() === categoriaUrl.toLowerCase()) {
-              b.classList.add('catalogo__filtro-btn--activo');
-            }
-          });
-        } else {
-          renderizarCatalogo('todos');
-        }
-
-        // 2. Renderiza productos únicamente en "Más Vendidos" (deja "carruselExplorar" intacto)
-        const carruselDestacados = document.getElementById('carruselMasVendidos');
-        if (carruselDestacados && window.inventarioProductos.length > 0) {
-          carruselDestacados.innerHTML = '';
-          const productosDestacados = window.inventarioProductos.slice(0, 10);
-          productosDestacados.forEach(prod => {
-            carruselDestacados.insertAdjacentHTML('beforeend', crearHTMLTarjeta(prod));
-          });
-        }
-
-        // 3. Listeners para los botones de filtrado por categoría
-        botonesFiltro.forEach(boton => {
-          boton.addEventListener('click', (e) => {
-            botonesFiltro.forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
-            e.target.classList.add('catalogo__filtro-btn--activo');
-            renderizarCatalogo(e.target.getAttribute('data-filtro'));
-          });
-        });
-    })
-    .catch(error => {
-        console.warn("No se pudo cargar obtener_productos.php:", error);
-        const grillaCatalogo = document.getElementById('grillaCatalogo');
-        if (grillaCatalogo) {
-            grillaCatalogo.innerHTML = '<div class="catalogo__vacio" style="grid-column: 1/-1; padding: 2rem; text-align: center;">No se pudo conectar con el catálogo de productos.</div>';
-        }
-    });
-
-});
-
-// =========================================
-  // GESTIÓN DE CATÁLOGO Y FILTROS DINÁMICOS (BD)
+  // 8. CATÁLOGO Y FILTROS DINÁMICOS CONECTADOS A LA BD
   // =========================================
   window.inventarioProductos = [];
   let categoriaSeleccionada = 'todos';
   let marcaSeleccionada = 'todas';
+
+  const escaparAtributo = (texto) => String(texto ?? '').replace(/"/g, '&quot;');
+
+  const armarNombreCompleto = (prod) => {
+    let titulo = prod.nombre || 'Suplemento';
+    if (prod.presentacion) titulo += ` - ${prod.presentacion}`;
+    if (prod.sabor) titulo += ` (${prod.sabor})`;
+    return titulo;
+  };
+
+  const crearHTMLTarjeta = (prod) => {
+    const tieneFoto = prod.img && prod.img.startsWith('http');
+    const imgHTML = tieneFoto 
+      ? `<img src="${escaparAtributo(prod.img)}" alt="${escaparAtributo(prod.nombre)}" class="producto-tarjeta__img" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;">`
+      : `<div class="producto-tarjeta__placeholder">${prod.sku || 'SUPPLEX'}</div>`;
+
+    const nombreCarrito = armarNombreCompleto(prod);
+    const precioNum = Number(prod.precio) || 0;
+
+    return `
+      <article class="producto-tarjeta tarjeta-sombra_efecto" 
+               style="border: 1px solid var(--color-borde); background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;"
+               data-id="${escaparAtributo(prod.id)}"
+               data-nombre="${escaparAtributo(nombreCarrito)}"
+               data-cat="${escaparAtributo((prod.cat || 'General') + ' | ' + (prod.marca || 'Genérica'))}"
+               data-desc="${escaparAtributo(prod.desc || '')}"
+               data-precio="${precioNum}"
+               data-stock="${Number(prod.stock) || 0}"
+               data-img="${escaparAtributo(prod.img || 'SUPPLEX')}">
+        <div class="producto-tarjeta__imagen-caja" style="height: 200px; background: #f4f4f5; display: flex; align-items: center; justify-content: center; position: relative;">
+          ${imgHTML}
+        </div>
+        <div class="producto-tarjeta__info" style="padding: 16px; display: flex; flex-direction: column; flex-grow: 1;">
+          <span class="producto-tarjeta__marca" style="font-size: 0.75rem; font-weight: 700; color: #71717a; text-transform: uppercase;">${prod.cat || 'General'} | ${prod.marca || 'Genérica'}</span>
+          <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem; font-weight: 800; margin: 4px 0 4px;">${prod.nombre}</h3>
+          <p style="font-size: 0.82rem; font-weight: 700; color: #27272a; margin-bottom: 4px;">${prod.presentacion || 'Estándar'} ${prod.sabor ? '• ' + prod.sabor : ''}</p>
+          <p style="font-size: 0.75rem; color: #71717a; margin-bottom: 12px;">SKU: ${prod.sku || 'N/D'}</p>
+          <div class="producto-tarjeta__precios" style="margin-top: auto; margin-bottom: 12px;">
+            <span class="producto-tarjeta__precio-actual" style="font-size: 1.15rem; font-weight: 900;">$ ${precioNum.toLocaleString('es-AR')}</span>
+          </div>
+          <button type="button" class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${escaparAtributo(nombreCarrito)}" data-precio="${precioNum}">AL CARRITO</button>
+        </div>
+      </article>
+    `;
+  };
 
   const renderizarCatalogoDinamico = () => {
     const grilla = document.getElementById('grillaCatalogo');
@@ -672,26 +598,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const ordenPrecio = document.getElementById('filtroOrdenPrecio')?.value || '';
 
     let filtrados = window.inventarioProductos.filter(prod => {
-      const matchCat = (categoriaSeleccionada === 'todos' || prod.cat.toLowerCase() === categoriaSeleccionada.toLowerCase());
-      const matchMarca = (marcaSeleccionada === 'todas' || prod.marca.toLowerCase() === marcaSeleccionada.toLowerCase());
+      const matchCat = (categoriaSeleccionada === 'todos' || (prod.cat && prod.cat.toLowerCase().includes(categoriaSeleccionada.toLowerCase())));
+      const matchMarca = (marcaSeleccionada === 'todas' || (prod.marca && prod.marca.toLowerCase() === marcaSeleccionada.toLowerCase()));
       const matchPres = (presentacionFiltro === '' || prod.presentacion === presentacionFiltro);
       const matchSabor = (saborFiltro === '' || prod.sabor === saborFiltro);
       const matchTexto = textoBusq === '' || 
-        prod.nombre.toLowerCase().includes(textoBusq) || 
-        prod.marca.toLowerCase().includes(textoBusq) || 
-        prod.cat.toLowerCase().includes(textoBusq) ||
-        prod.presentacion.toLowerCase().includes(textoBusq) ||
-        prod.sabor.toLowerCase().includes(textoBusq);
+        (prod.nombre && prod.nombre.toLowerCase().includes(textoBusq)) || 
+        (prod.marca && prod.marca.toLowerCase().includes(textoBusq)) || 
+        (prod.cat && prod.cat.toLowerCase().includes(textoBusq)) ||
+        (prod.sku && prod.sku.toLowerCase().includes(textoBusq)) ||
+        (prod.presentacion && prod.presentacion.toLowerCase().includes(textoBusq)) ||
+        (prod.sabor && prod.sabor.toLowerCase().includes(textoBusq));
 
       return matchCat && matchMarca && matchPres && matchSabor && matchTexto;
     });
 
-    if (ordenPrecio === 'menor') filtrados.sort((a, b) => a.precio - b.precio);
-    if (ordenPrecio === 'mayor') filtrados.sort((a, b) => b.precio - a.precio);
+    if (ordenPrecio === 'menor') {
+      filtrados.sort((a, b) => (Number(a.precio) || 0) - (Number(b.precio) || 0));
+    } else if (ordenPrecio === 'mayor') {
+      filtrados.sort((a, b) => (Number(b.precio) || 0) - (Number(a.precio) || 0));
+    }
 
-    // Actualizar contador visual de variantes cargadas
     if (contadorDiv) {
-      contadorDiv.textContent = `📦 Mostrando ${filtrados.length} de ${window.inventarioProductos.length} variantes cargadas en la base de datos`;
+      contadorDiv.textContent = `📦 Mostrando ${filtrados.length} de ${window.inventarioProductos.length} variantes activas en la base de datos`;
     }
 
     grilla.innerHTML = '';
@@ -700,104 +629,134 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    filtrados.forEach(prod => {
-      const tieneFoto = prod.img && prod.img.startsWith('http');
-      const imgHTML = tieneFoto 
-        ? `<img src="${prod.img}" alt="${prod.nombre}" style="width: 100%; height: 100%; object-fit: contain;">`
-        : `<div class="producto-tarjeta__placeholder">SUPPLEX</div>`;
-
-      const tarjeta = `
-        <article class="producto-tarjeta tarjeta-sombra_efecto" style="border: 1px solid var(--color-borde); background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;"
-                 data-id="${prod.id}"
-                 data-nombre="${prod.nombre} - ${prod.presentacion} (${prod.sabor})"
-                 data-cat="${prod.cat}"
-                 data-desc="${prod.desc}"
-                 data-precio="${prod.precio}"
-                 data-stock="${prod.stock}"
-                 data-img="${prod.img}">
-          <div class="producto-tarjeta__imagen-caja" style="height: 200px; background: #f4f4f5; display: flex; align-items: center; justify-content: center; position: relative;">
-            ${imgHTML}
-          </div>
-          <div class="producto-tarjeta__info" style="padding: 16px; display: flex; flex-direction: column; flex-grow: 1;">
-            <span class="producto-tarjeta__marca" style="font-size: 0.75rem; font-weight: 700; color: #71717a; text-transform: uppercase;">${prod.cat} | ${prod.marca}</span>
-            <h3 class="producto-tarjeta__nombre" style="font-size: 0.95rem; font-weight: 800; margin: 4px 0 4px;">${prod.nombre}</h3>
-            <p style="font-size: 0.85rem; font-weight: 700; color: #27272a; margin-bottom: 4px;">${prod.presentacion}</p>
-            <p style="font-size: 0.8rem; color: #52525b; margin-bottom: 12px;">Sabor: ${prod.sabor || 'N/D'}</p>
-            <div class="producto-tarjeta__precios" style="margin-top: auto; margin-bottom: 12px;">
-              <span class="producto-tarjeta__precio-actual" style="font-size: 1.15rem; font-weight: 900;">$ ${Number(prod.precio).toLocaleString('es-AR')}</span>
-            </div>
-            <button type="button" class="producto-tarjeta__boton boton-oscuro_efecto js-agregar-carrito" data-nombre="${prod.nombre} - ${prod.presentacion}" data-precio="${prod.precio}" style="width: 100%; padding: 10px; background: #111; color: #fff; border: none; border-radius: 6px; font-weight: 800; cursor: pointer;">AL CARRITO</button>
-          </div>
-        </article>
-      `;
-      grilla.insertAdjacentHTML('beforeend', tarjeta);
-    });
+    const htmlAcumulado = filtrados.map(prod => crearHTMLTarjeta(prod)).join('');
+    grilla.innerHTML = htmlAcumulado;
   };
 
-  // Cargar datos del servidor y poblar filtros dinámicamente con control anti-caché
   const rutaPHP = window.location.pathname.includes('/pages/') ? '../obtener_productos.php' : 'obtener_productos.php';
 
   fetch(rutaPHP + '?nocache=' + Date.now())
     .then(res => res.json())
     .then(data => {
       if (!Array.isArray(data)) {
-        console.error("Error al cargar productos:", data);
+        const grilla = document.getElementById('grillaCatalogo');
+        if (grilla) {
+          grilla.innerHTML = `<div style="grid-column: 1/-1; color: #ef4444; padding: 2rem; text-align: center; background: #fff; border-radius: 12px;">Error al cargar inventario: ${data?.error || data?.error_python || 'Servidor no disponible'}</div>`;
+        }
         return;
       }
+
       window.inventarioProductos = data;
 
-      // Poblar Categorías dinámicas en el aside
+      // 1. Poblar carrusel "Lo Más Vendido" en index.html (priorizando los que tienen precio > 0)
+      const carruselDestacados = document.getElementById('carruselMasVendidos');
+      if (carruselDestacados && data.length > 0) {
+        carruselDestacados.innerHTML = '';
+        const conPrecio = data.filter(p => Number(p.precio) > 0);
+        const destacados = (conPrecio.length > 0 ? conPrecio : data).slice(0, 10);
+        carruselDestacados.innerHTML = destacados.map(prod => crearHTMLTarjeta(prod)).join('');
+      }
+
+      // 2. Poblar Categorías dinámicas en productos.html
       const listaCat = document.getElementById('listaCategoriasBD');
       const categoriasUnicas = [...new Set(data.map(p => p.cat))].filter(Boolean);
       if (listaCat) {
+        listaCat.innerHTML = '<li><button type="button" class="catalogo__filtro-btn catalogo__filtro-btn--activo" data-cat="todos">Todos los productos</button></li>';
         categoriasUnicas.forEach(cat => {
-          listaCat.insertAdjacentHTML('beforeend', `<li><button class="catalogo__filtro-btn" data-cat="${cat}">${cat}</button></li>`);
+          listaCat.insertAdjacentHTML('beforeend', `<li><button type="button" class="catalogo__filtro-btn" data-cat="${escaparAtributo(cat)}">${cat}</button></li>`);
         });
       }
 
-      // Poblar Marcas dinámicas en el aside
+      // 3. Poblar Marcas dinámicas en productos.html
       const listaMarca = document.getElementById('listaMarcasBD');
       const marcasUnicas = [...new Set(data.map(p => p.marca))].filter(Boolean);
       if (listaMarca) {
+        listaMarca.innerHTML = '<li><button type="button" class="catalogo__filtro-btn catalogo__filtro-btn--activo" data-marca="todas">Todas las marcas</button></li>';
         marcasUnicas.forEach(marca => {
-          listaMarca.insertAdjacentHTML('beforeend', `<li><button class="catalogo__filtro-btn" data-marca="${marca}">${marca}</button></li>`);
+          listaMarca.insertAdjacentHTML('beforeend', `<li><button type="button" class="catalogo__filtro-btn" data-marca="${escaparAtributo(marca)}">${marca}</button></li>`);
         });
       }
 
-      // Poblar Selects de Presentación y Sabor
+      // 4. Poblar Selects de Presentación y Sabor
       const selectPres = document.getElementById('filtroPresentacion');
-      const presUnicas = [...new Set(data.map(p => p.presentacion))].filter(Boolean);
-      presUnicas.forEach(p => selectPres?.insertAdjacentHTML('beforeend', `<option value="${p}">${p}</option>`));
+      if (selectPres) {
+        const presUnicas = [...new Set(data.map(p => p.presentacion))].filter(Boolean);
+        presUnicas.forEach(p => selectPres.insertAdjacentHTML('beforeend', `<option value="${escaparAtributo(p)}">${p}</option>`));
+      }
 
       const selectSabor = document.getElementById('filtroSabor');
-      const saboresUnicos = [...new Set(data.map(p => p.sabor))].filter(Boolean);
-      saboresUnicos.forEach(s => selectSabor?.insertAdjacentHTML('beforeend', `<option value="${s}">${s}</option>`));
+      if (selectSabor) {
+        const saboresUnicos = [...new Set(data.map(p => p.sabor))].filter(Boolean);
+        saboresUnicos.forEach(s => selectSabor.insertAdjacentHTML('beforeend', `<option value="${escaparAtributo(s)}">${s}</option>`));
+      }
+
+      // 5. Verificar si viene una categoría por URL (?cat=Proteína desde index.html)
+      const urlParams = new URLSearchParams(window.location.search);
+      const catUrl = urlParams.get('cat');
+      if (catUrl) {
+        categoriaSeleccionada = catUrl;
+        document.querySelectorAll('#listaCategoriasBD button').forEach(b => {
+          const valorBtn = b.getAttribute('data-cat') || '';
+          const coincide = valorBtn !== 'todos' && valorBtn.toLowerCase().includes(catUrl.toLowerCase());
+          b.classList.toggle('catalogo__filtro-btn--activo', coincide);
+        });
+      }
 
       renderizarCatalogoDinamico();
 
-      // Listeners de filtros superiores
+      // 6. Listeners de filtros superiores
       document.getElementById('filtroBuscador')?.addEventListener('input', renderizarCatalogoDinamico);
       document.getElementById('filtroPresentacion')?.addEventListener('change', renderizarCatalogoDinamico);
       document.getElementById('filtroSabor')?.addEventListener('change', renderizarCatalogoDinamico);
       document.getElementById('filtroOrdenPrecio')?.addEventListener('change', renderizarCatalogoDinamico);
 
-      // Clic en categorías (barra lateral)
+      // 7. Botón Limpiar Filtros
+      document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => {
+        categoriaSeleccionada = 'todos';
+        marcaSeleccionada = 'todas';
+        const busq = document.getElementById('filtroBuscador');
+        const pres = document.getElementById('filtroPresentacion');
+        const sab = document.getElementById('filtroSabor');
+        const ord = document.getElementById('filtroOrdenPrecio');
+        if (busq) busq.value = '';
+        if (pres) pres.value = '';
+        if (sab) sab.value = '';
+        if (ord) ord.value = '';
+
+        document.querySelectorAll('#listaCategoriasBD button').forEach(b => {
+          b.classList.toggle('catalogo__filtro-btn--activo', b.getAttribute('data-cat') === 'todos');
+        });
+        document.querySelectorAll('#listaMarcasBD button').forEach(b => {
+          b.classList.toggle('catalogo__filtro-btn--activo', b.getAttribute('data-marca') === 'todas');
+        });
+        renderizarCatalogoDinamico();
+      });
+
+      // 8. Listeners para Categorías y Marcas en la barra lateral
       document.querySelectorAll('#listaCategoriasBD button').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('#listaCategoriasBD button').forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
-          e.target.classList.add('catalogo__filtro-btn--activo');
-          categoriaSeleccionada = e.target.getAttribute('data-cat');
+          e.currentTarget.classList.add('catalogo__filtro-btn--activo');
+          categoriaSeleccionada = e.currentTarget.getAttribute('data-cat') || 'todos';
           renderizarCatalogoDinamico();
         });
       });
 
-      // Clic en marcas (barra lateral)
       document.querySelectorAll('#listaMarcasBD button').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('#listaMarcasBD button').forEach(b => b.classList.remove('catalogo__filtro-btn--activo'));
-          e.target.classList.add('catalogo__filtro-btn--activo');
-          marcaSeleccionada = e.target.getAttribute('data-marca');
+          e.currentTarget.classList.add('catalogo__filtro-btn--activo');
+          marcaSeleccionada = e.currentTarget.getAttribute('data-marca') || 'todas';
           renderizarCatalogoDinamico();
         });
       });
+    })
+    .catch(err => {
+      console.warn("No se pudo conectar con obtener_productos.php:", err);
+      const grilla = document.getElementById('grillaCatalogo');
+      if (grilla) {
+        grilla.innerHTML = '<div style="grid-column: 1/-1; padding: 2rem; text-align: center; background: #fff; border-radius: 12px;">No se pudo conectar con el catálogo de productos.</div>';
+      }
     });
+
+});

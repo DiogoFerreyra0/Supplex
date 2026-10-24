@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-header("Cache-Control: no-cache, no-store, must-revalidate"); // Evita caché antigua
+header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 
@@ -16,43 +16,55 @@ if ($json_lauti === FALSE) {
 
 $datos = json_decode($json_lauti, true);
 
-if (isset($datos["aviso"]) || isset($datos["error_python"])) {
-    echo json_encode($datos, JSON_UNESCAPED_UNICODE);
+if (!is_array($datos) || isset($datos["aviso"]) || isset($datos["error_python"])) {
+    echo json_encode($datos ?? ["error" => "JSON inválido"], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-$productos = []; // CORREGIDO: Inicializamos correctamente la variable que luego devolvemos
+$productos = [];
 
 foreach ($datos as $index => $fila) {
     $f = array_change_key_case($fila, CASE_LOWER);
 
-    $id = $f["varianteid"] ?? ($index + 1);
-    $nombreBase = $f["nombre"] ?? $f["nombreproducto"] ?? $f["producto"] ?? 'Suplemento';
-    $marca = $f["marca"] ?? 'Genérica';
-    $categoria = $f["categoria"] ?? 'General';
-    $presentacion = $f["presentacion"] ?? '';
-    $saborColor = $f["saborcolor"] ?? '';
+    $id = $f["varianteid"] ?? $f["id"] ?? ($index + 1);
+    $sku = trim((string)($f["skuinterno"] ?? 'N/D'));
+    $nombreBase = trim((string)($f["producto"] ?? $f["nombre"] ?? $f["nombreproducto"] ?? 'Suplemento'));
+    $marca = trim((string)($f["marca"] ?? 'Genérica'));
+    $categoria = trim((string)($f["categoria"] ?? $f["tipo"] ?? 'General'));
+    $presentacion = trim((string)($f["presentacion"] ?? ''));
+    $saborColor = trim((string)($f["saborcolor"] ?? ''));
 
-    // Capturamos el PrecioVenta real de la tabla VariantesProducto
-    $precioVenta = $f["precioventa"] ?? $f["precio"] ?? 0;
-    if (is_string($precioVenta)) {
-        $precioVenta = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $precioVenta));
+    // Normalizar PrecioVenta (soporta NULL, "1000.00", "1000,00" o números)
+    $rawPrecio = $f["precioventa"] ?? $f["precio"] ?? 0;
+    if ($rawPrecio === null || $rawPrecio === '' || strtoupper((string)$rawPrecio) === 'NULL') {
+        $precioFinal = 0.0;
+    } elseif (is_numeric($rawPrecio)) {
+        $precioFinal = (float)$rawPrecio;
+    } else {
+        $limpio = str_replace(',', '.', trim((string)$rawPrecio));
+        $limpio = preg_replace('/[^0-9.]/', '', $limpio);
+        $precioFinal = (float)$limpio;
     }
 
-    $stockActual = $f["stockactual"] ?? $f["stock"] ?? 10;
+    // Normalizar StockActual (viene como decimal 0.000 desde SQL Server)
+    $rawStock = $f["stockactual"] ?? $f["stock"] ?? 0;
+    if (is_string($rawStock)) {
+        $rawStock = str_replace(',', '.', $rawStock);
+    }
+    $stockFinal = (int)round((float)$rawStock);
 
     $productos[] = [
-        "id" => $id,
-        "nombre" => trim($nombreBase),
-        "marca" => trim($marca),
-        "cat" => trim($categoria),
-        "presentacion" => trim($presentacion),
-        "sabor" => trim($saborColor),
-        "sku" => $f["skuinterno"] ?? 'N/D',
-        "precio" => (float)$precioVenta,
-        "img" => $f["imagenurl"] ?? "IMG",
-        "stock" => (int)$stockActual,
-        "desc" => "SKU: " . ($f["skuinterno"] ?? 'N/D') . " | Marca: " . trim($marca) . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor: $saborColor" : "")
+        "id" => (int)$id,
+        "sku" => $sku,
+        "nombre" => $nombreBase,
+        "marca" => $marca !== '' ? $marca : 'Genérica',
+        "cat" => $categoria !== '' ? $categoria : 'General',
+        "presentacion" => $presentacion,
+        "sabor" => $saborColor,
+        "precio" => $precioFinal,
+        "img" => $f["imagenurl"] ?? $f["imagen"] ?? "IMG",
+        "stock" => $stockFinal,
+        "desc" => "SKU: $sku | Marca: " . ($marca !== '' ? $marca : 'Genérica') . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor/Color: $saborColor" : "")
     ];
 }
 

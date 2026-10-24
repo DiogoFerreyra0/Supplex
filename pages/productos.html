@@ -8,9 +8,11 @@
 </head>
 <body>
     
+  <!-- ENCABEZADO -->
   <header class="encabezado">
     <div class="encabezado__principal" id="encabezadoPrincipal">
       <div class="encabezado__contenedor">
+        
         <a href="../index.html" class="encabezado__logo">
           <span class="encabezado__icono-logo">★</span>
           <span class="encabezado__texto-logo">SUPPLEX</span>
@@ -27,11 +29,12 @@
         </nav>
 
         <div class="encabezado__acciones">
-          <button class="encabezado__boton-accion icono_efecto" aria-label="Buscar">🔍</button>
-          <button class="encabezado__boton-accion icono_efecto" aria-label="Carrito">
+          <button type="button" class="encabezado__boton-accion icono_efecto" aria-label="Buscar">🔍</button>
+          <button type="button" class="encabezado__boton-accion icono_efecto" aria-label="Carrito">
             🛒 <span class="encabezado__contador-carrito">0</span>
           </button>
         </div>
+
       </div>
     </div>
   </header>
@@ -40,43 +43,48 @@
     <section class="catalogo">
       <div class="catalogo__contenedor-general" style="max-width: 1280px; margin: 0 auto; padding: 20px;">
         
-        <!-- BARRA SUPERIOR DE FILTROS -->
+        <!-- BARRA SUPERIOR DE FILTROS (Buscador, Presentación, Sabor, Precio) -->
         <div class="catalogo__barra-superior" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--color-borde); margin-bottom: 20px; box-shadow: var(--sombra-suave);">
           <div class="campo-filtro">
-            <label style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">BUSCAR PRODUCTO</label>
-            <input type="text" id="filtroBuscador" placeholder="Ej: Creatina, Whey..." style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem;">
+            <label for="filtroBuscador" style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">BUSCAR PRODUCTO / SKU</label>
+            <input type="text" id="filtroBuscador" placeholder="Ej: VAR-000001, Creatina, Whey..." style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem;">
           </div>
           <div class="campo-filtro">
-            <label style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">PRESENTACIÓN</label>
+            <label for="filtroPresentacion" style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">PRESENTACIÓN</label>
             <select id="filtroPresentacion" style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem; background: #fff;">
               <option value="">Todas las presentaciones</option>
             </select>
           </div>
           <div class="campo-filtro">
-            <label style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">SABOR / COLOR</label>
+            <label for="filtroSabor" style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">SABOR / COLOR</label>
             <select id="filtroSabor" style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem; background: #fff;">
               <option value="">Todos los sabores</option>
             </select>
           </div>
           <div class="campo-filtro">
-            <label style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">ORDENAR POR PRECIO</label>
+            <label for="filtroOrdenPrecio" style="font-size: 0.75rem; font-weight: 800; display: block; margin-bottom: 5px;">ORDENAR POR PRECIO</label>
             <select id="filtroOrdenPrecio" style="width: 100%; padding: 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.9rem; background: #fff;">
-              <option value="">Por defecto</option>
-              <option value="menor">Menor a mayor precio</option>
+              <option value="">Por defecto (ID / SKU)</option>
               <option value="mayor">Mayor a menor precio</option>
+              <option value="menor">Menor a mayor precio</option>
             </select>
           </div>
         </div>
 
-        <!-- CONTADOR VISUAL DE VARIANTES -->
-        <div id="contadorVariantes" style="font-size: 0.9rem; font-weight: 700; color: #52525b; margin-bottom: 20px; background: #f4f4f5; padding: 10px 16px; border-radius: 8px; display: inline-block;">
-          🔄 Cargando inventario...
+        <!-- CONTADOR VISUAL DE VARIANTES Y BOTÓN LIMPIAR FILTROS -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+          <div id="contadorVariantes" style="font-size: 0.9rem; font-weight: 700; color: #52525b; background: #fff; border: 1px solid var(--color-borde); padding: 10px 16px; border-radius: 8px;">
+            🔄 Sincronizando inventario con la base de datos...
+          </div>
+          <button type="button" id="btnLimpiarFiltros" style="padding: 10px 16px; background: var(--color-oscuro); color: #fff; border: none; border-radius: 8px; font-size: 0.82rem; font-weight: 800; cursor: pointer;">
+            LIMPIAR FILTROS
+          </button>
         </div>
 
         <div class="catalogo__contenedor" style="display: grid; grid-template-columns: 250px 1fr; gap: 32px; align-items: start;">
           
-          <!-- BARRA LATERAL (Categorías y Marcas) -->
-          <aside class="catalogo__filtros" style="display: flex; flex-direction: column; gap: 24px;">
+          <!-- BARRA LATERAL (Categorías y Marcas dinámicas de la Base de Datos) -->
+          <aside class="catalogo__filtros" style="display: flex; flex-direction: column; gap: 24px; background: transparent; padding: 0; border: none; box-shadow: none;">
             <div class="caja-filtro" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--color-borde); box-shadow: var(--sombra-suave);">
               <h3 class="catalogo__filtros-titulo" style="font-size: 0.95rem; font-weight: 900; text-transform: uppercase; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 2px solid var(--color-oscuro);">CATEGORÍAS</h3>
               <ul class="catalogo__lista" id="listaCategoriasBD" style="display: flex; flex-direction: column; gap: 6px;">
@@ -102,61 +110,329 @@
     </section>
   </main>
 
-  <!-- MODALES NECESARIOS PARA EL CARRITO, BUSCADOR Y VISTA RÁPIDA -->
+  <!-- ================= PIE DE PÁGINA COMPLETO ================= -->
+  <footer class="pie-pagina">
+    <div class="pie-pagina__contenedor">
+      
+      <div class="pie-pagina__arriba">
+        <div class="pie-pagina__marca">
+          <a href="../index.html" class="pie-pagina__logo">★</a>
+          <p class="pie-pagina__texto">Suplementación deportiva de calidad para atletas que buscan resultados reales. Tu rendimiento, nuestro compromiso.</p>
+          <div class="pie-pagina__redes">
+            <a href="#" class="pie-pagina__red-link icono_efecto" aria-label="Instagram">📷</a>
+            <a href="#" class="pie-pagina__red-link icono_efecto" aria-label="Facebook">📘</a>
+            <a href="#" class="pie-pagina__red-link icono_efecto" aria-label="TikTok">🎵</a>
+          </div>
+        </div>
+
+        <div class="pie-pagina__enlaces">
+          <h4 class="pie-pagina__titulo-columna">Tienda</h4>
+          <a href="../index.html#categorias" class="pie-pagina__link enlace_efecto">Categorías</a>
+          <a href="../index.html#promociones" class="pie-pagina__link enlace_efecto">Promociones</a>
+          <a href="productos.html" class="pie-pagina__link enlace_efecto">Novedades</a>
+        </div>
+
+        <div class="pie-pagina__enlaces">
+          <h4 class="pie-pagina__titulo-columna">Ayuda</h4>
+          <a href="#" class="pie-pagina__link enlace_efecto js-abrir-faq">Preguntas frecuentes</a>
+          <a href="../index.html#contactanos" class="pie-pagina__link enlace_efecto">Envíos</a>
+        </div>
+
+        <div class="pie-pagina__enlaces">
+          <h4 class="pie-pagina__titulo-columna">Empresa</h4>
+          <a href="../index.html#contactanos" class="pie-pagina__link enlace_efecto">Contáctanos</a>
+          <a href="nosotros.html" class="pie-pagina__link enlace_efecto">Quienes somos</a>
+        </div>
+
+        <div class="pie-pagina__enlaces">
+          <h4 class="pie-pagina__titulo-columna">Legal</h4>
+          <a href="#" class="pie-pagina__link enlace_efecto js-abrir-legal" data-tab="terminos">Términos y condiciones</a>
+          <a href="#" class="pie-pagina__link enlace_efecto js-abrir-legal" data-tab="privacidad">Política de privacidad</a>
+          <a href="#" class="pie-pagina__link enlace_efecto js-abrir-legal" data-tab="cookies">Cookies</a>
+        </div>
+      </div>
+
+      <div class="pie-pagina__pagos">
+        <h5 class="pie-pagina__pagos-titulo">MEDIOS DE PAGO ACEPTADOS</h5>
+        <div class="pie-pagina__pagos-metodos">
+          <span class="pie-pagina__badge-pago">Visa</span>
+          <span class="pie-pagina__badge-pago">Mastercard</span>
+          <span class="pie-pagina__badge-pago">Amex</span>
+          <span class="pie-pagina__badge-pago">Mercado Pago</span>
+          <span class="pie-pagina__badge-pago">Transferencia</span>
+          <span class="pie-pagina__badge-pago">Débito</span>
+        </div>
+      </div>
+
+      <div class="pie-pagina__abajo">
+        <p>© 2026 SUPPLEX. Todos los derechos reservados.</p>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Botón de WhatsApp Flotante -->
+  <a href="https://wa.me/5491100000000" target="_blank" class="whatsapp-flotante icono_efecto" aria-label="Escribinos por WhatsApp">💬</a> 
+
+  <!-- --- CARD FLOTANTE DE COOKIES Y LEGALES --- -->
+  <aside class="cookies-flotante" id="cookiesFlotante" aria-label="Aviso de privacidad y cookies">
+    <div class="cookies-flotante__cabecera">
+      <span class="cookies-flotante__icono">🍪</span>
+      <h4 class="cookies-flotante__titulo">Privacidad y Cookies</h4>
+      <button class="cookies-flotante__cerrar" id="btnCerrarCookiesBanner" aria-label="Cerrar aviso">&times;</button>
+    </div>
+    <p class="cookies-flotante__texto">
+      Utilizamos cookies propias y de terceros para mejorar tu experiencia de compra. Al continuar navegando, aceptás nuestros 
+      <a href="#" class="cookies-flotante__enlace js-abrir-legal" data-tab="terminos">Términos y Condiciones</a>, 
+      <a href="#" class="cookies-flotante__enlace js-abrir-legal" data-tab="privacidad">Política de Privacidad</a> y 
+      <a href="#" class="cookies-flotante__enlace js-abrir-legal" data-tab="cookies">Política de Cookies</a>.
+    </p>
+    <div class="cookies-flotante__acciones">
+      <button type="button" class="cookies-flotante__boton cookies-flotante__boton--primario boton_efecto" id="btnAceptarCookies">ACEPTAR TODO</button>
+      <button type="button" class="cookies-flotante__boton cookies-flotante__boton--secundario js-abrir-legal" data-tab="terminos">VER POLÍTICAS</button>
+    </div>
+  </aside>
+
+  <!-- --- MODAL DE LEGALES (TÉRMINOS, PRIVACIDAD Y COOKIES) --- -->
+  <div class="legal-modal" id="legalModal">
+    <div class="legal-modal__fondo" id="btnCerrarFondoLegal"></div>
+    <div class="legal-modal__panel">
+      <button class="legal-modal__cerrar" id="btnCerrarLegal" aria-label="Cerrar legales">&times;</button>
+      
+      <div class="legal-modal__contenido">
+        <h2 class="legal-modal__titulo">Información Legal</h2>
+        <p class="legal-modal__subtitulo">Transparencia, seguridad y condiciones de uso de SUPPLEX.</p>
+
+        <div class="legal-modal__tabs">
+          <button type="button" class="legal-modal__tab legal-modal__tab--activo" data-target="tab-terminos">Términos y Condiciones</button>
+          <button type="button" class="legal-modal__tab" data-target="tab-privacidad">Política de Privacidad</button>
+          <button type="button" class="legal-modal__tab" data-target="tab-cookies">Política de Cookies</button>
+        </div>
+
+        <div class="legal-modal__seccion legal-modal__seccion--activa" id="tab-terminos">
+          <h3>1. Condiciones Generales de Uso</h3>
+          <p>Al acceder y realizar pedidos a través del sitio web de <strong>SUPPLEX</strong>, el usuario acepta estar sujeto a los presentes Términos y Condiciones. Todos nuestros suplementos deportivos comercializados son 100% originales y cuentan con aprobación de las autoridades sanitarias correspondientes.</p>
+          <h3>2. Precios, Stock y Pedidos</h3>
+          <p>Los precios publicados están expresados en Pesos Argentinos (ARS). Las compras finalizadas mediante nuestro carrito web se confirman y coordinan vía WhatsApp, quedando sujetas a disponibilidad de stock al momento de procesar el pedido.</p>
+          <h3>3. Envíos y Devoluciones</h3>
+          <p>Realizamos envíos a todo el país dentro de las 24 a 48 hs hábiles posteriores a la acreditación del pago. Por razones de seguridad bromatológica, solo se aceptan cambios o devoluciones de productos que conserven su precinto de seguridad original intacto.</p>
+        </div>
+
+        <div class="legal-modal__seccion" id="tab-privacidad">
+          <h3>1. Protección de Datos Personales</h3>
+          <p>En <strong>SUPPLEX</strong> protegemos tu información conforme a la Ley N° 25.326 de Protección de Datos Personales. Los datos solicitados en el carrito (nombre, teléfono, dirección de entrega y correo electrónico) se utilizan exclusivamente para procesar y despachar tus pedidos.</p>
+          <h3>2. Confidencialidad</h3>
+          <p>No vendemos, alquilamos ni compartimos tu información personal con terceros ajenos a la operatoria logística de entrega. Podés solicitar la actualización o eliminación de tus datos en cualquier momento escribiéndonos a <strong>info@supplex.com</strong>.</p>
+        </div>
+
+        <div class="legal-modal__seccion" id="tab-cookies">
+          <h3>1. ¿Qué son las Cookies?</h3>
+          <p>Las cookies son pequeños archivos que se almacenan en tu navegador para recordar tus preferencias, mantener los suplementos guardados en tu carrito de compras y analizar el rendimiento del sitio.</p>
+          <h3>2. Tipos de Cookies que utilizamos</h3>
+          <p>Utilizamos <strong>cookies técnicas esenciales</strong> para el funcionamiento del carrito, la calculadora nutricional y la preferencia de avisos legales, así como cookies analíticas anónimas para mejorar nuestro catálogo.</p>
+        </div>
+
+        <div class="legal-modal__pie">
+          <button type="button" class="legal-modal__boton boton-oscuro_efecto" id="btnEntendidoLegal">ENTENDIDO Y ACEPTAR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- --- CARRITO MODAL COMPLETO (CON CUPONES) --- -->
   <div class="carrito-modal" id="carritoModal">
     <div class="carrito-modal__fondo" id="carritoFondo"></div>
     <div class="carrito-modal__panel">
+      
       <div class="carrito-modal__cabecera">
         <h3 class="carrito-modal__titulo">Tu Carrito</h3>
         <button class="carrito-modal__cerrar" id="btnCerrarCarrito" aria-label="Cerrar carrito">&times;</button>
       </div>
+
       <div class="carrito-modal__cuerpo" id="listaCarrito">
         <p class="carrito-modal__vacio">Tu carrito está vacío.</p>
       </div>
+
       <div class="carrito-modal__datos">
-        <div class="carrito-modal__campo"><input type="text" id="cartNombre" placeholder="Tu Nombre Completo" class="carrito-modal__input"></div>
-        <div class="carrito-modal__campo"><input type="text" id="cartDireccion" placeholder="Dirección de Envío" class="carrito-modal__input"></div>
+        <div class="carrito-modal__campo">
+          <input type="text" id="cartNombre" placeholder="Tu Nombre Completo" class="carrito-modal__input">
+        </div>
+        <div class="carrito-modal__campo">
+          <input type="text" id="cartDireccion" placeholder="Dirección de Envío" class="carrito-modal__input">
+        </div>
+        <div class="carrito-modal__campo carrito-modal__campo--cupon">
+          <input type="text" id="cartCupon" placeholder="Código de descuento (Ej: GYM)" class="carrito-modal__input" style="text-transform: uppercase;">
+          <button type="button" id="btnAplicarCupon" class="carrito-modal__boton-cupon">Aplicar</button>
+        </div>
+        <p id="msjCupon" class="carrito-modal__msj-cupon"></p>
       </div>
+
       <div class="carrito-modal__pie">
         <div class="carrito-modal__resumen">
           <div class="carrito-modal__linea"><span>Subtotal:</span> <span id="cartSubtotal">$ 0</span></div>
+          <div class="carrito-modal__linea carrito-modal__linea--descuento" id="lineaDescuento" style="display: none;">
+            <span>Descuento (<span id="cartNombreCupon"></span>):</span> 
+            <span id="cartMontoDescuento">-$ 0</span>
+          </div>
           <div class="carrito-modal__linea carrito-modal__linea--total"><span>Total:</span> <span id="totalCarrito">$ 0</span></div>
         </div>
+
         <button class="carrito-modal__boton" id="btnEnviarWhatsApp">FINALIZAR COMPRA</button>
       </div>
+
     </div>
   </div>
 
+  <!-- --- BUSCADOR A PANTALLA COMPLETA --- -->
   <div class="buscador-modal" id="buscadorModal">
     <div class="buscador-modal__contenido">
+      
       <div class="buscador-modal__cabecera">
-        <input type="text" class="buscador-modal__input" id="inputBuscador" placeholder="Buscar proteínas, creatina..." autocomplete="off">
+        <input type="text" class="buscador-modal__input" id="inputBuscador" placeholder="Buscar por nombre, SKU (VAR-000001), marca o sabor..." autocomplete="off">
         <button class="buscador-modal__cerrar" id="btnCerrarBuscador" aria-label="Cerrar buscador">&times;</button>
       </div>
+
       <div class="buscador-modal__resultados" id="resultadosBuscador">
         <p class="buscador-modal__vacio">Escribí arriba para buscar productos.</p>
       </div>
+
     </div>
   </div>
 
+  <!-- --- CARD FLOTANTE / MODAL DE INFORMACIÓN DEL PRODUCTO --- -->
   <div class="producto-modal" id="productoModal">
     <div class="producto-modal__fondo" id="btnCerrarFondoProducto"></div>
     <div class="producto-modal__panel">
       <button class="producto-modal__cerrar" id="btnCerrarProducto" aria-label="Cerrar">&times;</button>
+      
       <div class="producto-modal__contenido">
         <div class="producto-modal__imagen" id="modalProdImg">IMG</div>
+        
         <div class="producto-modal__info">
           <span class="producto-modal__categoria" id="modalProdCat">Categoría</span>
           <h3 class="producto-modal__titulo" id="modalProdTitulo">Nombre del Producto</h3>
-          <p class="producto-modal__descripcion" id="modalProdDesc">Descripción detallada...</p>
+          <p class="producto-modal__descripcion" id="modalProdDesc">Descripción detallada del producto...</p>
           <p id="modalProdStock" style="font-size: 0.85rem; font-weight: 700; color: #22c55e; margin-bottom: 12px;">✔ Stock disponible</p>
           <div class="producto-modal__precio" id="modalProdPrecio">$ 0</div>
-          <button type="button" class="producto-modal__boton boton-oscuro_efecto js-agregar-carrito" id="modalProdBtn" data-nombre="" data-precio="">AGREGAR AL CARRITO</button>
+          
+          <button type="button" class="producto-modal__boton boton-oscuro_efecto js-agregar-carrito" id="modalProdBtn" data-nombre="" data-precio="">
+            AGREGAR AL CARRITO
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- --- MODAL DE PREGUNTAS FRECUENTES --- -->
+  <div class="faq-modal" id="faqModal">
+    <div class="faq-modal__fondo" id="btnCerrarFondoFaq"></div>
+    <div class="faq-modal__panel">
+      <button class="faq-modal__cerrar" id="btnCerrarFaq" aria-label="Cerrar FAQ">&times;</button>
+      
+      <div class="faq-modal__contenido">
+        <h2 class="faq-modal__titulo">Preguntas Frecuentes</h2>
+        <p class="faq-modal__subtitulo">Resolvemos tus dudas más comunes de forma rápida.</p>
+
+        <div class="faq__acordeon">
+          <div class="faq__item">
+            <button class="faq__pregunta">¿Hacen envíos a todo el país? <span class="faq__icono">+</span></button>
+            <div class="faq__respuesta">
+              <p>Sí, realizamos envíos a toda la Argentina. Despachamos dentro de las 24/48 hs hábiles luego de confirmado el pago mediante correo y servicios de mensajería privada.</p>
+            </div>
+          </div>
+
+          <div class="faq__item">
+            <button class="faq__pregunta">¿Cuáles son los medios de pago aceptados? <span class="faq__icono">+</span></button>
+            <div class="faq__respuesta">
+              <p>Aceptamos tarjetas de crédito, débito, Mercado Pago y transferencias bancarias (estas últimas con un descuento especial aplicado al total).</p>
+            </div>
+          </div>
+
+          <div class="faq__item">
+            <button class="faq__pregunta">¿Cómo sé qué suplemento es el indicado para mí? <span class="faq__icono">+</span></button>
+            <div class="faq__respuesta">
+              <p>Depende de tu objetivo. Si buscás ganar masa muscular, recomendamos Proteína + Creatina. Podés usar nuestra "Calculadora de Calorías" en la web o contactarnos por WhatsApp para asesoramiento personalizado.</p>
+            </div>
+          </div>
+
+          <div class="faq__item">
+            <button class="faq__pregunta">¿Tienen local a la calle para retirar? <span class="faq__icono">+</span></button>
+            <div class="faq__respuesta">
+              <p>Actualmente somos una tienda 100% online. Sin embargo, podés coordinar con nosotros por WhatsApp para retirar tu pedido en nuestros puntos de entrega habilitados sin costo.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <script src="../main.js"></script>
+
+  <!-- Lógica de la Card Flotante de Cookies y Modal Legal -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cookiesFlotante = document.getElementById('cookiesFlotante');
+      const btnAceptarCookies = document.getElementById('btnAceptarCookies');
+      const btnCerrarCookiesBanner = document.getElementById('btnCerrarCookiesBanner');
+
+      const legalModal = document.getElementById('legalModal');
+      const btnCerrarLegal = document.getElementById('btnCerrarLegal');
+      const btnCerrarFondoLegal = document.getElementById('btnCerrarFondoLegal');
+      const btnEntendidoLegal = document.getElementById('btnEntendidoLegal');
+      const tabsLegal = document.querySelectorAll('.legal-modal__tab');
+      const seccionesLegal = document.querySelectorAll('.legal-modal__seccion');
+
+      if (cookiesFlotante && !localStorage.getItem('supplex_cookies_ok')) {
+        setTimeout(() => {
+          cookiesFlotante.classList.add('cookies-flotante--activo');
+        }, 600);
+      }
+
+      const ocultarBannerCookies = () => {
+        cookiesFlotante?.classList.remove('cookies-flotante--activo');
+        localStorage.setItem('supplex_cookies_ok', 'true');
+      };
+
+      btnAceptarCookies?.addEventListener('click', ocultarBannerCookies);
+      btnCerrarCookiesBanner?.addEventListener('click', () => {
+        cookiesFlotante?.classList.remove('cookies-flotante--activo');
+      });
+
+      const activarTabLegal = (nombreTab) => {
+        const targetId = `tab-${nombreTab}`;
+        tabsLegal.forEach(tab => {
+          tab.classList.toggle('legal-modal__tab--activo', tab.getAttribute('data-target') === targetId);
+        });
+        seccionesLegal.forEach(sec => {
+          sec.classList.toggle('legal-modal__seccion--activa', sec.id === targetId);
+        });
+      };
+
+      tabsLegal.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const target = tab.getAttribute('data-target').replace('tab-', '');
+          activarTabLegal(target);
+        });
+      });
+
+      document.querySelectorAll('.js-abrir-legal').forEach(enlace => {
+        enlace.addEventListener('click', (e) => {
+          e.preventDefault();
+          const tabSolicitada = enlace.getAttribute('data-tab') || 'terminos';
+          activarTabLegal(tabSolicitada);
+          legalModal?.classList.add('legal-modal--activo');
+        });
+      });
+
+      const cerrarModalLegal = () => legalModal?.classList.remove('legal-modal--activo');
+      btnCerrarLegal?.addEventListener('click', cerrarModalLegal);
+      btnCerrarFondoLegal?.addEventListener('click', cerrarModalLegal);
+      btnEntendidoLegal?.addEventListener('click', () => {
+        cerrarModalLegal();
+        ocultarBannerCookies();
+      });
+    });
+  </script>
 </body>
 </html>
