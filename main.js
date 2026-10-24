@@ -644,7 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       window.inventarioProductos = data;
 
-      // 1. Poblar carrusel "Lo Más Vendido" en index.html
+      // 1. Poblar carrusel "Lo Más Vendido" en index.html (priorizando los que tienen precio > 0)
       const carruselDestacados = document.getElementById('carruselMasVendidos');
       if (carruselDestacados && data.length > 0) {
         carruselDestacados.innerHTML = '';
@@ -686,6 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saboresUnicos.forEach(s => selectSabor.insertAdjacentHTML('beforeend', `<option value="${escaparAtributo(s)}">${s}</option>`));
       }
 
+      // 5. Verificar si viene una categoría por URL
       const urlParams = new URLSearchParams(window.location.search);
       const catUrl = urlParams.get('cat');
       if (catUrl) {
@@ -699,7 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       renderizarCatalogoDinamico();
 
-      // Listeners
+      // Listeners de filtros superiores
       document.getElementById('filtroBuscador')?.addEventListener('input', renderizarCatalogoDinamico);
       document.getElementById('filtroPresentacion')?.addEventListener('change', renderizarCatalogoDinamico);
       document.getElementById('filtroSabor')?.addEventListener('change', renderizarCatalogoDinamico);

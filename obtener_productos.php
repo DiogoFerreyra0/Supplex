@@ -33,7 +33,7 @@ foreach ($datos as $index => $fila) {
     $presentacion = trim((string)($f["presentacion"] ?? ''));
     $saborColor = trim((string)($f["saborcolor"] ?? ''));
 
-    // Normalizar PrecioVenta
+    // Normalizar PrecioVenta (Acepta $0 perfectamente)
     $rawPrecio = $f["precioventa"] ?? $f["precio"] ?? 0;
     if ($rawPrecio === null || $rawPrecio === '' || strtoupper((string)$rawPrecio) === 'NULL') {
         $precioFinal = 0.0;
@@ -45,7 +45,6 @@ foreach ($datos as $index => $fila) {
         $precioFinal = (float)$limpio;
     }
 
-    // Normalizar StockActual
     $rawStock = $f["stockactual"] ?? $f["stock"] ?? 0;
     if (is_string($rawStock)) {
         $rawStock = str_replace(',', '.', $rawStock);
