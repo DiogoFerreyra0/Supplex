@@ -448,13 +448,13 @@ file_put_contents($archivo_pedidos, json_encode($registro_pedidos, JSON_PRETTY_P
 
             <!-- CHECK DIFERENCIADOR: NUEVA VARIANTE vs NUEVO PRODUCTO PADRE -->
             <div class="selector-tipo-alta" id="selectorTipoAlta">
-                <label class="opcion-check opcion-check--activa" id="labelCheckVariante">
-                    <input type="radio" name="tipo_alta_check" value="variante" id="radioNuevaVariante" checked>
-                    Nueva Variante
-                </label>
                 <label class="opcion-check" id="labelCheckPadre">
                     <input type="radio" name="tipo_alta_check" value="padre" id="radioNuevoPadre">
                     Nuevo Producto (Padre)
+                </label>
+                <label class="opcion-check opcion-check--activa" id="labelCheckVariante">
+                    <input type="radio" name="tipo_alta_check" value="variante" id="radioNuevaVariante" checked>
+                    Nueva Variante
                 </label>
             </div>
             
