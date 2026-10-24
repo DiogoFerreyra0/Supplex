@@ -22,37 +22,45 @@ if (isset($datos["aviso"]) || isset($datos["error_python"])) {
 $productos = [];
 
 foreach ($datos as $index => $fila) {
-    // Convertimos todas las claves a minúsculas para estandarizar la lectura
+    // Convertimos todas las claves de la fila a minúsculas para un manejo seguro
     $f = array_change_key_case($fila, CASE_LOWER);
 
-    $id = $f["varianteid"] ?? $f["id"] ?? ($index + 1);
-    $nombreProducto = $f["producto"] ?? $f["nombre"] ?? 'Suplemento';
+    $id = $f["varianteid"] ?? ($index + 1);
+    $nombreBase = $f["nombreproducto"] ?? $f["nombre"] ?? 'Suplemento';
+    $marca = $f["marca"] ?? '';
     $presentacion = $f["presentacion"] ?? '';
     $saborColor = $f["saborcolor"] ?? '';
+    $categoria = $f["categoria"] ?? 'General';
 
-    // Armamos un nombre comercial claro (Ej: "Creatina Monohidrato - 500g - Frutos Rojos")
-    $nombreCompleto = $nombreProducto;
+    // Armamos el nombre comercial completo (Ej: "Creatina Xtrenght - 250 g (Chocolate)")
+    $nombreCompleto = $nombreBase;
+    if ($marca !== '') {
+        $nombreCompleto = "$nombreBase ($marca)";
+    }
     if ($presentacion !== '') {
         $nombreCompleto .= " - " . $presentacion;
     }
     if ($saborColor !== '') {
-        $nombreCompleto .= " (" . $saborColor . ")";
+        $nombreCompleto .= " - " . $saborColor;
     }
 
-    // Limpiar el precio de venta por si viene formateado
-    $precioBruto = $f["precioventa"] ?? $f["precio"] ?? 0;
-    if (is_string($precioBruto)) {
-        $precioBruto = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $precioBruto));
+    // Obtenemos el PrecioVenta real de la base de datos de Lauti
+    $precioVenta = $f["precioventa"] ?? 0;
+    if (is_string($precioVenta)) {
+        $precioVenta = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $precioVenta));
     }
+
+    // Stock actual calculado desde MovimientosStock
+    $stockActual = $f["stockactual"] ?? 10;
 
     $productos[] = [
         "id" => $id,
         "nombre" => $nombreCompleto,
-        "cat" => $f["categoria"] ?? $f["tipo"] ?? 'General',
-        "desc" => "SKU: " . ($f["skuinterno"] ?? 'N/D') . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor/Color: $saborColor" : ""),
-        "precio" => (float)$precioBruto,
-        "img" => $f["imagenurl"] ?? $f["imagen"] ?? $f["foto"] ?? "IMG",
-        "stock" => (int)($f["stockactual"] ?? $f["stock"] ?? 10)
+        "cat" => $categoria,
+        "desc" => "SKU: " . ($f["skuinterno"] ?? 'N/D') . " | Marca: " . ($marca !== '' ? $marca : 'Genérica') . " | Presentación: " . ($presentacion !== '' ? $presentacion : 'Estándar') . ($saborColor !== '' ? " | Sabor/Color: $saborColor" : ""),
+        "precio" => (float)$precioVenta,
+        "img" => $f["imagenurl"] ?? "IMG",
+        "stock" => (int)$stockActual
     ];
 }
 
