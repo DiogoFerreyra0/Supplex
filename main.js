@@ -1,5 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  // Función auxiliar para que las fotos subidas en img/productos/ se vean desde index.html y desde /pages/productos.html
+  const resolverRutaImagen = (img) => {
+    if (!img || img === 'IMG' || img === 'SUPPLEX') return '';
+    if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:')) return img;
+    const enSubcarpeta = window.location.pathname.includes('/pages/');
+    const rutaLimpia = img.replace(/^(\.\/|\.\.\/)+/, '');
+    return enSubcarpeta ? `../${rutaLimpia}` : rutaLimpia;
+  };
+
   // =========================================
   // 1. ENCABEZADO FIJO (Sticky Header)
   // =========================================
@@ -400,12 +409,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const descMostrar = clicEnTarjeta.getAttribute('data-desc') || (productoData ? productoData.desc : 'Suplemento deportivo de alta calidad.');
       const precioMostrar = parseFloat(clicEnTarjeta.getAttribute('data-precio') ?? productoData?.precio ?? btnTarjeta?.getAttribute('data-precio') ?? 0) || 0;
       const stockMostrar = parseInt(clicEnTarjeta.getAttribute('data-stock') ?? productoData?.stock ?? 0, 10);
-      const imgMostrar = clicEnTarjeta.getAttribute('data-img') || productoData?.img || 'SUPPLEX';
+      const imgRaw = clicEnTarjeta.getAttribute('data-img') || productoData?.img || '';
+      const urlFoto = resolverRutaImagen(imgRaw);
 
       if (modalProdImg) {
-        const tieneFoto = imgMostrar && imgMostrar.startsWith('http');
-        modalProdImg.innerHTML = tieneFoto 
-          ? `<img src="${imgMostrar}" alt="${nombreMostrar}" style="width: 100%; height: 100%; object-fit: contain;">`
+        modalProdImg.innerHTML = urlFoto !== ''
+          ? `<img src="${urlFoto}" alt="${nombreMostrar}" style="width: 100%; height: 100%; object-fit: contain;">`
           : `<div class="producto-tarjeta__placeholder">SUPPLEX</div>`;
       }
       if (modalProdCat) modalProdCat.textContent = catMostrar;
@@ -550,9 +559,9 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const crearHTMLTarjeta = (prod) => {
-    const tieneFoto = prod.img && prod.img.startsWith('http');
-    const imgHTML = tieneFoto 
-      ? `<img src="${escaparAtributo(prod.img)}" alt="${escaparAtributo(prod.nombre)}" class="producto-tarjeta__img" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;">`
+    const urlFoto = resolverRutaImagen(prod.img);
+    const imgHTML = urlFoto !== ''
+      ? `<img src="${escaparAtributo(urlFoto)}" alt="${escaparAtributo(prod.nombre)}" class="producto-tarjeta__img" loading="lazy" style="width: 100%; height: 100%; object-fit: contain;">`
       : `<div class="producto-tarjeta__placeholder">SUPPLEX</div>`;
 
     const nombreCarrito = armarNombreCompleto(prod);
